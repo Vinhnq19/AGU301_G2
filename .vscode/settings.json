@@ -67,5 +67,6 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "AGU301_G2.slnx"
+    "dotnet.defaultSolution": "AGU301_G2.slnx",
+    "dotrush.roslyn.projectOrSolutionFiles": []
 }

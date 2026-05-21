@@ -1,51 +1,27 @@
-// MoveCommand.cs
-// Concrete Command di chuyển một Transform đến vị trí mới.
-// Ứng dụng: queue các bước di chuyển, hỗ trợ Undo để quay lại vị trí cũ.
-
 using UnityEngine;
 
-/// <summary>
-/// Lệnh di chuyển một Transform đến vị trí đích.
-/// Execute: dịch chuyển đến vị trí mới. Undo: quay về vị trí cũ.
-/// </summary>
 public class MoveCommand : Command
 {
-    // Transform cần di chuyển
-    private readonly Transform _transform;
+    private readonly PlayerController _player;
+    private readonly Vector2 _direction;
+    private Vector2 _previousPosition;
 
-    // Vị trí đích cần di chuyển đến
-    private readonly Vector3 _targetPosition;
-
-    // Lưu vị trí trước khi di chuyển để Undo
-    private Vector3 _previousPosition;
-
-    /// <summary>
-    /// Khởi tạo lệnh di chuyển với target Transform và vị trí đích.
-    /// </summary>
-    /// <param name="transform">Transform sẽ được di chuyển</param>
-    /// <param name="targetPosition">Vị trí đích trong world space</param>
-    public MoveCommand(Transform transform, Vector3 targetPosition)
+    public MoveCommand(PlayerController player, Vector2 direction)
     {
-        _transform = transform;
-        _targetPosition = targetPosition;
+        _player = player;
+        _direction = direction;
     }
 
-    /// <summary>
-    /// Lưu vị trí hiện tại rồi di chuyển Transform đến vị trí đích.
-    /// </summary>
     public override void Execute()
     {
-        _previousPosition = _transform.position;
-        _transform.position = _targetPosition;
-        Debug.Log($"[MoveCommand] Di chuyển từ {_previousPosition} → {_targetPosition}");
+        _previousPosition = (Vector2)_player.transform.position;
+        _player.Move(_direction);
+        Debug.Log($"[MoveCommand] Execute — direction: {_direction}, from: {_previousPosition}");
     }
 
-    /// <summary>
-    /// Quay Transform về vị trí trước khi Execute.
-    /// </summary>
     public override void Undo()
     {
-        _transform.position = _previousPosition;
-        Debug.Log($"[MoveCommand] Undo: quay về {_previousPosition}");
+        _player.SetPosition(_previousPosition);
+        Debug.Log($"[MoveCommand] Undo — restored position: {_previousPosition}");
     }
 }

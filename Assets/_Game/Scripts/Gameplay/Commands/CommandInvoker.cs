@@ -1,69 +1,51 @@
-// CommandInvoker.cs
-// Bộ thực thi Command Pattern: quản lý hàng đợi lệnh và hỗ trợ Undo/Redo.
-// Gắn script này lên Player hoặc GameManager để điều khiển toàn bộ chuỗi lệnh.
-
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Quản lý và thực thi các Command, hỗ trợ Undo lệnh gần nhất.
-/// Gắn lên một GameObject trong scene để sử dụng.
-/// </summary>
 public class CommandInvoker : MonoBehaviour
 {
-    // Stack lưu lịch sử các lệnh đã thực thi để hỗ trợ Undo
-    private readonly Stack<Command> _history = new Stack<Command>();
+    private readonly Stack<Command> _undoStack = new Stack<Command>();
+    private readonly Stack<Command> _redoStack = new Stack<Command>();
 
-    /// <summary>
-    /// Thực thi một lệnh và đẩy vào lịch sử để có thể Undo sau.
-    /// </summary>
-    /// <param name="command">Lệnh cần thực thi</param>
+    public int UndoCount => _undoStack.Count;
+    public int RedoCount => _redoStack.Count;
+
     public void ExecuteCommand(Command command)
     {
         command.Execute();
-        _history.Push(command);
+        _undoStack.Push(command);
+        _redoStack.Clear();
     }
 
-    /// <summary>
-    /// Hoàn tác lệnh gần nhất đã thực thi.
-    /// Không làm gì nếu lịch sử trống.
-    /// </summary>
-    public void UndoLastCommand()
+    public void Undo()
     {
-        if (_history.Count == 0)
+        if (_undoStack.Count == 0)
         {
-            Debug.Log("[CommandInvoker] Không có lệnh nào để Undo.");
+            Debug.Log("[CommandInvoker] Undo — không có command.");
             return;
         }
 
-        Command lastCommand = _history.Pop();
-        lastCommand.Undo();
+        Command command = _undoStack.Pop();
+        command.Undo();
+        _redoStack.Push(command);
     }
 
-    /// <summary>
-    /// Xóa toàn bộ lịch sử lệnh (ví dụ khi bắt đầu game mới).
-    /// </summary>
+    public void Redo()
+    {
+        if (_redoStack.Count == 0)
+        {
+            Debug.Log("[CommandInvoker] Redo — không có command.");
+            return;
+        }
+
+        Command command = _redoStack.Pop();
+        command.Execute();
+        _undoStack.Push(command);
+    }
+
     public void ClearHistory()
     {
-        _history.Clear();
-        Debug.Log("[CommandInvoker] Đã xóa toàn bộ lịch sử lệnh.");
-    }
-
-    /// <summary>
-    /// Demo: nhấn H để Heal, U để Undo lệnh cuối.
-    /// Xóa block này khi tích hợp vào game thật.
-    /// </summary>
-    [Header("Demo References")]
-    [SerializeField] private PlayerStats playerStats;
-
-    private void Update()
-    {
-        // Nhấn H: thực thi HealCommand
-        if (Input.GetKeyDown(KeyCode.H) && playerStats != null)
-            ExecuteCommand(new HealCommand(playerStats, 20f));
-
-        // Nhấn U: Undo lệnh gần nhất
-        if (Input.GetKeyDown(KeyCode.U))
-            UndoLastCommand();
+        _undoStack.Clear();
+        _redoStack.Clear();
+        Debug.Log("[CommandInvoker] Đã xóa undo/redo stack.");
     }
 }

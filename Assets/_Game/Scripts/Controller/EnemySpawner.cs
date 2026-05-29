@@ -1,63 +1,37 @@
-// EnemySpawner.cs
-// Điều phối việc spawn hàng loạt enemy qua EnemyFactory theo từng wave.
-// Tự động spawn wave tiếp theo khi nhận event OnNextWave từ GameManager.
-
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Điều phối spawn enemy theo wave sử dụng EnemyFactory.
-/// Lắng nghe event OnNextWave từ GameManager để tự động spawn wave tiếp theo.
-/// </summary>
 public class EnemySpawner : MonoBehaviour
 {
     [Header("References")]
-    // Reference đến EnemyFactory để tạo enemy
     [SerializeField] private EnemyFactory enemyFactory;
 
     [Header("Spawn Settings")]
-    // Danh sách vị trí có thể spawn enemy trong scene
     [SerializeField] private Transform[] spawnPoints;
-
-    // Thời gian delay (giây) giữa mỗi lần spawn trong wave
     [SerializeField] private float spawnDelay = 1.5f;
-
-    // Thời gian chờ (giây) trước khi bắt đầu wave mới sau khi Boss chết
     [SerializeField] private float waveStartDelay = 2f;
 
-    /// <summary>
-    /// Đăng ký lắng nghe event OnNextWave và bắt đầu wave 1.
-    /// </summary>
+    // Tập hợp các key enemy — phải khớp với PoolEntry.key trong ObjectPool Inspector
+    private static readonly string[] EnemyKeys = { "Zombie", "Skeleton", "Boss" };
+
     private void Start()
     {
-        // Đăng ký callback để tự động spawn khi GameManager phát event NextWave
         GameManager.Instance.OnNextWave += OnWaveStarted;
-
         StartCoroutine(SpawnWave());
     }
 
-    /// <summary>
-    /// Hủy đăng ký event khi object bị destroy để tránh memory leak.
-    /// </summary>
     private void OnDestroy()
     {
         if (GameManager.Instance != null)
             GameManager.Instance.OnNextWave -= OnWaveStarted;
     }
 
-    /// <summary>
-    /// Callback được gọi tự động khi GameManager.NextWave() phát event.
-    /// Chờ một khoảng rồi spawn wave mới.
-    /// </summary>
     private void OnWaveStarted()
     {
         StartCoroutine(SpawnWaveWithDelay());
     }
 
-    /// <summary>
-    /// Chờ waveStartDelay giây rồi bắt đầu spawn wave tiếp theo.
-    /// </summary>
     private IEnumerator SpawnWaveWithDelay()
     {
         Debug.Log($"[EnemySpawner] Wave {GameManager.Instance.CurrentWave} sẽ bắt đầu sau {waveStartDelay}s...");
@@ -65,10 +39,6 @@ public class EnemySpawner : MonoBehaviour
         StartCoroutine(SpawnWave());
     }
 
-    /// <summary>
-    /// Coroutine spawn từng enemy trong wave với delay giữa mỗi lần.
-    /// Số lượng enemy tăng dần theo wave hiện tại.
-    /// </summary>
     private IEnumerator SpawnWave()
     {
         List<string> enemyList = BuildWaveEnemyList(GameManager.Instance.CurrentWave);
@@ -77,15 +47,26 @@ public class EnemySpawner : MonoBehaviour
 
         foreach (string enemyType in enemyList)
         {
-            // Dừng nếu game không còn chạy
             if (!GameManager.Instance.IsGameRunning)
                 yield break;
 
-            // Chọn điểm spawn ngẫu nhiên
             Vector3 spawnPosition = GetRandomSpawnPoint();
 
-            // Dùng Factory tạo enemy
-            enemyFactory.Create(enemyType, spawnPosition);
+            // ── Ưu tiên lấy từ ObjectPool ──────────────────────────────
+            // Nếu chưa có ObjectPool trong scene, fallback sang Factory
+            if (ObjectPool.Instance != null)
+            {
+                GameObject enemyObj = ObjectPool.Instance.Get(enemyType, spawnPosition);
+
+                // Gọi Initialize nếu enemy implement IEnemy
+                if (enemyObj != null)
+                    enemyObj.GetComponent<IEnemy>()?.Initialize();
+            }
+            else
+            {
+                // Fallback: dùng Factory như cũ (đảm bảo backward-compatible)
+                enemyFactory.Create(enemyType, spawnPosition);
+            }
 
             yield return new WaitForSeconds(spawnDelay);
         }
@@ -93,11 +74,6 @@ public class EnemySpawner : MonoBehaviour
         Debug.Log("[EnemySpawner] Đã spawn xong tất cả enemy trong wave. Tiêu diệt Boss để qua wave tiếp!");
     }
 
-    /// <summary>
-    /// Xây dựng danh sách enemy cho wave dựa trên số wave hiện tại.
-    /// Wave càng cao càng có nhiều enemy và loại khó hơn.
-    /// </summary>
-    /// <param name="wave">Số wave hiện tại</param>
     private List<string> BuildWaveEnemyList(int wave)
     {
         List<string> list = new List<string>();
@@ -118,10 +94,6 @@ public class EnemySpawner : MonoBehaviour
         return list;
     }
 
-    /// <summary>
-    /// Trả về vị trí spawn ngẫu nhiên từ danh sách SpawnPoints.
-    /// Nếu không có SpawnPoint nào, trả về vị trí gốc (0,0,0).
-    /// </summary>
     private Vector3 GetRandomSpawnPoint()
     {
         if (spawnPoints == null || spawnPoints.Length == 0)
@@ -132,5 +104,15 @@ public class EnemySpawner : MonoBehaviour
 
         int randomIndex = Random.Range(0, spawnPoints.Length);
         return spawnPoints[randomIndex].position;
+    }
+
+    // ── Helper: trả enemy về pool khi nó chết ─────────────────────────────
+    // Gọi từ script Enemy khi HP = 0 (thay vì Destroy)
+    public static void ReturnEnemyToPool(string enemyType, GameObject enemyObj)
+    {
+        if (ObjectPool.Instance != null)
+            ObjectPool.Instance.Return(enemyType, enemyObj);
+        else
+            Destroy(enemyObj);
     }
 }

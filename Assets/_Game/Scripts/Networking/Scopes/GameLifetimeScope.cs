@@ -1,0 +1,79 @@
+using DungeonBuilder.Building;
+using DungeonBuilder.Core;
+using DungeonBuilder.Harvesting;
+using DungeonBuilder.Networking.Pool;
+using DungeonBuilder.UI.HUD;
+using DungeonBuilder.Wave;
+using UnityEngine;
+using VContainer;
+using VContainer.Unity;
+
+namespace DungeonBuilder.Networking.Scopes
+{
+    public sealed class GameLifetimeScope : LifetimeScope
+    {
+        [Header("Scene Services")]
+        [SerializeField] private NetworkObjectPool _networkObjectPool;
+        [SerializeField] private SharedResourceManager _sharedResourceManager;
+        [SerializeField] private CoreManager _coreManager;
+        [SerializeField] private GridManager _gridManager;
+        [SerializeField] private BuildingController _buildingController;
+        [SerializeField] private WaveManager _waveManager;
+
+        [Header("UI")]
+        [SerializeField] private HUDView _hudView;
+
+        protected override void Configure(IContainerBuilder builder)
+        {
+            builder.Register<EventBus>(Lifetime.Singleton);
+            builder.Register<HUDModel>(Lifetime.Singleton);
+            builder.RegisterEntryPoint<HUDPresenter>(Lifetime.Singleton);
+
+            if (_networkObjectPool != null)
+            {
+                builder.RegisterComponent(_networkObjectPool).AsImplementedInterfaces();
+            }
+
+            if (_sharedResourceManager != null)
+            {
+                builder.RegisterComponent(_sharedResourceManager);
+            }
+
+            if (_coreManager != null)
+            {
+                builder.RegisterComponent(_coreManager);
+            }
+
+            if (_gridManager != null)
+            {
+                builder.RegisterComponent(_gridManager);
+            }
+
+            if (_buildingController != null)
+            {
+                builder.RegisterComponent(_buildingController);
+            }
+
+            if (_waveManager != null)
+            {
+                builder.RegisterComponent(_waveManager);
+            }
+
+            if (_hudView != null)
+            {
+                builder.RegisterComponent(_hudView);
+            }
+
+            // Scene-placed objects that cannot be pre-registered individually
+            // (multiple instances of same type). Runs once after container build,
+            // before Start() and well before OnNetworkSpawn().
+            builder.RegisterBuildCallback(resolver =>
+            {
+                foreach (HarvestableNode node in FindObjectsByType<HarvestableNode>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                {
+                    resolver.InjectGameObject(node.gameObject);
+                }
+            });
+        }
+    }
+}

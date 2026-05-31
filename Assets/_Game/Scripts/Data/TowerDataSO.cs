@@ -24,5 +24,7 @@ namespace Assets._Game.Scripts.Data
         public float rangePerLevel = 0.5f;
         public int upgradeCostWood = 15;
         public int upgradeCostOre = 5;
+        // public Sprite icon;  // TODO: bat comment khi gan icon cho Tower Selection Panel
     }
 }
+

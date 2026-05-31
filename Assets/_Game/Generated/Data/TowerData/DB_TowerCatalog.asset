@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a06ed25a5a8e9b948a8cfbc6fa292890, type: 3}
+  m_Name: DB_TowerCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.TowerCatalogSO
+  _towers:
+  - {fileID: 11400000, guid: afbb5f0571c523645bcabf52df592faf, type: 2}
+  - {fileID: 11400000, guid: 408b6a3b846412546a2e4fc232e1ddd7, type: 2}
+  - {fileID: 11400000, guid: b104f3a907a6c0b4f9a418df81e1e167, type: 2}

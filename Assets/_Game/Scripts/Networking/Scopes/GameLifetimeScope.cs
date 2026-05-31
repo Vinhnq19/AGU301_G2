@@ -1,8 +1,10 @@
 using DungeonBuilder.Building;
 using DungeonBuilder.Core;
+using DungeonBuilder.Data;
 using DungeonBuilder.Harvesting;
 using DungeonBuilder.Networking.Pool;
 using DungeonBuilder.UI.HUD;
+using DungeonBuilder.UI.TowerSelection;
 using DungeonBuilder.Wave;
 using UnityEngine;
 using VContainer;
@@ -22,6 +24,10 @@ namespace DungeonBuilder.Networking.Scopes
 
         [Header("UI")]
         [SerializeField] private HUDView _hudView;
+        [SerializeField] private TowerSelectionView _towerSelectionView;
+
+        [Header("Data")]
+        [SerializeField] private TowerCatalogSO _towerCatalog;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -62,6 +68,22 @@ namespace DungeonBuilder.Networking.Scopes
             if (_hudView != null)
             {
                 builder.RegisterComponent(_hudView);
+            }
+
+            // TowerSelectionPresenter dang ky ca AsSelf de BuilderTool co the inject duoc
+            // (RegisterEntryPoint chi expose qua IInitializable, khong resolve duoc concrete type)
+            builder.Register<TowerSelectionModel>(Lifetime.Singleton);
+            builder.Register<TowerSelectionPresenter>(Lifetime.Singleton).AsSelf();
+            builder.RegisterBuildCallback(resolver => resolver.Resolve<TowerSelectionPresenter>().Initialize());
+
+            if (_towerSelectionView != null)
+            {
+                builder.RegisterComponent(_towerSelectionView);
+            }
+
+            if (_towerCatalog != null)
+            {
+                builder.RegisterInstance(_towerCatalog);
             }
 
             // Scene-placed objects that cannot be pre-registered individually

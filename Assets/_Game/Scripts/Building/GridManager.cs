@@ -83,7 +83,7 @@ namespace DungeonBuilder.Building
                 Mathf.RoundToInt(local.y / _cellSize));
         }
 
-        private bool IsInsideBounds(Vector2Int position)
+        public bool IsInsideBounds(Vector2Int position)
         {
             return position.x >= _minBounds.x
                 && position.y >= _minBounds.y

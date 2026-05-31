@@ -13,8 +13,15 @@ MonoBehaviour:
   m_Name: DB_ArrowTowerData
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.TowerDataSO
   towerType: 0
-  damage: 12
-  range: 4
+  damage: 20
+  range: 3.5
   attackRate: 1.2
   woodCost: 25
   oreCost: 0
+  bulletSpeed: 8
+  bulletLifetime: 3
+  maxLevel: 3
+  damagePerLevel: 5
+  rangePerLevel: 0.5
+  upgradeCostWood: 15
+  upgradeCostOre: 5

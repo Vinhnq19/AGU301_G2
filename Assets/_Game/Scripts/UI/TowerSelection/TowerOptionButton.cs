@@ -7,10 +7,6 @@ using UnityEngine.UI;
 
 namespace DungeonBuilder.UI.TowerSelection
 {
-    /// <summary>
-    /// MonoBehaviour tren moi button tower trong Tower Selection Panel.
-    /// Hien thi ten, chi phi, va trang thai du tien cua tower.
-    /// </summary>
     public sealed class TowerOptionButton : MonoBehaviour
     {
         [Header("UI Refs")]

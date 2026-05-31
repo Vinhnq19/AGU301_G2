@@ -4,16 +4,11 @@ using UnityEngine.UI;
 
 namespace DungeonBuilder.UI.TowerSelection
 {
-    /// <summary>
-    /// MonoBehaviour tren Canvas Screen Space.
-    /// Hien thi danh sach tower co the xay khi player click o trong.
-    /// Yeu cau: EventSystem trong scene, GraphicRaycaster tren Canvas nay.
-    /// </summary>
     public sealed class TowerSelectionView : MonoBehaviour
     {
         [Header("Panel")]
         [SerializeField] private GameObject _panelRoot;
-        [SerializeField] private Button _backdropButton; // Image trong suot toan man hinh — click de dong panel
+        [SerializeField] private Button _backdropButton;
 
         [Header("Tower Buttons")]
         [SerializeField] private TowerOptionButton[] _towerButtons;

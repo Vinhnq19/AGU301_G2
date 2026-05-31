@@ -145,7 +145,6 @@ namespace DungeonBuilder.Networking.Pool
             if (!networkObject.gameObject.activeSelf)
             {
                 networkObject.gameObject.SetActive(true);
-                DBLog.Warning($"pool.reactivated.{hash}", $"Pool found inactive NetworkObject root and reactivated it. prefab={entry.Prefab.name}, hash={hash}.", 1f, networkObject);
             }
 
             Inject(networkObject);
@@ -187,6 +186,7 @@ namespace DungeonBuilder.Networking.Pool
             }
 
             networkObject.transform.SetPositionAndRotation(transform.position, Quaternion.identity);
+            networkObject.gameObject.SetActive(false);
 
             foreach (IPoolable poolable in networkObject.GetComponentsInChildren<IPoolable>(true))
             {

@@ -86,7 +86,13 @@ namespace DungeonBuilder.Building
                 return;
             }
 
-            tower.Spawn();
+            // Guard giong BaseTower.FireAt(): neu pool da spawn roi thi khong Spawn() lai.
+            // Neu goi Spawn() tren object da spawn → exception → SetTowerNetworkObjectId khong chay
+            // → TowerNetworkObjectId = 0 → Remove khong tim duoc tower de despawn.
+            if (!tower.IsSpawned)
+            {
+                tower.Spawn();
+            }
 
             // Ghi NetworkObjectId vào GridCell sau Spawn (ID được gán khi Spawn)
             _grid.SetTowerNetworkObjectId(gridPosition, tower.NetworkObjectId);

@@ -44,7 +44,6 @@ namespace DungeonBuilder.UI.TowerSelection
             base.Initialize();
         }
 
-        // ─── Public API (gọi từ BuilderTool) ─────────────────────────
 
         /// <summary>
         /// Mo panel chon tower tai gridPos. Goi tu BuilderTool.UseAction().
@@ -63,7 +62,6 @@ namespace DungeonBuilder.UI.TowerSelection
             Model.Close();
         }
 
-        // ─── Gọi từ TowerSelectionView ────────────────────────────────
 
         /// <summary>
         /// Player chon mot tower trong panel.
@@ -74,8 +72,6 @@ namespace DungeonBuilder.UI.TowerSelection
             _buildingController?.RequestPlaceTower(Model.SelectedGridPosition, towerType);
             Hide();
         }
-
-        // ─── BasePresenter ────────────────────────────────────────────
 
         protected override void OnModelChanged()
         {
@@ -91,7 +87,6 @@ namespace DungeonBuilder.UI.TowerSelection
             base.Dispose();
         }
 
-        // ─── Private ─────────────────────────────────────────────────
 
         private void RefreshAffordability()
         {

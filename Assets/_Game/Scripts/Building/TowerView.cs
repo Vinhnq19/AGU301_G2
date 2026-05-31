@@ -1,7 +1,6 @@
 using DungeonBuilder.Building;
 using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Assets._Game.Scripts.Building
@@ -10,7 +9,7 @@ namespace Assets._Game.Scripts.Building
     /// View của tower: hiển thị level, range indicator, panel Upgrade/Remove.
     /// Yêu cầu Physics2D Raycaster trên camera và EventSystem trong scene.
     /// </summary>
-    public sealed class TowerView : MonoBehaviour, IPointerClickHandler
+    public sealed class TowerView : MonoBehaviour
     {
         [Header("Info")]
         [SerializeField] private TMP_Text _levelText;
@@ -72,9 +71,11 @@ namespace Assets._Game.Scripts.Building
         }
 
         /// <summary>
-        /// Toggle panel Upgrade/Remove khi player click vào tower.
+        /// Toggle panel Upgrade/Remove. Goi tu TowerPresenter.OnPointerClick() tren root.
+        /// TowerPresenter nam cung BoxCollider2D tren root → nhan Physics2D Raycaster event.
+        /// TowerView nam trong Canvas child → khong nhan duoc event truc tiep.
         /// </summary>
-        public void OnPointerClick(PointerEventData eventData)
+        public void TogglePanel()
         {
             if (_actionPanel == null) return;
             _actionPanel.SetActive(!_actionPanel.activeSelf);

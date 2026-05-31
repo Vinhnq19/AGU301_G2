@@ -1,28 +1,36 @@
-# Hướng Dẫn Setup Và Test Dungeon Builder
+# Huong Dan Setup Va Test Dungeon Builder
 
-Phần setup trong Unity đã được tự động hóa bằng editor tool:
+Phan setup trong Unity da duoc tu dong hoa bang editor tool:
 
 ```text
 Assets/_Game/Editor/DungeonBuilderBootstrapper.cs
 ```
 
-Tool này tạo sẵn placeholder sprite, ScriptableObject data, prefab, GameObject trong scene, HUD text, NetworkManager prefab list, pool entries và các reference serialized cần thiết.
+Tool nay tao placeholder sprite, ScriptableObject data, prefab, object trong scene, HUD text, NetworkManager prefab list, pool entries va cac reference serialized can thiet.
 
-## 1. Chạy Bootstrap
+## 1. Trang Thai Hien Tai
 
-Codex đã đặt flag chạy một lần tại:
+Da kiem tra trong repo:
 
-```text
-ProjectSettings/DungeonBuilderBootstrapRequested.flag
-```
+- `ProjectSettings/DungeonBuilderBootstrapRequested.flag` khong con, tuc la khong dang doi autorun bootstrap.
+- `Assets/Scenes/SampleScene.unity` co `GameRoot`, `NetworkManager`, `BuildingController`, `GridManager`, `SharedResourceManager`, `NetworkObjectPool`.
+- `NetworkManager` dang dung `DB_Player` lam Player Prefab va `DB_NetworkPrefabs` lam network prefab list.
+- `BuildingController` da co 3 tower data va 3 tower prefab mapping: Arrow, Cannon, Frost.
+- `NetworkObjectPool` da co pool entries cho tower prefabs.
+- `DB_Player.prefab` da co `BuilderTool`, va `ToolController` dang order tool: Axe, Pickaxe, Weapon, Builder.
+- Input hien tai dung action cu `Next`/`Previous`; code van support alias nay. Phim mac dinh la `2` de next tool, `1` de previous tool, chuot trai de use tool.
 
-Nếu Unity đang mở, quay lại Unity và đợi compile/import xong. Sau khi compile thành công, bootstrap sẽ tự chạy. Nếu không tự chạy hoặc file flag vẫn còn, chạy thủ công bằng menu:
+Ket luan: ve mat asset va reference, builder da duoc wire dung. Minh chua chay duoc Unity batch compile/play tu terminal vi project dang duoc mo trong mot Unity instance khac. De xac nhan runtime 100%, can test trong Editor dang mo theo phan 5 ben duoi va xem Console co log `build.accept` hay `build.reject`.
+
+## 2. Chay Bootstrap Khi Can Tao Lai Setup
+
+Neu Unity dang mo, quay lai Unity va doi compile/import xong. Neu setup bi mat reference hoac muon tao lai placeholder, chay menu:
 
 ```text
 Dungeon Builder > Bootstrap Generated Setup
 ```
 
-Nếu muốn chạy bằng PowerShell, đóng Unity trước rồi chạy:
+Neu muon chay bang PowerShell, dong Unity truoc roi chay:
 
 ```powershell
 & "C:\Program Files\Unity\Hub\Editor\6000.3.11f1\Editor\Unity.exe" `
@@ -32,9 +40,11 @@ Nếu muốn chạy bằng PowerShell, đóng Unity trước rồi chạy:
   -logFile "d:\NHH\PersonalProject\AGU301_G2\Logs\DungeonBuilderBootstrap.log"
 ```
 
-## 2. Asset Và Object Được Tạo
+Neu len loi `another Unity instance is running with this project open`, dong Unity dang mo truoc khi chay batchmode.
 
-Sau khi bootstrap chạy thành công, kiểm tra có các thư mục:
+## 3. Asset Va Object Duoc Tao
+
+Sau khi bootstrap chay thanh cong, kiem tra co cac thu muc:
 
 ```text
 Assets/_Game/Generated/Data/
@@ -43,7 +53,7 @@ Assets/_Game/Generated/Sprites/
 Assets/_Game/Generated/DB_NetworkPrefabs.asset
 ```
 
-Trong `Assets/Scenes/SampleScene.unity`, tool sẽ tạo:
+Trong `Assets/Scenes/SampleScene.unity`, tool tao:
 
 ```text
 GameRoot
@@ -52,9 +62,10 @@ DB_SpawnPoints
 DB_ResourceNodes
 DB_HUDCanvas
 EventSystem
+NetworkManager
 ```
 
-`GameRoot` sẽ có và đã wire reference cho:
+`GameRoot` can co va da wire reference cho:
 
 - `NetworkObjectPool`
 - `SharedResourceManager`
@@ -63,7 +74,7 @@ EventSystem
 - `WaveManager`
 - `GameLifetimeScope`
 
-Prefab được tạo gồm:
+Prefab duoc tao gom:
 
 - `DB_Player`
 - `DB_ResourceDrop`
@@ -71,132 +82,241 @@ Prefab được tạo gồm:
 - `DB_DroneEnemy`, `DB_BruteEnemy`, `DB_MinerBugEnemy`
 - `DB_ArrowTower`, `DB_CannonTower`, `DB_FrostTower`
 
-Visual chỉ là placeholder circle, square, capsule để test flow trước. Sau khi flow ổn mới thay art thật.
+Visual hien tai chi la placeholder circle, square, capsule de test flow truoc. Sau khi flow on moi thay art that.
 
-## 3. Checklist Sau Bootstrap
+## 4. Checklist Sau Bootstrap
 
-1. Console không có compile error.
-2. `ProjectSettings/DungeonBuilderBootstrapRequested.flag` đã biến mất. Nếu còn, chạy menu bootstrap thủ công.
-3. `NetworkManager > Player Prefab` trỏ đến `DB_Player`.
-4. `NetworkManager > Network Prefabs` dùng `DB_NetworkPrefabs`.
-5. `GameRoot > GameLifetimeScope` đã có đủ reference.
-6. `GameRoot > NetworkObjectPool` có entries cho drop, enemy, tower.
-7. `GameRoot > BuildingController` có tower data và tower prefab mapping.
-8. `GameRoot > WaveManager` có core target, spawn points, enemy prefabs.
-9. `DB_HUDCanvas > HUDView` đã gán đủ TMP text refs.
+1. Console khong co compile error.
+2. `ProjectSettings/DungeonBuilderBootstrapRequested.flag` da bien mat.
+3. `NetworkManager > Player Prefab` tro den `DB_Player`.
+4. `NetworkManager > Network Prefabs` dung `DB_NetworkPrefabs`.
+5. `GameRoot > GameLifetimeScope` da co du reference.
+6. `GameRoot > NetworkObjectPool` co entries cho drop, enemy, tower.
+7. `GameRoot > BuildingController` co tower data va tower prefab mapping.
+8. `GameRoot > WaveManager` co core target, spawn points, enemy prefabs.
+9. `DB_HUDCanvas > HUDView` da gan du TMP text refs.
 
-## 4. Luồng Test 1: Host Một Instance
+## 5. Cach Dung Builder
 
-Mục tiêu: xác nhận scene, spawn player, pool, harvest, HUD hoạt động trước khi test client.
+Builder khong dat tower truc tiep tren client. Khi bam chuot, `BuilderTool` lay vi tri chuot, doi sang grid, goi `BuildingController.RequestPlaceTower`, sau do server moi quyet dinh co spawn tower hay khong.
 
-1. Mở `Assets/Scenes/SampleScene.unity`.
-2. Bấm Play.
-3. Chọn object `NetworkManager` trong Hierarchy.
-4. Trong Inspector của `NetworkManager`, bấm `Start Host`.
-5. Xác nhận player `DB_Player` spawn ra scene.
-6. Di chuyển bằng `WASD` hoặc arrow keys.
-7. Dùng chuột trái vào node tài nguyên gần player.
-8. Đi vào `DB_ResourceDrop` vừa spawn.
-9. Kiểm tra HUD:
-   - Wood/Stone/Ore/Crystal tăng.
-   - Không có `NullReferenceException`.
-   - Resource chỉ tăng khi server xử lý pickup.
-10. Đợi hết countdown build phase.
-11. Xác nhận `WaveManager` spawn enemy ở `DB_SpawnPoints`.
-12. Dùng weapon/tool đánh enemy và kiểm tra enemy death effect rồi return pool.
+Dieu kien de dat duoc tower:
 
-Nếu cần đổi tool trong setup placeholder hiện tại:
+- Dang chay Host hoac Client da connect vao Host.
+- Player local da spawn va la owner.
+- Da chon dung tool `Builder`.
+- Co du resource cho tower dang chon.
+- Click vao cell nam trong bounds va chua co tower.
+- `BuildingController`, `GridManager`, `SharedResourceManager`, `NetworkObjectPool` inject duoc qua VContainer.
 
-- `2`: next tool.
-- `1`: previous tool.
-- Tool order mặc định: Axe, Pickaxe, Weapon, Builder.
+Cost mac dinh:
 
-## 5. Luồng Test 2: Build Tower
+| Tower | Wood | Ore |
+| --- | ---: | ---: |
+| Arrow | 25 | 0 |
+| Cannon | 40 | 15 |
+| Frost | 25 | 10 |
 
-Mục tiêu: xác nhận `BuilderTool -> BuildingController -> SharedResourceManager -> NetworkObjectPool`.
+`BuilderTool` hien dang selected tower mac dinh la Arrow, nen chi can 25 Wood la dat duoc tower dau tien.
 
-1. Chạy Host như Luồng Test 1.
-2. Harvest vài node để có Wood/Ore.
-3. Bấm `2` vài lần để chuyển đến `Builder`.
-4. Click vào vị trí trống trên grid.
-5. Xác nhận:
-   - Resource bị trừ theo `TowerDataSO`.
-   - Tower prefab spawn ở vị trí grid.
-   - `GridManager` không cho đặt đè lên cell đã occupied.
+### Test Builder Tren 1 Instance
 
-Nếu Builder không đặt được:
+1. Mo `Assets/Scenes/SampleScene.unity`.
+2. Bam Play.
+3. Chon object `NetworkManager` trong Hierarchy.
+4. Trong Inspector cua `NetworkManager`, bam `Start Host`.
+5. Xac nhan player `DB_Player` spawn ra scene.
+6. Di chuyen bang `WASD` hoac arrow keys.
+7. Chon dung tool harvest:
+   - Tool order: Axe, Pickaxe, Weapon, Builder.
+   - Bam `2` de sang tool tiep theo.
+   - Bam `1` de lui tool truoc do.
+8. Dung Axe/Pickaxe click vao resource node de lay resource drop.
+9. Di vao drop de nhat. HUD phai tang resource.
+10. Bam `2` den khi Console hien log dang chon `Builder`, hoac dem tu order mac dinh: tu Axe bam `2` 3 lan se toi Builder.
+11. Click chuot trai vao vi tri trong gan player, tranh click trung node/resource/tower.
+12. Expected:
+    - HUD tru Wood.
+    - Tower square spawn dung grid tren ca server.
+    - Console co log `build.accept`.
 
-- Kiểm tra `GameRoot > BuildingController` có đủ tower data và prefab mapping.
-- Kiểm tra `GameRoot > NetworkObjectPool` có tower prefabs.
-- Kiểm tra Console có lỗi VContainer resolve `BuildingController` hoặc `GridManager` không.
+Neu khong dat duoc, doc Console theo cac log sau:
 
-## 6. Luồng Test 3: Host Và Client Bằng ParrelSync
+- `build.reject.cost`: thieu resource. Harvest them Wood/Ore.
+- `build.reject.grid`: click ngoai bounds hoac cell da occupied. Click vi tri khac.
+- `build.reject.refs`: thieu reference/injection. Kiem tra `GameRoot > GameLifetimeScope`, `BuildingController`, `NetworkObjectPool`.
+- `build.reject.pool`: pool khong tra ve tower. Kiem tra pool entries va network prefab list.
+- Khong thay `build.send`: chua chon Builder, chua spawn player owner, hoac input attack khong vao.
+- Thay `build.send` nhung khong thay `build.recv`: network chua listening hoac client chua connect Host.
 
-Mục tiêu: xác nhận server-authoritative resource và network spawn hiển thị ở nhiều client.
+## 6. Demo 2 Clone Choi Cung Nhau Bang ParrelSync
 
-1. Mở project chính trong Unity.
-2. Dùng ParrelSync tạo/mở clone nếu chưa có.
-3. Ở project chính:
-   - Mở `SampleScene`.
-   - Bấm Play.
-   - Chọn `NetworkManager`.
-   - Bấm `Start Host`.
-4. Ở project clone:
-   - Mở cùng scene.
-   - Bấm Play.
-   - Chọn `NetworkManager`.
-   - Bấm `Start Client`.
-5. Kiểm tra client connect và player thứ hai spawn.
-6. Từ client, harvest node tài nguyên.
-7. Kiểm tra cả Host và Client:
-   - Cùng thấy resource drop.
-   - HUD resource cập nhật giống nhau.
-   - Client không tự cộng resource local.
-8. Đợi wave spawn enemy.
-9. Kiểm tra enemy xuất hiện trên cả Host và Client.
-10. Kill enemy từ Host hoặc Client, xác nhận death effect chạy và enemy biến mất trên cả hai.
+Muc tieu: chay 2 Unity Editor instance tren cung may, mot Host va mot Client, de test resource sync, player sync va tower spawn.
 
-## 7. Luồng Test 4: Anti-Cheat Và Edge Case
+### 6.1. Tao Clone
 
-Mục tiêu: kiểm tra server từ chối input không hợp lệ thay vì crash.
+1. Mo project goc trong Unity.
+2. Tren menu Unity, mo ParrelSync. Thuong nam o:
 
-1. Đứng xa resource node rồi click vào node.
-2. Expected: server từ chối vì quá range, không spawn drop.
-3. Đứng xa enemy rồi attack.
-4. Expected: server từ chối vì quá range, enemy không mất máu.
-5. Thử đặt tower khi thiếu resource.
-6. Expected: không spawn tower, resource không âm.
-7. Destroy/disable `WaveManager` khi countdown đang chạy.
-8. Expected: không có exception do UniTask đã dùng `destroyCancellationToken`.
+```text
+ParrelSync > Clones Manager
+```
 
-## 8. Input Cleanup Sau Khi Test Flow Ổn
+3. Neu chua co clone, bam `Create new clone`.
+4. Doi ParrelSync tao clone xong. Clone se nam ngoai project goc va dung symlink toi `Assets`, `Packages`, `ProjectSettings`.
+5. Trong Clones Manager, bam `Open in New Editor` cho clone.
+6. Doi clone import/compile xong. Ca project goc va clone deu phai mo duoc `Assets/Scenes/SampleScene.unity`.
 
-`InputReader` hiện hỗ trợ cả tên action cũ và tên action theo plan. Khi flow placeholder đã chạy ổn, nên chỉnh `Assets/InputSystem_Actions.inputactions`:
+Neu clone khong thay package ParrelSync, kiem tra `Packages/manifest.json` co:
 
-- Rename `Jump` thành `Dash`.
-- Rename `Next` thành `NextTool`.
-- Rename `Previous` thành `PrevTool`.
-- Thêm `Hotbar1` đến `Hotbar6`.
-- Giữ nguyên `UI` action map.
+```json
+"com.veriorpies.parrelsync": "https://github.com/VeriorPies/ParrelSync.git?path=/ParrelSync"
+```
 
-Sau khi chỉnh input, test lại Luồng 1 và Luồng 2.
+### 6.2. Chuan Bi Truoc Khi Bam Play
 
-## 9. Khi Nào Bắt Đầu Thay Art Thật
+Lam tren ca project goc va clone:
 
-Chỉ thay art/prefab thật sau khi các flow này pass:
+1. Mo cung scene:
+
+```text
+Assets/Scenes/SampleScene.unity
+```
+
+2. Chon `NetworkManager`.
+3. Kiem tra `UnityTransport`:
+   - Address: `127.0.0.1`
+   - Port: `7777`
+   - Server Listen Address: `127.0.0.1`
+4. Dam bao chi co 1 instance bam `Start Host`. Instance con lai chi bam `Start Client`.
+5. Neu vua test truoc do, Stop Play ca hai instance truoc, roi Start lai theo dung thu tu Host truoc, Client sau.
+
+### 6.3. Chay Host
+
+Lam trong project goc:
+
+1. Bam Play.
+2. Chon `NetworkManager`.
+3. Bam `Start Host`.
+4. Expected:
+   - Console co log network listening/host started.
+   - Scene spawn 1 player.
+   - `NetworkManager` dang IsHost/IsServer/IsClient.
+
+Neu Host khong start:
+
+- Kiem tra co instance nao khac dang giu port `7777` khong.
+- Stop Play tat ca Unity instance, doi vai giay, roi chay lai Host truoc.
+- Neu van loi port, doi port cua ca Host va Client sang cung mot port moi, vi du `7778`.
+
+### 6.4. Chay Client Tu Clone
+
+Lam trong Unity clone:
+
+1. Bam Play.
+2. Chon `NetworkManager`.
+3. Bam `Start Client`.
+4. Expected:
+   - Client connect vao Host.
+   - Host thay player thu hai spawn.
+   - Client thay it nhat 2 player trong scene.
+   - Ca hai instance thay cung resource nodes, core, HUD.
+
+Neu Client khong connect:
+
+- Host phai dang Play va da `Start Host` truoc.
+- Address cua Client phai la `127.0.0.1`.
+- Port cua Client phai trung Host.
+- Console Client khong duoc co prefab mismatch. Neu co, chay bootstrap lai o project goc, de clone sync, roi mo lai clone.
+
+### 6.5. Test 2 Nguoi Harvest Va Build
+
+1. Tren Host, di chuyen player bang `WASD`.
+2. Tren Client clone, di chuyen player bang `WASD`.
+3. Xac nhan moi Editor chi dieu khien player cua minh.
+4. Tren mot instance, chon Axe/Pickaxe roi click resource node.
+5. Nhat drop.
+6. Expected:
+   - HUD resource tang tren ca Host va Client.
+   - Resource khong chi tang local mot ben.
+7. Harvest toi it nhat 25 Wood.
+8. Tren Client clone, bam `2` den Builder, roi click cell trong.
+9. Expected:
+   - Tower spawn tren ca Host va Client.
+   - HUD resource bi tru tren ca hai.
+   - Host Console co `build.recv` va `build.accept`.
+10. Tren Host, thu click dung cell vua co tower.
+11. Expected:
+    - Khong spawn tower thu hai cung cell.
+    - Console co `build.reject.grid`.
+
+### 6.6. Test Wave Va Enemy
+
+1. Doi countdown build phase ket thuc.
+2. Expected:
+   - Enemy spawn tu `DB_SpawnPoints`.
+   - Enemy hien tren ca Host va Client.
+3. Dung Weapon tool de danh enemy.
+4. Expected:
+   - Enemy mat mau/death duoc server xu ly.
+   - Enemy bien mat tren ca hai instance.
+   - Khong co `NullReferenceException`.
+
+### 6.7. Dau Hieu Demo 2 Clone Pass
+
+Demo pass khi:
+
+- Host va Client connect cung session.
+- Moi ben dieu khien dung player cua minh.
+- Resource/HUD sync giong nhau.
+- Client co the gui request harvest/build len Host.
+- Tower dat tu Client xuat hien tren ca hai instance.
+- Enemy wave spawn va despawn tren ca hai instance.
+- Console khong co compile error, prefab mismatch, VContainer resolve error, NullReferenceException lap lai.
+
+## 7. Luong Test Anti-Cheat Va Edge Case
+
+Muc tieu: kiem tra server tu choi input khong hop le thay vi crash.
+
+1. Dung xa resource node roi click vao node.
+2. Expected: server tu choi vi qua range, khong spawn drop.
+3. Dung xa enemy roi attack.
+4. Expected: server tu choi vi qua range, enemy khong mat mau.
+5. Thu dat tower khi thieu resource.
+6. Expected: khong spawn tower, resource khong am, Console co `build.reject.cost`.
+7. Thu dat tower vao cell da occupied.
+8. Expected: khong spawn tower, Console co `build.reject.grid`.
+9. Destroy/disable `WaveManager` khi countdown dang chay.
+10. Expected: khong co exception do UniTask da dung `destroyCancellationToken`.
+
+## 8. Input Cleanup Sau Khi Test Flow On
+
+`InputReader` hien support ca ten action cu va ten action theo plan. Khi flow placeholder da chay on, nen chinh `Assets/InputSystem_Actions.inputactions`:
+
+- Rename `Jump` thanh `Dash`.
+- Rename `Next` thanh `NextTool`.
+- Rename `Previous` thanh `PrevTool`.
+- Them `Hotbar1` den `Hotbar6`.
+- Giu nguyen `UI` action map.
+
+Sau khi chinh input, test lai builder va demo 2 clone.
+
+## 9. Khi Nao Bat Dau Thay Art That
+
+Chi thay art/prefab that sau khi cac flow nay pass:
 
 - Host spawn player.
-- Harvest và HUD resource hoạt động.
-- Resource sync giữa Host/Client.
+- Harvest va HUD resource hoat dong.
+- Resource sync giua Host/Client.
 - Wave spawn enemy.
 - Enemy death return pool.
-- Builder đặt được tower.
+- Builder dat duoc tower.
 
-Khi thay art thật, giữ nguyên rule prefab:
+Khi thay art that, giu nguyen rule prefab:
 
 ```text
 [Root] NetworkObject + NetworkTransform + gameplay scripts
-  [Child] Visual chứa SpriteRenderer/model
+  [Child] Visual chua SpriteRenderer/model
 ```
 
-DOTween chỉ được tween child `Visual`, không tween root có `NetworkTransform`.
+DOTween chi duoc tween child `Visual`, khong tween root co `NetworkTransform`.

@@ -1,4 +1,5 @@
 using DungeonBuilder.Building;
+using DungeonBuilder.Core.Debugging;
 using DungeonBuilder.Core.Enums;
 using Unity.Netcode;
 using UnityEngine;
@@ -14,6 +15,16 @@ namespace DungeonBuilder.Player.Tools
 
         public ToolType ToolType => DungeonBuilder.Core.Enums.ToolType.Builder;
 
+        private void Awake()
+        {
+            EnsureReferences();
+        }
+
+        public override void OnNetworkSpawn()
+        {
+            EnsureReferences();
+        }
+
         [Inject]
         public void Construct(BuildingController buildingController, GridManager gridManager)
         {
@@ -23,8 +34,17 @@ namespace DungeonBuilder.Player.Tools
 
         public void UseAction(Vector3 targetPosition)
         {
-            if (!IsOwner || _buildingController == null)
+            if (!IsOwner)
             {
+                DBLog.Warning($"build.tool.not-owner.{NetworkObjectId}", $"Builder use ignored because this player is not owner. owner={OwnerClientId}.", 1f, this);
+                return;
+            }
+
+            EnsureReferences();
+
+            if (_buildingController == null)
+            {
+                DBLog.Warning($"build.tool.no-controller.{NetworkObjectId}", "Builder use ignored because BuildingController is missing.", 1f, this);
                 return;
             }
 
@@ -32,6 +52,7 @@ namespace DungeonBuilder.Player.Tools
                 ? _gridManager.WorldToGrid(targetPosition)
                 : Vector2Int.RoundToInt(new Vector2(targetPosition.x, targetPosition.y));
 
+            DBLog.Info($"build.tool.use.{NetworkObjectId}", $"Builder use accepted locally. target={targetPosition}, grid={gridPosition}, tower={_selectedTowerType}.", 0.2f, this);
             _buildingController.RequestPlaceTower(gridPosition, _selectedTowerType);
         }
 
@@ -42,6 +63,19 @@ namespace DungeonBuilder.Player.Tools
         public void SetTowerType(TowerType towerType)
         {
             _selectedTowerType = towerType;
+        }
+
+        private void EnsureReferences()
+        {
+            if (_buildingController == null)
+            {
+                _buildingController = FindFirstObjectByType<BuildingController>();
+            }
+
+            if (_gridManager == null)
+            {
+                _gridManager = FindFirstObjectByType<GridManager>();
+            }
         }
     }
 }

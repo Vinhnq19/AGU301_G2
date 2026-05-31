@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using DungeonBuilder.Core.Debugging;
+using DungeonBuilder.Core.Enums;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -15,6 +16,12 @@ namespace DungeonBuilder.Player.Tools
         private readonly List<ITool> _tools = new();
         private InputReader _inputReader;
         private int _currentIndex;
+
+        /// <summary>
+        /// Tool dang duoc local owner su dung. Static de TowerPresenter co the doc
+        /// ma khong can injection (tower o GameLifetimeScope, ToolController o PlayerLifetimeScope).
+        /// </summary>
+        public static ToolType LocalActiveTool { get; private set; } = ToolType.None;
 
         [Inject]
         public void Construct(InputReader inputReader)
@@ -42,6 +49,12 @@ namespace DungeonBuilder.Player.Tools
             _inputReader.OnNextToolPressed += SelectNextTool;
             _inputReader.OnPrevToolPressed += SelectPreviousTool;
             _inputReader.OnHotbarPressed += SelectTool;
+
+            // Ghi nhan tool dau tien khi spawn
+            if (_tools.Count > 0)
+            {
+                LocalActiveTool = _tools[_currentIndex].ToolType;
+            }
         }
 
         public override void OnNetworkDespawn()
@@ -56,6 +69,8 @@ namespace DungeonBuilder.Player.Tools
             _inputReader.OnNextToolPressed -= SelectNextTool;
             _inputReader.OnPrevToolPressed -= SelectPreviousTool;
             _inputReader.OnHotbarPressed -= SelectTool;
+
+            LocalActiveTool = ToolType.None;
         }
 
         public void SelectTool(int index)
@@ -68,6 +83,7 @@ namespace DungeonBuilder.Player.Tools
 
             _tools[_currentIndex].CancelAction();
             _currentIndex = index;
+            LocalActiveTool = _tools[_currentIndex].ToolType;
             DBLog.Info($"tool.select.{NetworkObjectId}", $"Selected tool index={_currentIndex}, type={_tools[_currentIndex].ToolType}.", 0.25f, this);
         }
 
@@ -79,7 +95,7 @@ namespace DungeonBuilder.Player.Tools
             {
                 foreach (MonoBehaviour behaviour in _toolBehaviours)
                 {
-                    if (behaviour is ITool tool)
+                    if (behaviour is ITool tool && tool.ToolType != ToolType.None)
                     {
                         _tools.Add(tool);
                     }
@@ -93,7 +109,7 @@ namespace DungeonBuilder.Player.Tools
 
             foreach (MonoBehaviour behaviour in GetComponentsInChildren<MonoBehaviour>(true))
             {
-                if (behaviour is ITool tool)
+                if (behaviour is ITool tool && tool.ToolType != ToolType.None)
                 {
                     _tools.Add(tool);
                 }

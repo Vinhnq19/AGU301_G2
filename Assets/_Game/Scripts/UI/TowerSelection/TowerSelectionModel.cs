@@ -7,10 +7,6 @@ using UnityEngine;
 
 namespace DungeonBuilder.UI.TowerSelection
 {
-    /// <summary>
-    /// Model cua Tower Selection Panel.
-    /// Luu grid position da chon va affordability cua tung tower.
-    /// </summary>
     public sealed class TowerSelectionModel : IModel
     {
         public event Action OnChanged;

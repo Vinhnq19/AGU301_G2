@@ -5,6 +5,7 @@ namespace DungeonBuilder.Core.Enums
         Axe,
         Pickaxe,
         Weapon,
-        Builder
+        Builder,
+        None
     }
 }

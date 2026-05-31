@@ -70,8 +70,6 @@ namespace DungeonBuilder.Networking.Scopes
                 builder.RegisterComponent(_hudView);
             }
 
-            // TowerSelectionPresenter dang ky ca AsSelf de BuilderTool co the inject duoc
-            // (RegisterEntryPoint chi expose qua IInitializable, khong resolve duoc concrete type)
             builder.Register<TowerSelectionModel>(Lifetime.Singleton);
             builder.Register<TowerSelectionPresenter>(Lifetime.Singleton).AsSelf();
             builder.RegisterBuildCallback(resolver => resolver.Resolve<TowerSelectionPresenter>().Initialize());
@@ -86,9 +84,6 @@ namespace DungeonBuilder.Networking.Scopes
                 builder.RegisterInstance(_towerCatalog);
             }
 
-            // Scene-placed objects that cannot be pre-registered individually
-            // (multiple instances of same type). Runs once after container build,
-            // before Start() and well before OnNetworkSpawn().
             builder.RegisterBuildCallback(resolver =>
             {
                 foreach (HarvestableNode node in FindObjectsByType<HarvestableNode>(FindObjectsInactive.Include, FindObjectsSortMode.None))

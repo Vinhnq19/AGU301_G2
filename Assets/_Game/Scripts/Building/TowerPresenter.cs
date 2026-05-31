@@ -1,7 +1,10 @@
 using DungeonBuilder.Building;
 using DungeonBuilder.Core.Debugging;
+using DungeonBuilder.Core.Enums;
+using DungeonBuilder.Player.Tools;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using VContainer;
 
 namespace Assets._Game.Scripts.Building
@@ -9,8 +12,10 @@ namespace Assets._Game.Scripts.Building
     /// <summary>
     /// Presenter của tower (MonoBehaviour trên root prefab). Bridges TowerModel ↔ TowerView.
     /// Xử lý request Upgrade / Remove gửi lên server qua BuildingController.
+    /// IPointerClickHandler tren root (cung BoxCollider2D): nhan Physics2D Raycaster click de
+    /// toggle ActionPanel. TowerView nam trong Canvas child khong nhan duoc event truc tiep.
     /// </summary>
-    public sealed class TowerPresenter : MonoBehaviour
+    public sealed class TowerPresenter : MonoBehaviour, IPointerClickHandler
     {
         private TowerModel _model;
         private TowerView _view;
@@ -58,6 +63,12 @@ namespace Assets._Game.Scripts.Building
             DBLog.Info($"tower.remove.request.{gridPos}", $"Remove request from presenter. grid={gridPos}.", 0.25f, this);
             _view?.HidePanel();
             _buildingController?.RequestRemoveTower(gridPos);
+        }
+
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            if (ToolController.LocalActiveTool != ToolType.Builder) return;
+            _view?.TogglePanel();
         }
 
         private void OnModelChanged()

@@ -41,3 +41,5 @@ Trước khi viết mã cho một tính năng mới:
 1. Hãy suy nghĩ từng bước (Think step by step).
 2. Viết ra một bản kế hoạch triển khai ngắn gọn (Implementation Plan) liệt kê các file sẽ sửa/tạo.
 3. Đợi người dùng phê duyệt kế hoạch rồi mới tiến hành viết mã.
+4. luôn dạ ở cuối câu trả lời
+5. tag độ khó từ 1-6 bằng #level 1

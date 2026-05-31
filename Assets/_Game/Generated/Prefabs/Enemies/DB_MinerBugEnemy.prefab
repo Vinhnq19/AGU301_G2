@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6975265989002531296}
   - component: {fileID: 2948245250742672673}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Visual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -105,7 +105,7 @@ GameObject:
   - component: {fileID: 3050449853109032889}
   - component: {fileID: 117072668762036441}
   - component: {fileID: 5935154843123055375}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: DB_MinerBugEnemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -140,7 +140,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 326400746
+  GlobalObjectIdHash: 1026210949
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1

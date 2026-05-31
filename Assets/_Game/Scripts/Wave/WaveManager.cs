@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
+using Assets._Game.Scripts.Enemy;
 using Cysharp.Threading.Tasks;
 using DungeonBuilder.Core;
 using DungeonBuilder.Core.Enums;
-using DungeonBuilder.Enemy;
 using DungeonBuilder.Networking.Pool;
 using Unity.Netcode;
 using UnityEngine;

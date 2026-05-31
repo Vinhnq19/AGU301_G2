@@ -1,10 +1,11 @@
 #if UNITY_EDITOR
 using System.Collections.Generic;
 using System.IO;
+using Assets._Game.Scripts.Data;
+using Assets._Game.Scripts.Enemy;
 using DungeonBuilder.Building;
 using DungeonBuilder.Core.Enums;
 using DungeonBuilder.Data;
-using DungeonBuilder.Enemy;
 using DungeonBuilder.Enemy.Types;
 using DungeonBuilder.Harvesting;
 using DungeonBuilder.Networking;
@@ -247,7 +248,7 @@ namespace DungeonBuilder.Editor
             data.enemyType = type;
             data.maxHealth = health;
             data.moveSpeed = speed;
-            data.rewardGold = reward;
+            data.rewardToken = reward;
         }
 
         private static void ConfigureTower(TowerDataSO data, TowerType type, float damage, float range, float rate, int wood, int ore)

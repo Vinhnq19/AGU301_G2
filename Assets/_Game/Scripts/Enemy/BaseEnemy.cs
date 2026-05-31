@@ -1,17 +1,18 @@
 using System;
+using Assets._Game.Scripts.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using DungeonBuilder.Core;
 using DungeonBuilder.Core.Enums;
 using DungeonBuilder.Core.Interfaces;
-using DungeonBuilder.Data;
+using DungeonBuilder.Enemy;
 using DungeonBuilder.Enemy.States;
 using DungeonBuilder.Networking.Pool;
 using Unity.Netcode;
 using UnityEngine;
 using VContainer;
 
-namespace DungeonBuilder.Enemy
+namespace Assets._Game.Scripts.Enemy
 {
     [RequireComponent(typeof(NetworkObject))]
     public class BaseEnemy : NetworkBehaviour, IDamageable, IPoolable
@@ -33,9 +34,10 @@ namespace DungeonBuilder.Enemy
         private Rigidbody2D[] _rigidbodies;
         private bool _isDying;
         private float _lastAttackTime;
+        private float _slowMultiplier = 1f;
 
-        public EnemyType EnemyType => _data != null ? _data.enemyType : DungeonBuilder.Core.Enums.EnemyType.Drone;
-        public float MoveSpeed => _data != null ? _data.moveSpeed : 2f;
+        public EnemyType EnemyType => _data != null ? _data.enemyType : EnemyType.Drone;
+        public float MoveSpeed => (_data != null ? _data.moveSpeed : 2f) * _slowMultiplier;
         public Transform Visual => _visual;
 
         [Inject]
@@ -108,6 +110,7 @@ namespace DungeonBuilder.Enemy
         public void OnReturnToPool()
         {
             _isDying = false;
+            _slowMultiplier = 1f;
             _stateMachine.ChangeState(null);
             SetPhysicsActive(false);
 
@@ -205,11 +208,43 @@ namespace DungeonBuilder.Enemy
             _visual.DOPunchPosition(Vector3.right * 0.08f, 0.25f, 8, 0.5f);
         }
 
+        /// <summary>
+        /// Áp dụng hiệu ứng chậm lên enemy trong khoảng thời gian nhất định. Server-only.
+        /// </summary>
+        public void ApplySlow(float slowMultiplier, float duration)
+        {
+            if (!IsServer || _isDying) return;
+            _slowMultiplier = Mathf.Clamp(slowMultiplier, 0.1f, 1f);
+            PlaySlowFeedbackClientRpc();
+            SlowResetAsync(duration).Forget();
+        }
+
+        private async UniTaskVoid SlowResetAsync(float duration)
+        {
+            try
+            {
+                await UniTask.Delay(
+                    TimeSpan.FromSeconds(duration),
+                    cancellationToken: destroyCancellationToken);
+                _slowMultiplier = 1f;
+            }
+            catch (OperationCanceledException) { }
+        }
+
+        [ClientRpc]
+        private void PlaySlowFeedbackClientRpc()
+        {
+            if (_visual == null) return;
+            _visual.DOKill();
+            _visual.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f);
+        }
+
         private void ResetEnemy()
         {
             float maxHealth = _data != null ? _data.maxHealth : 100f;
             _currentHP.Value = maxHealth;
             _isDying = false;
+            _slowMultiplier = 1f;
             _lastAttackTime = -999f;
             _stateMachine.ChangeState(new MoveToCoreState());
         }

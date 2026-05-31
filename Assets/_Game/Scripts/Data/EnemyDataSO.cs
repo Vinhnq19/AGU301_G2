@@ -1,7 +1,7 @@
 using DungeonBuilder.Core.Enums;
 using UnityEngine;
 
-namespace DungeonBuilder.Data
+namespace Assets._Game.Scripts.Data
 {
     [CreateAssetMenu(fileName = "EnemyData", menuName = "Dungeon Builder/Data/Enemy")]
     public sealed class EnemyDataSO : ScriptableObject
@@ -9,6 +9,6 @@ namespace DungeonBuilder.Data
         public EnemyType enemyType;
         public float maxHealth = 100f;
         public float moveSpeed = 2f;
-        public int rewardGold = 10;
+        public int rewardToken = 10;
     }
 }

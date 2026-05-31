@@ -1,3 +1,4 @@
+using Assets._Game.Scripts.Enemy;
 using DungeonBuilder.Enemy.States;
 
 namespace DungeonBuilder.Enemy

@@ -1,3 +1,5 @@
+using Assets._Game.Scripts.Enemy;
+
 namespace DungeonBuilder.Enemy.States
 {
     public sealed class StunnedState : IEnemyState

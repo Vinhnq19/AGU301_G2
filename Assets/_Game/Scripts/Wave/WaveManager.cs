@@ -4,6 +4,8 @@ using Assets._Game.Scripts.Enemy;
 using Cysharp.Threading.Tasks;
 using DungeonBuilder.Core;
 using DungeonBuilder.Core.Enums;
+using DungeonBuilder.Data;
+using DungeonBuilder.Enemy;
 using DungeonBuilder.Networking.Pool;
 using Unity.Netcode;
 using UnityEngine;
@@ -13,12 +15,18 @@ namespace DungeonBuilder.Wave
 {
     public sealed class WaveManager : NetworkBehaviour
     {
-        [SerializeField, Min(1f)] private float _buildPhaseDuration = 30f;
-        [SerializeField, Min(0.1f)] private float _spawnInterval = 0.5f;
-        [SerializeField, Min(1)] private int _baseEnemiesPerWave = 4;
+        [System.Serializable]
+        public struct EnemyPrefabMapping
+        {
+            public EnemyType enemyType;
+            public NetworkObject prefab;
+        }
+
+        [SerializeField] private WaveCatalogSO _waveCatalog;
+        [SerializeField] private EnemyPrefabMapping[] _enemyPrefabMappings;
+        [SerializeField] private EnemyPath[] _enemyPaths;
         [SerializeField] private Transform _coreTarget;
         [SerializeField] private Transform[] _spawnPoints;
-        [SerializeField] private NetworkObject[] _enemyPrefabs;
 
         private readonly NetworkVariable<int> _currentWave = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         private readonly NetworkVariable<float> _phaseCountdown = new(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
@@ -27,6 +35,7 @@ namespace DungeonBuilder.Wave
         private EventBus _eventBus;
         private INetworkPool _pool;
         private readonly HashSet<ulong> _activeEnemyIds = new();
+        private readonly Dictionary<EnemyType, NetworkObject> _prefabLookup = new();
 
         [Inject]
         public void Construct(EventBus eventBus, INetworkPool pool)
@@ -41,6 +50,7 @@ namespace DungeonBuilder.Wave
 
             if (IsServer)
             {
+                InitializePrefabLookup();
                 RunWaveLoopAsync().Forget();
             }
         }
@@ -50,14 +60,47 @@ namespace DungeonBuilder.Wave
             _phaseCountdown.OnValueChanged -= HandlePhaseCountdownChanged;
         }
 
+        private void InitializePrefabLookup()
+        {
+            _prefabLookup.Clear();
+            if (_enemyPrefabMappings != null)
+            {
+                foreach (var mapping in _enemyPrefabMappings)
+                {
+                    if (mapping.prefab != null)
+                    {
+                        _prefabLookup[mapping.enemyType] = mapping.prefab;
+                    }
+                }
+            }
+        }
+
         private async UniTaskVoid RunWaveLoopAsync()
         {
             try
             {
                 while (IsServer && IsSpawned && IsNetworkReady())
                 {
+                    float buildDuration = 30f; // Default fallback
+                    if (_waveCatalog != null && _waveCatalog.waves != null && _currentWave.Value < _waveCatalog.waves.Count)
+                    {
+                        var waveConfig = _waveCatalog.waves[_currentWave.Value];
+                        if (waveConfig != null)
+                        {
+                            buildDuration = waveConfig.buildPhaseDuration;
+                        }
+                    }
+                    else if (_waveCatalog != null && _waveCatalog.waves != null && _waveCatalog.waves.Count > 0)
+                    {
+                        var lastWave = _waveCatalog.waves[_waveCatalog.waves.Count - 1];
+                        if (lastWave != null)
+                        {
+                            buildDuration = lastWave.buildPhaseDuration;
+                        }
+                    }
+
                     _gamePhase.Value = GamePhase.Build;
-                    await CountdownAsync(_buildPhaseDuration);
+                    await CountdownAsync(buildDuration);
                     if (!IsNetworkReady())
                     {
                         return;
@@ -106,38 +149,88 @@ namespace DungeonBuilder.Wave
         {
             _activeEnemyIds.Clear();
 
-            if (!IsNetworkReady() || _pool == null || _enemyPrefabs == null || _enemyPrefabs.Length == 0)
+            if (!IsNetworkReady() || _pool == null || _waveCatalog == null || _waveCatalog.waves == null || _waveCatalog.waves.Count == 0)
             {
                 return;
             }
 
-            int count = Mathf.Max(1, _baseEnemiesPerWave + waveNumber - 1);
+            WaveSO waveConfig = null;
+            int waveIndex = waveNumber - 1;
+            bool isFallback = false;
 
-            for (int i = 0; i < count; i++)
+            if (waveIndex < _waveCatalog.waves.Count)
+            {
+                waveConfig = _waveCatalog.waves[waveIndex];
+            }
+            else
+            {
+                waveConfig = _waveCatalog.waves[_waveCatalog.waves.Count - 1];
+                isFallback = true;
+            }
+
+            if (waveConfig == null || waveConfig.spawnGroups == null)
+            {
+                return;
+            }
+
+            foreach (var group in waveConfig.spawnGroups)
             {
                 if (!IsNetworkReady())
                 {
                     return;
                 }
 
-                NetworkObject prefab = _enemyPrefabs[i % _enemyPrefabs.Length];
-                Transform spawnPoint = GetSpawnPoint(i);
-                Vector3 position = spawnPoint != null ? spawnPoint.position : transform.position;
-                Quaternion rotation = spawnPoint != null ? spawnPoint.rotation : Quaternion.identity;
-
-                NetworkObject enemy = _pool.Get(prefab, position, rotation);
-                if (enemy != null)
+                if (!_prefabLookup.TryGetValue(group.enemyType, out NetworkObject prefab) || prefab == null)
                 {
-                    enemy.GetComponent<BaseEnemy>()?.SetCoreTarget(_coreTarget);
-                    if (!enemy.IsSpawned)
-                    {
-                        enemy.Spawn();
-                    }
-
-                    _activeEnemyIds.Add(enemy.NetworkObjectId);
+                    Debug.LogWarning($"[WaveManager] Prefab not found for EnemyType: {group.enemyType}");
+                    continue;
                 }
 
-                await UniTask.Delay(TimeSpan.FromSeconds(_spawnInterval), cancellationToken: destroyCancellationToken);
+                int spawnCount = group.count;
+                if (isFallback)
+                {
+                    spawnCount += (waveNumber - _waveCatalog.waves.Count);
+                }
+
+                for (int i = 0; i < spawnCount; i++)
+                {
+                    if (!IsNetworkReady())
+                    {
+                        return;
+                    }
+
+                    Transform spawnPoint = GetSpawnPoint(group.spawnPointIndex);
+                    Vector3 position = spawnPoint != null ? spawnPoint.position : transform.position;
+                    Quaternion rotation = spawnPoint != null ? spawnPoint.rotation : Quaternion.identity;
+
+                    NetworkObject enemyObj = _pool.Get(prefab, position, rotation);
+                    if (enemyObj != null)
+                    {
+                        BaseEnemy enemy = enemyObj.GetComponent<BaseEnemy>();
+                        if (enemy != null)
+                        {
+                            enemy.SetCoreTarget(_coreTarget);
+
+                            if (_enemyPaths != null && group.pathIndex >= 0 && group.pathIndex < _enemyPaths.Length)
+                            {
+                                EnemyPath path = _enemyPaths[group.pathIndex];
+                                if (path != null && path.Waypoints != null)
+                                {
+                                    enemy.SetPath(path.Waypoints);
+                                }
+                            }
+                        }
+
+                        if (!enemyObj.IsSpawned)
+                        {
+                            enemyObj.Spawn();
+                        }
+
+                        _activeEnemyIds.Add(enemyObj.NetworkObjectId);
+                    }
+
+                    await UniTask.Delay(TimeSpan.FromSeconds(group.spawnInterval), cancellationToken: destroyCancellationToken);
+                }
             }
         }
 

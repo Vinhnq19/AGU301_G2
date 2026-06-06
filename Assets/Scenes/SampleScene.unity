@@ -1122,18 +1122,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Wave.WaveManager
   ShowTopMostFoldoutHeaderGroup: 1
-  _buildPhaseDuration: 30
-  _spawnInterval: 0.5
-  _baseEnemiesPerWave: 4
+  _waveCatalog: {fileID: 11400000, guid: 2f3d0b3c66da4663a8a3c613e5519db3, type: 2}
+  _enemyPrefabMappings:
+  - enemyType: 0
+    prefab: {fileID: 4663314838043120436, guid: 66be538882501b149ae4c21c82e67e50, type: 3}
+  - enemyType: 1
+    prefab: {fileID: 1860617485065313912, guid: 39a5f7e9b5755bd478ebe7d2ea518059, type: 3}
+  - enemyType: 2
+    prefab: {fileID: 3611466090651016692, guid: 26a2134d735ca374893c9f44c4549367, type: 3}
+  _enemyPaths: []
   _coreTarget: {fileID: 108622721}
   _spawnPoints:
   - {fileID: 1051264160}
   - {fileID: 1552014417}
   - {fileID: 1809912112}
-  _enemyPrefabs:
-  - {fileID: 4663314838043120436, guid: 66be538882501b149ae4c21c82e67e50, type: 3}
-  - {fileID: 1860617485065313912, guid: 39a5f7e9b5755bd478ebe7d2ea518059, type: 3}
-  - {fileID: 3611466090651016692, guid: 26a2134d735ca374893c9f44c4549367, type: 3}
 --- !u!114 &211244833
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5001,7 +5003,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 895797161e75fcd4ebe7054794adf317, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.UI.TowerSelection.TowerOptionButton
-  _button: {fileID: 0}
+  _button: {fileID: 2053900825}
   _nameText: {fileID: 379665798}
   _costText: {fileID: 207841772}
   _disabledOverlay: {fileID: 1761678267}

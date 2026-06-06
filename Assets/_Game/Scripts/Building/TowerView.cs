@@ -1,4 +1,7 @@
+using System.Linq;
+using Assets._Game.Scripts.Building;
 using DungeonBuilder.Building;
+using Assets._Game.Scripts.Data;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -85,9 +88,17 @@ namespace Assets._Game.Scripts.Building
 
             if (_upgradeCostText != null)
             {
-                _upgradeCostText.text = model.CanUpgrade
-                    ? $"Upgrade: {model.UpgradeWoodCost}W / {model.UpgradeOreCost}O"
-                    : "MAX";
+                if (model.CanUpgrade)
+                {
+                    string costStr = model.UpgradeCost.Count > 0
+                        ? string.Join("  ", model.UpgradeCost.Select(c => $"{c.amount}{ResourceCost.Abbr(c.type)}"))
+                        : "Free";
+                    _upgradeCostText.text = $"Upgrade: {costStr}";
+                }
+                else
+                {
+                    _upgradeCostText.text = "MAX";
+                }
             }
         }
 
@@ -104,9 +115,11 @@ namespace Assets._Game.Scripts.Building
 
             if (!done && _constructionProgressText != null)
             {
-                _constructionProgressText.text = model.OreRequired > 0
-                    ? $"{model.WoodPaid}/{model.WoodRequired}W  {model.OrePaid}/{model.OreRequired}O"
-                    : $"{model.WoodPaid}/{model.WoodRequired}W";
+                string progress = model.BuildCost.Count > 0
+                    ? string.Join("  ", model.BuildCost.Select(c =>
+                        $"{model.GetPaid(c.type)}/{c.amount}{ResourceCost.Abbr(c.type)}"))
+                    : "";
+                _constructionProgressText.text = progress;
             }
         }
 

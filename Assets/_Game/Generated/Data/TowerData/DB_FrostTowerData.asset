@@ -16,12 +16,15 @@ MonoBehaviour:
   damage: 30
   range: 5
   attackRate: 1.5
-  woodCost: 25
-  oreCost: 10
   bulletSpeed: 8
   bulletLifetime: 2
+  buildCost:
+  - type: 0
+    amount: 25
   maxLevel: 3
   damagePerLevel: 5
   rangePerLevel: 0.5
-  upgradeCostWood: 15
-  upgradeCostOre: 5
+  upgradeLevels:
+  - costs:
+    - type: 0
+      amount: 40

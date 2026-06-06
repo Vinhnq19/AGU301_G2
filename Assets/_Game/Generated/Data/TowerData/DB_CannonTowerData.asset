@@ -13,8 +13,27 @@ MonoBehaviour:
   m_Name: DB_CannonTowerData
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.TowerDataSO
   towerType: 1
-  damage: 35
-  range: 3.5
-  attackRate: 0.55
-  woodCost: 40
-  oreCost: 15
+  damage: 30
+  range: 10
+  attackRate: 0.5
+  bulletSpeed: 6
+  bulletLifetime: 3
+  buildCost:
+  - type: 0
+    amount: 45
+  - type: 4
+    amount: 5
+  maxLevel: 3
+  damagePerLevel: 7
+  rangePerLevel: 0.5
+  upgradeLevels:
+  - costs:
+    - type: 0
+      amount: 50
+    - type: 4
+      amount: 5
+  - costs:
+    - type: 0
+      amount: 55
+    - type: 4
+      amount: 5

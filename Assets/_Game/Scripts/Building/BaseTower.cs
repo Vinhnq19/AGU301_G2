@@ -13,8 +13,10 @@ using VContainer;
 namespace DungeonBuilder.Building
 {
     /// <summary>
-    /// Script chinh cua moi tower. Quan ly vong doi: Place, Attack, Upgrade, Remove.
-    /// Attack loop chi chay tren Server. NetworkVariable replicate state sang tat ca client.
+    /// Script chinh cua moi tower. Quan ly vong doi: Place, Contribute, Attack, Upgrade, Remove.
+    /// Tower bat dau o trang thai UnderConstruction (woodPaid=0, orePaid=0).
+    /// Attack loop chi chay sau khi IsConstructed == true.
+    /// NetworkVariable replicate state sang tat ca client.
     /// </summary>
     [RequireComponent(typeof(NetworkObject))]
     public class BaseTower : NetworkBehaviour
@@ -24,10 +26,18 @@ namespace DungeonBuilder.Building
         [SerializeField] private NetworkObject _bulletPrefab;
         [SerializeField] private Transform _firePoint;
 
+        [Header("Visual")]
+        [SerializeField] private SpriteRenderer _visual;
+
         private readonly NetworkVariable<int> _currentLevel = new(
             1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
-        // Non-alloc enemy detection buffer — class level
+        private readonly NetworkVariable<int> _woodPaid = new(
+            0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+        private readonly NetworkVariable<int> _orePaid = new(
+            0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
         private readonly Collider2D[] _overlapResults = new Collider2D[16];
         private ContactFilter2D _enemyFilter;
 
@@ -38,7 +48,11 @@ namespace DungeonBuilder.Building
         [Inject] private INetworkPool _pool;
 
         public int CurrentLevel => _currentLevel.Value;
-        public bool CanUpgrade => _data != null && _currentLevel.Value < _data.maxLevel;
+        public bool CanUpgrade  => _data != null && _currentLevel.Value < _data.maxLevel;
+        public int WoodPaid     => _woodPaid.Value;
+        public int OrePaid      => _orePaid.Value;
+        public bool IsConstructed => _data == null
+            || (_woodPaid.Value >= _data.woodCost && _orePaid.Value >= _data.oreCost);
 
         private void Awake()
         {
@@ -47,20 +61,31 @@ namespace DungeonBuilder.Building
             _enemyFilter.useTriggers = false;
 
             _presenter = GetComponent<TowerPresenter>();
-            _view = GetComponentInChildren<TowerView>();
+            _view      = GetComponentInChildren<TowerView>();
         }
 
         public override void OnNetworkSpawn()
         {
             _model = new TowerModel(_data);
+
             _currentLevel.OnValueChanged += HandleLevelChanged;
+            _woodPaid.OnValueChanged     += (_, _) => HandleConstructionChanged();
+            _orePaid.OnValueChanged      += (_, _) => HandleConstructionChanged();
 
             if (_presenter != null)
             {
                 _presenter.Initialize(_model, _view);
             }
 
+            if (IsServer)
+            {
+                _woodPaid.Value = 0;
+                _orePaid.Value  = 0;
+            }
+
             _model.SetLevel(_currentLevel.Value);
+            _model.SetConstructionProgress(_woodPaid.Value, _orePaid.Value);
+            UpdateVisualAlpha();
 
             if (IsServer)
             {
@@ -73,14 +98,22 @@ namespace DungeonBuilder.Building
             _currentLevel.OnValueChanged -= HandleLevelChanged;
         }
 
-        // ─── Lifecycle Methods ────────────────────────────────────────
-
         /// <summary>
         /// Goi boi BuildingController ngay sau tower.Spawn() de ghi nhan vi tri grid.
         /// </summary>
         public void OnPlaced(Vector2Int gridPosition)
         {
-            DBLog.Info($"tower.placed.{NetworkObjectId}", $"Tower placed at grid={gridPosition}.", 0f, this);
+            DBLog.Info($"tower.placed.{NetworkObjectId}", $"[BaseTower] Tower placed at grid={gridPosition}.", 0f, this);
+        }
+
+        /// <summary>
+        /// Cap nhat tien do xay dung. Chi goi tu server (BuildingController.ContributeTowerServerRpc).
+        /// </summary>
+        public void UpdateConstruction(int woodPaid, int orePaid)
+        {
+            if (!IsServer) return;
+            _woodPaid.Value = woodPaid;
+            _orePaid.Value  = orePaid;
         }
 
         /// <summary>
@@ -90,18 +123,15 @@ namespace DungeonBuilder.Building
         {
             if (!IsServer || !CanUpgrade) return;
             _currentLevel.Value++;
-            DBLog.Info($"tower.upgrade.{NetworkObjectId}", $"Tower upgraded to level {_currentLevel.Value}.", 0f, this);
+            DBLog.Info($"tower.upgrade.{NetworkObjectId}", $"[BaseTower] Tower upgraded to level {_currentLevel.Value}.", 0f, this);
         }
 
-        // ─── Internal ─────────────────────────────────────────────────
-
-        /// <summary>
-        /// Attack loop server-only: tim enemy gan nhat trong range roi ban.
-        /// </summary>
         private async UniTaskVoid StartAttackLoopAsync()
         {
             try
             {
+                await UniTask.WaitUntil(() => IsConstructed, cancellationToken: destroyCancellationToken);
+
                 while (IsServer && IsSpawned)
                 {
                     float interval = _data != null && _data.attackRate > 0f ? 1f / _data.attackRate : 1f;
@@ -145,7 +175,7 @@ namespace DungeonBuilder.Building
         {
             if (_bulletPrefab == null || _pool == null || target == null) return;
 
-            Vector3 firePos = _firePoint != null ? _firePoint.position : transform.position;
+            Vector3 firePos  = _firePoint != null ? _firePoint.position : transform.position;
             Vector3 direction = (target.transform.position - firePos).normalized;
             Quaternion rotation = direction != Vector3.zero
                 ? Quaternion.FromToRotation(Vector3.right, direction)
@@ -162,7 +192,7 @@ namespace DungeonBuilder.Building
             }
 
             float damage = _model != null ? _model.Damage : (_data != null ? _data.damage : 10f);
-            float speed  = _data != null ? _data.bulletSpeed   : 8f;
+            float speed  = _data != null ? _data.bulletSpeed    : 8f;
             float life   = _data != null ? _data.bulletLifetime : 3f;
 
             bullet.Initialize(damage, speed, life, target.NetworkObjectId, firePos);
@@ -172,7 +202,7 @@ namespace DungeonBuilder.Building
                 bulletObj.Spawn();
             }
 
-            DBLog.Info($"tower.fire.{NetworkObjectId}", $"Bullet fired. target={target.NetworkObjectId}, dmg={damage:0.0}.", 0.1f, this);
+            DBLog.Info($"tower.fire.{NetworkObjectId}", $"[BaseTower] Bullet fired. target={target.NetworkObjectId}, dmg={damage:0.0}.", 0.1f, this);
         }
 
         private void HandleLevelChanged(int previousValue, int newValue)
@@ -180,11 +210,20 @@ namespace DungeonBuilder.Building
             _model?.SetLevel(newValue);
         }
 
-        /// <summary>
-        /// Ve truc quan khi chon tower trong Editor:
-        /// - Vong tron vang: tam tan cong (range)
-        /// - Diem xanh la: vi tri ban dan (firePoint hoac root)
-        /// </summary>
+        private void HandleConstructionChanged()
+        {
+            UpdateVisualAlpha();
+            _model?.SetConstructionProgress(_woodPaid.Value, _orePaid.Value);
+        }
+
+        private void UpdateVisualAlpha()
+        {
+            if (_visual == null) return;
+            Color c = _visual.color;
+            c.a = IsConstructed ? 1f : 0.4f;
+            _visual.color = c;
+        }
+
         private void OnDrawGizmosSelected()
         {
             float range = _model != null

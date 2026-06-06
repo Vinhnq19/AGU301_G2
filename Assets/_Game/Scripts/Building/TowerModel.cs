@@ -22,6 +22,12 @@ namespace Assets._Game.Scripts.Building
         public int UpgradeWoodCost => _data != null ? _data.upgradeCostWood : 0;
         public int UpgradeOreCost  => _data != null ? _data.upgradeCostOre  : 0;
 
+        public int WoodRequired => _data?.woodCost ?? 0;
+        public int OreRequired  => _data?.oreCost  ?? 0;
+        public int WoodPaid { get; private set; }
+        public int OrePaid  { get; private set; }
+        public bool IsConstructed => WoodPaid >= WoodRequired && OrePaid >= OreRequired;
+
         public TowerModel(TowerDataSO data)
         {
             _data = data;
@@ -30,6 +36,16 @@ namespace Assets._Game.Scripts.Building
         public void SetLevel(int level)
         {
             Level = level;
+            OnChanged?.Invoke();
+        }
+
+        /// <summary>
+        /// Cap nhat tien do xay dung. Goi tu BaseTower khi NetworkVariable thay doi.
+        /// </summary>
+        public void SetConstructionProgress(int woodPaid, int orePaid)
+        {
+            WoodPaid = woodPaid;
+            OrePaid  = orePaid;
             OnChanged?.Invoke();
         }
     }

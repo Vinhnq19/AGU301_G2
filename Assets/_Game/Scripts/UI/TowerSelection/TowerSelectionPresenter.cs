@@ -90,13 +90,11 @@ namespace DungeonBuilder.UI.TowerSelection
 
         private void RefreshAffordability()
         {
-            if (_catalog == null || _resources == null) return;
+            if (_catalog == null) return;
 
             foreach (TowerDataSO data in _catalog.Towers)
             {
-                bool canAfford = _resources.CanAfford(ResourceType.Wood, data.woodCost)
-                              && _resources.CanAfford(ResourceType.Ore,  data.oreCost);
-                Model.UpdateAffordability(data, canAfford);
+                Model.UpdateAffordability(data, true);
             }
         }
 

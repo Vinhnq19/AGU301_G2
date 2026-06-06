@@ -13,8 +13,15 @@ MonoBehaviour:
   m_Name: DB_FrostTowerData
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.TowerDataSO
   towerType: 2
-  damage: 6
-  range: 3.8
-  attackRate: 0.8
+  damage: 30
+  range: 5
+  attackRate: 1.5
   woodCost: 25
   oreCost: 10
+  bulletSpeed: 8
+  bulletLifetime: 2
+  maxLevel: 3
+  damagePerLevel: 5
+  rangePerLevel: 0.5
+  upgradeCostWood: 15
+  upgradeCostOre: 5

@@ -54,6 +54,7 @@ namespace Assets._Game.Scripts.Building
         {
             Vector2Int gridPos = GetGridPosition();
             DBLog.Info($"tower.upgrade.request.{gridPos}", $"Upgrade request from presenter. grid={gridPos}.", 0.25f, this);
+            _view?.HidePanel();
             _buildingController?.RequestUpgradeTower(gridPos);
         }
 

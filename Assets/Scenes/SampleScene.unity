@@ -5001,7 +5001,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 895797161e75fcd4ebe7054794adf317, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.UI.TowerSelection.TowerOptionButton
-  _button: {fileID: 0}
+  _button: {fileID: 2053900825}
   _nameText: {fileID: 379665798}
   _costText: {fileID: 207841772}
   _disabledOverlay: {fileID: 1761678267}

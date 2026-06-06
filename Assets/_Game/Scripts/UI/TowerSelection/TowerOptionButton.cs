@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Assets._Game.Scripts.Data;
 using DungeonBuilder.Core.Enums;
 using TMPro;
@@ -48,9 +49,10 @@ namespace DungeonBuilder.UI.TowerSelection
             // Chi phi
             if (_costText != null)
             {
-                _costText.text = data.oreCost > 0
-                    ? $"{data.woodCost}W  {data.oreCost}O"
-                    : $"{data.woodCost}W";
+                if (data.buildCost != null && data.buildCost.Length > 0)
+                    _costText.text = string.Join("  ", data.buildCost.Select(c => c.ToString()));
+                else
+                    _costText.text = "Free";
             }
 
             // Icon (TODO: bat comment khi co Sprite)

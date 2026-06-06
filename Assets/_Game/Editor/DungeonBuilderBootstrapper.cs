@@ -253,12 +253,15 @@ namespace DungeonBuilder.Editor
 
         private static void ConfigureTower(TowerDataSO data, TowerType type, float damage, float range, float rate, int wood, int ore)
         {
-            data.towerType = type;
-            data.damage = damage;
-            data.range = range;
+            data.towerType  = type;
+            data.damage     = damage;
+            data.range      = range;
             data.attackRate = rate;
-            data.woodCost = wood;
-            data.oreCost = ore;
+
+            var costs = new System.Collections.Generic.List<ResourceCost>();
+            if (wood > 0) costs.Add(new ResourceCost(ResourceType.Wood, wood));
+            if (ore  > 0) costs.Add(new ResourceCost(ResourceType.Ore,  ore));
+            data.buildCost = costs.ToArray();
         }
 
         private static void ConfigureResource(ResourceNodeDataSO data, ResourceType type, int hits, int amount, int max, float respawn)

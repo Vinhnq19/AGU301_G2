@@ -1,4 +1,7 @@
+using System.Linq;
+using Assets._Game.Scripts.Building;
 using DungeonBuilder.Building;
+using Assets._Game.Scripts.Data;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,8 +9,8 @@ using UnityEngine.UI;
 namespace Assets._Game.Scripts.Building
 {
     /// <summary>
-    /// View của tower: hiển thị level, range indicator, panel Upgrade/Remove.
-    /// Yêu cầu Physics2D Raycaster trên camera và EventSystem trong scene.
+    /// View cua tower: hien thi level, range indicator, panel Upgrade/Remove, panel Construction.
+    /// Yeu cau Physics2D Raycaster tren camera va EventSystem trong scene.
     /// </summary>
     public sealed class TowerView : MonoBehaviour
     {
@@ -23,8 +26,17 @@ namespace Assets._Game.Scripts.Building
         [SerializeField] private Button _removeButton;
         [SerializeField] private TMP_Text _upgradeCostText;
 
+        [Header("Construction Panel")]
+        [SerializeField] private GameObject _constructionPanel;
+        [SerializeField] private TMP_Text _constructionProgressText;
+        [SerializeField] private Button _contributeButton;
+        [SerializeField] private Button _constructionRemoveButton;
+
         private TowerPresenter _presenter;
 
+        /// <summary>
+        /// Wire buttons vao presenter. Goi boi TowerPresenter.Initialize().
+        /// </summary>
         public void SetPresenter(TowerPresenter presenter)
         {
             _presenter = presenter;
@@ -40,10 +52,22 @@ namespace Assets._Game.Scripts.Building
                 _removeButton.onClick.RemoveAllListeners();
                 _removeButton.onClick.AddListener(() => _presenter?.RequestRemove());
             }
+
+            if (_contributeButton != null)
+            {
+                _contributeButton.onClick.RemoveAllListeners();
+                _contributeButton.onClick.AddListener(() => _presenter?.RequestContribute());
+            }
+
+            if (_constructionRemoveButton != null)
+            {
+                _constructionRemoveButton.onClick.RemoveAllListeners();
+                _constructionRemoveButton.onClick.AddListener(() => _presenter?.RequestRemove());
+            }
         }
 
         /// <summary>
-        /// Cập nhật toàn bộ UI theo TowerModel hiện tại.
+        /// Cap nhat UI theo TowerModel hien tai (level, range, upgrade cost).
         /// </summary>
         public void Render(TowerModel model)
         {
@@ -59,21 +83,49 @@ namespace Assets._Game.Scripts.Building
 
             if (_upgradeButton != null)
             {
-                _upgradeButton.interactable = model.CanUpgrade;
+                _upgradeButton.interactable = model.CanUpgrade && model.IsConstructed;
             }
 
             if (_upgradeCostText != null)
             {
-                _upgradeCostText.text = model.CanUpgrade
-                    ? $"Upgrade: {model.UpgradeWoodCost}W / {model.UpgradeOreCost}O"
-                    : "MAX";
+                if (model.CanUpgrade)
+                {
+                    string costStr = model.UpgradeCost.Count > 0
+                        ? string.Join("  ", model.UpgradeCost.Select(c => $"{c.amount}{ResourceCost.Abbr(c.type)}"))
+                        : "Free";
+                    _upgradeCostText.text = $"Upgrade: {costStr}";
+                }
+                else
+                {
+                    _upgradeCostText.text = "MAX";
+                }
             }
         }
 
         /// <summary>
-        /// Toggle panel Upgrade/Remove. Goi tu TowerPresenter.OnPointerClick() tren root.
-        /// TowerPresenter nam cung BoxCollider2D tren root → nhan Physics2D Raycaster event.
-        /// TowerView nam trong Canvas child → khong nhan duoc event truc tiep.
+        /// Cap nhat Construction Panel theo tien do dong gop tai nguyen.
+        /// Hien construction panel khi chua xay xong, an khi da active.
+        /// </summary>
+        public void RenderConstruction(TowerModel model)
+        {
+            if (model == null) return;
+
+            bool done = model.IsConstructed;
+            _constructionPanel?.SetActive(!done);
+
+            if (!done && _constructionProgressText != null)
+            {
+                string progress = model.BuildCost.Count > 0
+                    ? string.Join("  ", model.BuildCost.Select(c =>
+                        $"{model.GetPaid(c.type)}/{c.amount}{ResourceCost.Abbr(c.type)}"))
+                    : "";
+                _constructionProgressText.text = progress;
+            }
+        }
+
+        /// <summary>
+        /// Toggle panel Upgrade/Remove. Chi goi khi tower da IsConstructed.
+        /// Goi tu TowerPresenter.OnPointerClick() tren root.
         /// </summary>
         public void TogglePanel()
         {

@@ -10,10 +10,10 @@ using VContainer;
 namespace Assets._Game.Scripts.Building
 {
     /// <summary>
-    /// Presenter của tower (MonoBehaviour trên root prefab). Bridges TowerModel ↔ TowerView.
-    /// Xử lý request Upgrade / Remove gửi lên server qua BuildingController.
-    /// IPointerClickHandler tren root (cung BoxCollider2D): nhan Physics2D Raycaster click de
-    /// toggle ActionPanel. TowerView nam trong Canvas child khong nhan duoc event truc tiep.
+    /// Presenter cua tower (MonoBehaviour tren root prefab). Bridges TowerModel voi TowerView.
+    /// Xu ly request Upgrade / Remove / Contribute gui len server qua BuildingController.
+    /// IPointerClickHandler tren root (cung BoxCollider2D): nhan Physics2D Raycaster click.
+    /// Chi mo ActionPanel khi Builder tool active va tower da IsConstructed.
     /// </summary>
     public sealed class TowerPresenter : MonoBehaviour, IPointerClickHandler
     {
@@ -30,7 +30,7 @@ namespace Assets._Game.Scripts.Building
         }
 
         /// <summary>
-        /// Gọi bởi BaseTower.OnNetworkSpawn() sau khi tạo TowerModel.
+        /// Goi boi BaseTower.OnNetworkSpawn() sau khi tao TowerModel.
         /// </summary>
         public void Initialize(TowerModel model, TowerView view)
         {
@@ -50,30 +50,53 @@ namespace Assets._Game.Scripts.Building
             OnModelChanged();
         }
 
+        /// <summary>
+        /// Goi tu TowerView.UpgradeButton.onClick.
+        /// </summary>
         public void RequestUpgrade()
         {
             Vector2Int gridPos = GetGridPosition();
-            DBLog.Info($"tower.upgrade.request.{gridPos}", $"Upgrade request from presenter. grid={gridPos}.", 0.25f, this);
+            DBLog.Info($"tower.upgrade.request.{gridPos}", $"[TowerPresenter] Upgrade request. grid={gridPos}.", 0.25f, this);
+            _view?.HidePanel();
             _buildingController?.RequestUpgradeTower(gridPos);
         }
 
+        /// <summary>
+        /// Goi tu TowerView.RemoveButton.onClick.
+        /// </summary>
         public void RequestRemove()
         {
             Vector2Int gridPos = GetGridPosition();
-            DBLog.Info($"tower.remove.request.{gridPos}", $"Remove request from presenter. grid={gridPos}.", 0.25f, this);
+            DBLog.Info($"tower.remove.request.{gridPos}", $"[TowerPresenter] Remove request. grid={gridPos}.", 0.25f, this);
             _view?.HidePanel();
             _buildingController?.RequestRemoveTower(gridPos);
         }
 
+        /// <summary>
+        /// Goi tu TowerView.ContributeButton.onClick.
+        /// </summary>
+        public void RequestContribute()
+        {
+            Vector2Int gridPos = GetGridPosition();
+            DBLog.Info($"tower.contribute.request.{gridPos}", $"[TowerPresenter] Contribute request. grid={gridPos}.", 0.25f, this);
+            _buildingController?.RequestContributeTower(gridPos);
+        }
+
+        /// <summary>
+        /// Physics2D Raycaster hit BoxCollider2D tren root.
+        /// Chi mo ActionPanel khi Builder tool active va tower da IsConstructed.
+        /// </summary>
         public void OnPointerClick(PointerEventData eventData)
         {
             if (ToolController.LocalActiveTool != ToolType.Builder) return;
+            if (_model != null && !_model.IsConstructed) return;
             _view?.TogglePanel();
         }
 
         private void OnModelChanged()
         {
             _view?.Render(_model);
+            _view?.RenderConstruction(_model);
         }
 
         private Vector2Int GetGridPosition()

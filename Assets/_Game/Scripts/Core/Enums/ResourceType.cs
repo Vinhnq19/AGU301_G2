@@ -2,9 +2,13 @@ namespace DungeonBuilder.Core.Enums
 {
     public enum ResourceType
     {
-        Wood,
-        Stone,
-        Ore,
-        Crystal
+        Wood      = 0,
+        Stone     = 1,
+        Ore       = 2,
+        Crystal   = 3,
+        Copper    = 4,
+        Iron      = 5,
+        BlueGems  = 6,
+        PurpleGems = 7,
     }
 }

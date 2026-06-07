@@ -8,14 +8,27 @@ using VContainer;
 
 namespace DungeonBuilder.Networking
 {
+    /// <summary>
+    /// Quan ly tai nguyen chung toan doi. Moi loai tai nguyen la 1 NetworkVariable
+    /// de dam bao dong bo real-time tren tat ca client.
+    /// Server la nguon su that duy nhat (WritePermission.Server).
+    /// </summary>
     public sealed class SharedResourceManager : NetworkBehaviour
     {
-        private readonly NetworkVariable<int> _wood = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-        private readonly NetworkVariable<int> _stone = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-        private readonly NetworkVariable<int> _ore = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-        private readonly NetworkVariable<int> _crystal = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        private readonly NetworkVariable<int> _wood       = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        private readonly NetworkVariable<int> _stone      = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        private readonly NetworkVariable<int> _ore        = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        private readonly NetworkVariable<int> _crystal    = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        private readonly NetworkVariable<int> _copper     = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        private readonly NetworkVariable<int> _iron       = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        private readonly NetworkVariable<int> _blueGems   = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        private readonly NetworkVariable<int> _purpleGems = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
         private Dictionary<ResourceType, NetworkVariable<int>> _resources;
+
+        // Luu tham chieu delegate de co the unsubscribe chinh xac
+        private readonly Dictionary<ResourceType, NetworkVariable<int>.OnValueChangedDelegate> _handlers = new();
+
         private EventBus _eventBus;
 
         private void Awake()
@@ -31,49 +44,55 @@ namespace DungeonBuilder.Networking
 
         public override void OnNetworkSpawn()
         {
-            _wood.OnValueChanged += HandleWoodChanged;
-            _stone.OnValueChanged += HandleStoneChanged;
-            _ore.OnValueChanged += HandleOreChanged;
-            _crystal.OnValueChanged += HandleCrystalChanged;
+            foreach (var pair in _resources)
+            {
+                ResourceType type = pair.Key;
+                NetworkVariable<int> variable = pair.Value;
+
+                NetworkVariable<int>.OnValueChangedDelegate handler = (_, newValue) =>
+                {
+                    _eventBus?.RaiseResourceUpdated(type, newValue);
+                    DBLog.Info($"resource.update.{type}", $"[SharedResourceManager] Updated. type={type}, value={newValue}.", 0.5f, this);
+                };
+
+                _handlers[type] = handler;
+                variable.OnValueChanged += handler;
+            }
 
             RaiseAllCurrentValues();
         }
 
         public override void OnNetworkDespawn()
         {
-            _wood.OnValueChanged -= HandleWoodChanged;
-            _stone.OnValueChanged -= HandleStoneChanged;
-            _ore.OnValueChanged -= HandleOreChanged;
-            _crystal.OnValueChanged -= HandleCrystalChanged;
+            foreach (var pair in _resources)
+            {
+                if (_handlers.TryGetValue(pair.Key, out var handler))
+                {
+                    pair.Value.OnValueChanged -= handler;
+                }
+            }
+
+            _handlers.Clear();
         }
 
         public void AddResource(ResourceType type, int amount)
         {
-            if (!IsServer || amount <= 0)
-            {
-                return;
-            }
+            if (!IsServer || amount <= 0) return;
 
             NetworkVariable<int> variable = GetVariable(type);
             variable.Value += amount;
-            DBLog.Info($"resource.add.{type}", $"Resource added. type={type}, amount={amount}, total={variable.Value}.", 0.2f, this);
+            DBLog.Info($"resource.add.{type}", $"[SharedResourceManager] Added. type={type}, amount={amount}, total={variable.Value}.", 0.2f, this);
         }
 
         public bool TrySpend(ResourceType type, int amount)
         {
-            if (!IsServer || amount < 0)
-            {
-                return false;
-            }
+            if (!IsServer || amount < 0) return false;
 
             NetworkVariable<int> variable = GetVariable(type);
-            if (variable.Value < amount)
-            {
-                return false;
-            }
+            if (variable.Value < amount) return false;
 
             variable.Value -= amount;
-            DBLog.Info($"resource.spend.{type}", $"Resource spent. type={type}, amount={amount}, total={variable.Value}.", 0.2f, this);
+            DBLog.Info($"resource.spend.{type}", $"[SharedResourceManager] Spent. type={type}, amount={amount}, total={variable.Value}.", 0.2f, this);
             return true;
         }
 
@@ -89,17 +108,12 @@ namespace DungeonBuilder.Networking
 
         private NetworkVariable<int> GetVariable(ResourceType type)
         {
-            if (_resources == null)
-            {
-                BuildResourceMap();
-            }
+            if (_resources == null) BuildResourceMap();
 
             if (_resources.TryGetValue(type, out NetworkVariable<int> variable))
-            {
                 return variable;
-            }
 
-            Debug.LogError($"[{nameof(SharedResourceManager)}] No NetworkVariable for ResourceType.{type}. Check BuildResourceMap().", this);
+            Debug.LogError($"[SharedResourceManager] No NetworkVariable for ResourceType.{type}. Check BuildResourceMap().", this);
             return _wood;
         }
 
@@ -107,43 +121,23 @@ namespace DungeonBuilder.Networking
         {
             _resources = new Dictionary<ResourceType, NetworkVariable<int>>
             {
-                [ResourceType.Wood] = _wood,
-                [ResourceType.Stone] = _stone,
-                [ResourceType.Ore] = _ore,
-                [ResourceType.Crystal] = _crystal
+                [ResourceType.Wood]       = _wood,
+                [ResourceType.Stone]      = _stone,
+                [ResourceType.Ore]        = _ore,
+                [ResourceType.Crystal]    = _crystal,
+                [ResourceType.Copper]     = _copper,
+                [ResourceType.Iron]       = _iron,
+                [ResourceType.BlueGems]   = _blueGems,
+                [ResourceType.PurpleGems] = _purpleGems,
             };
         }
 
         private void RaiseAllCurrentValues()
         {
-            _eventBus?.RaiseResourceUpdated(ResourceType.Wood, _wood.Value);
-            _eventBus?.RaiseResourceUpdated(ResourceType.Stone, _stone.Value);
-            _eventBus?.RaiseResourceUpdated(ResourceType.Ore, _ore.Value);
-            _eventBus?.RaiseResourceUpdated(ResourceType.Crystal, _crystal.Value);
-        }
-
-        private void HandleWoodChanged(int previousValue, int newValue)
-        {
-            _eventBus?.RaiseResourceUpdated(ResourceType.Wood, newValue);
-            DBLog.Info("resource.update.Wood", $"Resource updated on client. type=Wood, value={newValue}.", 0.5f, this);
-        }
-
-        private void HandleStoneChanged(int previousValue, int newValue)
-        {
-            _eventBus?.RaiseResourceUpdated(ResourceType.Stone, newValue);
-            DBLog.Info("resource.update.Stone", $"Resource updated on client. type=Stone, value={newValue}.", 0.5f, this);
-        }
-
-        private void HandleOreChanged(int previousValue, int newValue)
-        {
-            _eventBus?.RaiseResourceUpdated(ResourceType.Ore, newValue);
-            DBLog.Info("resource.update.Ore", $"Resource updated on client. type=Ore, value={newValue}.", 0.5f, this);
-        }
-
-        private void HandleCrystalChanged(int previousValue, int newValue)
-        {
-            _eventBus?.RaiseResourceUpdated(ResourceType.Crystal, newValue);
-            DBLog.Info("resource.update.Crystal", $"Resource updated on client. type=Crystal, value={newValue}.", 0.5f, this);
+            foreach (var pair in _resources)
+            {
+                _eventBus?.RaiseResourceUpdated(pair.Key, pair.Value.Value);
+            }
         }
     }
 }

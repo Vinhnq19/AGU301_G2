@@ -35,6 +35,8 @@ namespace Assets._Game.Scripts.Enemy
         private bool _isDying;
         private float _lastAttackTime;
         private float _slowMultiplier = 1f;
+        private Transform[] _currentPathWaypoints;
+        private int _currentWaypointIndex;
 
         public EnemyType EnemyType => _data != null ? _data.enemyType : EnemyType.Drone;
         public float MoveSpeed => (_data != null ? _data.moveSpeed : 2f) * _slowMultiplier;
@@ -92,6 +94,8 @@ namespace Assets._Game.Scripts.Enemy
         public void OnGetFromPool()
         {
             _isDying = false;
+            _currentPathWaypoints = null;
+            _currentWaypointIndex = 0;
             SetPhysicsActive(true);
 
             if (_visual != null)
@@ -113,6 +117,8 @@ namespace Assets._Game.Scripts.Enemy
             _slowMultiplier = 1f;
             _stateMachine.ChangeState(null);
             SetPhysicsActive(false);
+            _currentPathWaypoints = null;
+            _currentWaypointIndex = 0;
 
             if (_visual == null)
             {
@@ -134,6 +140,12 @@ namespace Assets._Game.Scripts.Enemy
             _coreTarget = coreTarget;
         }
 
+        public void SetPath(Transform[] waypoints)
+        {
+            _currentPathWaypoints = waypoints;
+            _currentWaypointIndex = 0;
+        }
+
         public virtual bool IsBlockedByWall()
         {
             return false;
@@ -146,13 +158,30 @@ namespace Assets._Game.Scripts.Enemy
 
         public virtual void MoveTowardsCore()
         {
+            if (_currentPathWaypoints != null && _currentWaypointIndex < _currentPathWaypoints.Length)
+            {
+                Transform waypoint = _currentPathWaypoints[_currentWaypointIndex];
+                if (waypoint != null)
+                {
+                    Vector3 targetPos = waypoint.position;
+                    Vector3 nextPosition = Vector3.MoveTowards(transform.position, targetPos, MoveSpeed * Time.deltaTime);
+                    transform.position = nextPosition;
+
+                    if (Vector3.Distance(transform.position, targetPos) < 0.15f)
+                    {
+                        _currentWaypointIndex++;
+                    }
+                    return;
+                }
+            }
+
             if (_coreTarget == null)
             {
                 return;
             }
 
-            Vector3 nextPosition = Vector3.MoveTowards(transform.position, _coreTarget.position, MoveSpeed * Time.deltaTime);
-            transform.position = nextPosition;
+            Vector3 nextPositionDirect = Vector3.MoveTowards(transform.position, _coreTarget.position, MoveSpeed * Time.deltaTime);
+            transform.position = nextPositionDirect;
         }
 
         public virtual void AttackCurrentBlocker()

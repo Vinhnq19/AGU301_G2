@@ -6,6 +6,7 @@ using Assets._Game.Scripts.Enemy;
 using Cysharp.Threading.Tasks;
 using DungeonBuilder.Core.Debugging;
 using DungeonBuilder.Core.Enums;
+using DungeonBuilder.Networking;
 using DungeonBuilder.Networking.Pool;
 using DungeonBuilder.Projectile;
 using Unity.Netcode;
@@ -16,7 +17,7 @@ namespace DungeonBuilder.Building
 {
     /// <summary>
     /// Script chinh cua moi tower. Quan ly vong doi: Place → Contribute → Active → Upgrade → Remove.
-    /// 8 NetworkVariable (1 per ResourceType) theo doi tien do xay dung.
+    /// NetworkList theo doi tien do xay dung tu build cost cua tower.
     /// Attack loop chi bat dau sau khi IsConstructed == true.
     /// </summary>
     [RequireComponent(typeof(NetworkObject))]
@@ -30,18 +31,11 @@ namespace DungeonBuilder.Building
         [Header("Visual")]
         [SerializeField] private SpriteRenderer _visual;
 
-        private readonly NetworkVariable<int> _currentLevel    = new(1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-        private readonly NetworkVariable<int> _paidWood        = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-        private readonly NetworkVariable<int> _paidStone       = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-        private readonly NetworkVariable<int> _paidOre         = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-        private readonly NetworkVariable<int> _paidCrystal     = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-        private readonly NetworkVariable<int> _paidCopper      = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-        private readonly NetworkVariable<int> _paidIron        = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-        private readonly NetworkVariable<int> _paidBlueGems    = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-        private readonly NetworkVariable<int> _paidPurpleGems  = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-
-        private Dictionary<ResourceType, NetworkVariable<int>> _paidVars;
-        private readonly Dictionary<ResourceType, NetworkVariable<int>.OnValueChangedDelegate> _paidHandlers = new();
+        private readonly NetworkVariable<int> _currentLevel = new(1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        private readonly NetworkList<ResourceAmount> _paidResources = new(
+            null,
+            NetworkVariableReadPermission.Everyone,
+            NetworkVariableWritePermission.Server);
 
         private readonly Collider2D[] _overlapResults = new Collider2D[16];
         private ContactFilter2D _enemyFilter;
@@ -55,8 +49,16 @@ namespace DungeonBuilder.Building
         public int CurrentLevel => _currentLevel.Value;
         public bool CanUpgrade  => _data != null && _currentLevel.Value < _data.maxLevel;
 
-        public int GetPaid(ResourceType type) =>
-            _paidVars != null && _paidVars.TryGetValue(type, out var v) ? v.Value : 0;
+        public int GetPaid(ResourceType type)
+        {
+            foreach (ResourceAmount resource in _paidResources)
+            {
+                if (resource.Type == type)
+                    return resource.Amount;
+            }
+
+            return 0;
+        }
 
         public bool IsConstructed
         {
@@ -64,16 +66,14 @@ namespace DungeonBuilder.Building
             {
                 if (_data == null || _data.buildCost == null || _data.buildCost.Length == 0)
                     return true;
-                foreach (ResourceCost c in _data.buildCost)
-                    if (GetPaid(c.type) < c.amount) return false;
+                foreach (var pair in GetRequiredBuildAmounts())
+                    if (GetPaid(pair.Key) < pair.Value) return false;
                 return true;
             }
         }
 
         private void Awake()
         {
-            BuildPaidVarMap();
-
             _enemyFilter = new ContactFilter2D();
             _enemyFilter.SetLayerMask(LayerMask.GetMask("Enemy"));
             _enemyFilter.useTriggers = false;
@@ -86,21 +86,18 @@ namespace DungeonBuilder.Building
         {
             _model = new TowerModel(_data);
 
+            if (IsServer)
+                ResetConstructionProgress();
+
             _currentLevel.OnValueChanged += HandleLevelChanged;
-            SubscribePaidHandlers();
+            _paidResources.OnListChanged += HandlePaidChanged;
 
             if (_presenter != null)
                 _presenter.Initialize(_model, _view);
 
-            if (IsServer)
-            {
-                foreach (var kv in _paidVars)
-                    kv.Value.Value = 0;
-            }
-
             _model.SetLevel(_currentLevel.Value);
-            foreach (var kv in _paidVars)
-                _model.SetPaid(kv.Key, kv.Value.Value);
+            foreach (ResourceAmount resource in _paidResources)
+                _model.SetPaid(resource.Type, resource.Amount);
 
             UpdateVisualAlpha();
 
@@ -118,7 +115,7 @@ namespace DungeonBuilder.Building
         public override void OnNetworkDespawn()
         {
             _currentLevel.OnValueChanged -= HandleLevelChanged;
-            UnsubscribePaidHandlers();
+            _paidResources.OnListChanged -= HandlePaidChanged;
         }
 
         /// <summary>Goi boi BuildingController sau tower.Spawn().</summary>
@@ -128,14 +125,18 @@ namespace DungeonBuilder.Building
         }
 
         /// <summary>
-        /// Cap nhat tien do xay dung cho 1 loai resource.
-        /// Chi goi tu server (BuildingController.ContributeTowerServerRpc).
+        /// Danh dau toan bo build cost da duoc thanh toan.
+        /// Chi goi tu server sau khi IResourceService.TrySpend thanh cong.
         /// </summary>
-        public void UpdateConstruction(ResourceType type, int paid)
+        public void CompleteConstruction()
         {
             if (!IsServer) return;
-            if (_paidVars.TryGetValue(type, out var v))
-                v.Value = paid;
+
+            foreach (var pair in GetRequiredBuildAmounts())
+            {
+                if (TryGetPaidIndex(pair.Key, out int index))
+                    _paidResources[index] = new ResourceAmount(pair.Key, pair.Value);
+            }
         }
 
         /// <summary>Tang level tower. Chi goi tu server.</summary>
@@ -204,49 +205,62 @@ namespace DungeonBuilder.Building
             DBLog.Info($"tower.fire.{NetworkObjectId}", $"[BaseTower] Fired. target={target.NetworkObjectId}, dmg={damage:0.0}.", 0.1f, this);
         }
 
-        private void BuildPaidVarMap()
+        private void ResetConstructionProgress()
         {
-            _paidVars = new Dictionary<ResourceType, NetworkVariable<int>>
+            _paidResources.Clear();
+            foreach (var pair in GetRequiredBuildAmounts())
             {
-                [ResourceType.Wood]       = _paidWood,
-                [ResourceType.Stone]      = _paidStone,
-                [ResourceType.Ore]        = _paidOre,
-                [ResourceType.Crystal]    = _paidCrystal,
-                [ResourceType.Copper]     = _paidCopper,
-                [ResourceType.Iron]       = _paidIron,
-                [ResourceType.BlueGems]   = _paidBlueGems,
-                [ResourceType.PurpleGems] = _paidPurpleGems,
-            };
+                _paidResources.Add(new ResourceAmount(pair.Key, 0));
+            }
         }
 
-        private void SubscribePaidHandlers()
+        private Dictionary<ResourceType, int> GetRequiredBuildAmounts()
         {
-            foreach (var kv in _paidVars)
+            var totals = new Dictionary<ResourceType, int>();
+            if (_data?.buildCost == null)
+                return totals;
+
+            foreach (ResourceCost cost in _data.buildCost)
             {
-                ResourceType type = kv.Key;
-                NetworkVariable<int>.OnValueChangedDelegate handler = (_, newVal) =>
+                if (!ResourceTypeUtility.IsValid(cost.type) || cost.amount < 0)
+                    continue;
+
+                totals.TryGetValue(cost.type, out int current);
+                totals[cost.type] = cost.amount > int.MaxValue - current
+                    ? int.MaxValue
+                    : current + cost.amount;
+            }
+
+            return totals;
+        }
+
+        private bool TryGetPaidIndex(ResourceType type, out int index)
+        {
+            for (int i = 0; i < _paidResources.Count; i++)
+            {
+                if (_paidResources[i].Type == type)
                 {
-                    _model?.SetPaid(type, newVal);
-                    UpdateVisualAlpha();
-
-                    DBLog.Info(
-                        $"tower.construction.{NetworkObjectId}",
-                        $"[BaseTower] Construction updated. {type}={newVal}, isConstructed={IsConstructed}.",
-                        0.1f, this);
-                };
-                _paidHandlers[type] = handler;
-                kv.Value.OnValueChanged += handler;
+                    index = i;
+                    return true;
+                }
             }
+
+            index = -1;
+            return false;
         }
 
-        private void UnsubscribePaidHandlers()
+        private void HandlePaidChanged(NetworkListEvent<ResourceAmount> changeEvent)
         {
-            foreach (var kv in _paidVars)
-            {
-                if (_paidHandlers.TryGetValue(kv.Key, out var handler))
-                    kv.Value.OnValueChanged -= handler;
-            }
-            _paidHandlers.Clear();
+            if (changeEvent.Type != NetworkListEvent<ResourceAmount>.EventType.Value)
+                return;
+
+            _model?.SetPaid(changeEvent.Value.Type, changeEvent.Value.Amount);
+            UpdateVisualAlpha();
+
+            DBLog.Info(
+                $"tower.construction.{NetworkObjectId}",
+                $"[BaseTower] Construction updated. {changeEvent.Value.Type}={changeEvent.Value.Amount}, isConstructed={IsConstructed}.",
+                0.1f, this);
         }
 
         private void HandleLevelChanged(int _, int newVal) => _model?.SetLevel(newVal);

@@ -3,8 +3,8 @@ using Assets._Game.Scripts.Data;
 using DungeonBuilder.Building;
 using DungeonBuilder.Core;
 using DungeonBuilder.Core.Enums;
+using DungeonBuilder.Core.Interfaces;
 using DungeonBuilder.Data;
-using DungeonBuilder.Networking;
 using DungeonBuilder.UI.Base;
 
 namespace DungeonBuilder.UI.TowerSelection
@@ -16,29 +16,26 @@ namespace DungeonBuilder.UI.TowerSelection
     public sealed class TowerSelectionPresenter
         : BasePresenter<TowerSelectionView, TowerSelectionModel>
     {
-        private readonly EventBus _eventBus;
         private readonly BuildingController _buildingController;
-        private readonly SharedResourceManager _resources;
+        private readonly IResourceService _resources;
         private readonly TowerCatalogSO _catalog;
 
         public TowerSelectionPresenter(
             TowerSelectionView view,
             TowerSelectionModel model,
-            EventBus eventBus,
             BuildingController buildingController,
-            SharedResourceManager resources,
+            IResourceService resources,
             TowerCatalogSO catalog)
             : base(view, model)
         {
-            _eventBus = eventBus;
             _buildingController = buildingController;
             _resources = resources;
             _catalog = catalog;
 
-            _eventBus.OnResourceUpdated += HandleResourceUpdated;
+            _resources.ResourceChanged += HandleResourceChanged;
         }
 
-        public void Initialize()
+        public override void Initialize()
         {
             View.SetPresenter(this);
             base.Initialize();
@@ -83,7 +80,7 @@ namespace DungeonBuilder.UI.TowerSelection
 
         public override void Dispose()
         {
-            _eventBus.OnResourceUpdated -= HandleResourceUpdated;
+            _resources.ResourceChanged -= HandleResourceChanged;
             base.Dispose();
         }
 
@@ -94,11 +91,11 @@ namespace DungeonBuilder.UI.TowerSelection
 
             foreach (TowerDataSO data in _catalog.Towers)
             {
-                Model.UpdateAffordability(data, true);
+                Model.UpdateAffordability(data, _resources.CanAfford(data.buildCost));
             }
         }
 
-        private void HandleResourceUpdated(ResourceType type, int value)
+        private void HandleResourceChanged(ResourceChanged change)
         {
             if (!Model.IsOpen) return;
             RefreshAffordability();

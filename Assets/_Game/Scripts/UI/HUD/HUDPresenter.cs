@@ -1,5 +1,6 @@
 using DungeonBuilder.Core;
 using DungeonBuilder.Core.Enums;
+using DungeonBuilder.Core.Interfaces;
 using DungeonBuilder.UI.Base;
 using VContainer.Unity;
 
@@ -8,11 +9,13 @@ namespace DungeonBuilder.UI.HUD
     public sealed class HUDPresenter : BasePresenter<HUDView, HUDModel>, IInitializable
     {
         private readonly EventBus _eventBus;
+        private readonly IResourceService _resources;
 
-        public HUDPresenter(HUDView view, HUDModel model, EventBus eventBus) : base(view, model)
+        public HUDPresenter(HUDView view, HUDModel model, EventBus eventBus, IResourceService resources) : base(view, model)
         {
             _eventBus = eventBus;
-            _eventBus.OnResourceUpdated += HandleResourceUpdated;
+            _resources = resources;
+            _resources.ResourceChanged += HandleResourceChanged;
             _eventBus.OnWaveStarted += HandleWaveStarted;
             _eventBus.OnCoreHealthChanged += HandleCoreHealthChanged;
             _eventBus.OnPhaseCountdownChanged += HandlePhaseCountdownChanged;
@@ -20,6 +23,11 @@ namespace DungeonBuilder.UI.HUD
 
         public override void Initialize()
         {
+            foreach (var pair in _resources.GetSnapshot())
+            {
+                Model.SetResource(pair.Key, pair.Value);
+            }
+
             View.SetPresenter(this);
             base.Initialize();
         }
@@ -46,7 +54,7 @@ namespace DungeonBuilder.UI.HUD
 
         public override void Dispose()
         {
-            _eventBus.OnResourceUpdated -= HandleResourceUpdated;
+            _resources.ResourceChanged -= HandleResourceChanged;
             _eventBus.OnWaveStarted -= HandleWaveStarted;
             _eventBus.OnCoreHealthChanged -= HandleCoreHealthChanged;
             _eventBus.OnPhaseCountdownChanged -= HandlePhaseCountdownChanged;
@@ -58,9 +66,9 @@ namespace DungeonBuilder.UI.HUD
             View.Render();
         }
 
-        private void HandleResourceUpdated(ResourceType type, int value)
+        private void HandleResourceChanged(ResourceChanged change)
         {
-            Model.SetResource(type, value);
+            Model.SetResource(change.Type, change.CurrentAmount);
         }
 
         private void HandleWaveStarted(int wave)

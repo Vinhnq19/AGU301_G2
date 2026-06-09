@@ -1,7 +1,7 @@
 using Assets._Game.Scripts.Data;
 using DungeonBuilder.Core.Debugging;
 using DungeonBuilder.Core.Enums;
-using DungeonBuilder.Networking;
+using DungeonBuilder.Core.Interfaces;
 using DungeonBuilder.Networking.Pool;
 using System;
 using System.Collections.Generic;
@@ -17,12 +17,12 @@ namespace DungeonBuilder.Building
         [SerializeField] private TowerDataSO[] _towerData;
         [SerializeField] private TowerPrefabEntry[] _towerPrefabs;
 
-        private SharedResourceManager _sharedResources;
+        private IResourceService _sharedResources;
         private GridManager _grid;
         private INetworkPool _pool;
 
         [Inject]
-        public void Construct(SharedResourceManager sharedResources, GridManager grid, INetworkPool pool)
+        public void Construct(IResourceService sharedResources, GridManager grid, INetworkPool pool)
         {
             _sharedResources = sharedResources;
             _grid = grid;
@@ -98,20 +98,18 @@ namespace DungeonBuilder.Building
                 return;
             }
 
-            var sb = new StringBuilder();
-            foreach (ResourceCost cost in data.buildCost)
+            if (!_sharedResources.TrySpend(data.buildCost))
             {
-                int remaining = Mathf.Max(0, cost.amount - tower.GetPaid(cost.type));
-                int toSpend   = Mathf.Min(_sharedResources.GetAmount(cost.type), remaining);
-                if (toSpend > 0)
-                {
-                    _sharedResources.TrySpend(cost.type, toSpend);
-                    tower.UpdateConstruction(cost.type, tower.GetPaid(cost.type) + toSpend);
-                }
-                sb.Append($"{tower.GetPaid(cost.type)}/{cost.amount}{ResourceCost.Abbr(cost.type)} ");
+                DBLog.Warning(
+                    $"tower.contribute.reject.cost.{gridPosition}",
+                    "[BuildingController] Contribution rejected: not enough resources.",
+                    0.5f,
+                    tower);
+                return;
             }
 
-            DBLog.Info($"tower.contribute.{gridPosition}", $"[BuildingController] Contributed. Progress: {sb.ToString().Trim()}.", 0.25f, tower);
+            tower.CompleteConstruction();
+            DBLog.Info($"tower.contribute.{gridPosition}", "[BuildingController] Construction paid in full.", 0.25f, tower);
 
             if (tower.IsConstructed)
                 DBLog.Info($"tower.activated.{gridPosition}", $"[BuildingController] Tower activated at {gridPosition}.", 0.25f, tower);
@@ -144,17 +142,11 @@ namespace DungeonBuilder.Building
 
             ResourceCost[] upgradeCost = data.GetUpgradeCostForLevel(tower.CurrentLevel);
 
-            foreach (ResourceCost cost in upgradeCost)
+            if (!_sharedResources.TrySpend(upgradeCost))
             {
-                if (!_sharedResources.CanAfford(cost.type, cost.amount))
-                {
-                    DBLog.Warning($"upgrade.reject.cost.{gridPosition}", $"[BuildingController] Upgrade rejected: not enough {cost.type}.", 0.5f, this);
-                    return;
-                }
+                DBLog.Warning($"upgrade.reject.cost.{gridPosition}", "[BuildingController] Upgrade rejected: not enough resources.", 0.5f, this);
+                return;
             }
-
-            foreach (ResourceCost cost in upgradeCost)
-                _sharedResources.TrySpend(cost.type, cost.amount);
 
             tower.UpgradeLevel();
             DBLog.Info($"upgrade.accept.{gridPosition}", $"[BuildingController] Tower upgraded to level {tower.CurrentLevel}.", 0.25f, this);
@@ -192,12 +184,16 @@ namespace DungeonBuilder.Building
                 if (tower != null && data != null)
                 {
                     var sb = new StringBuilder();
+                    var refundedTypes = new HashSet<ResourceType>();
                     foreach (ResourceCost cost in data.buildCost)
                     {
+                        if (!refundedTypes.Add(cost.type))
+                            continue;
+
                         int refund = Mathf.RoundToInt(tower.GetPaid(cost.type) * 0.5f);
                         if (refund > 0)
                         {
-                            _sharedResources.AddResource(cost.type, refund);
+                            _sharedResources.TryAdd(cost.type, refund);
                             sb.Append($"{refund}{ResourceCost.Abbr(cost.type)} ");
                         }
                     }

@@ -15,4 +15,4 @@ MonoBehaviour:
   enemyType: 1
   maxHealth: 160
   moveSpeed: 1.4
-  rewardGold: 15
+  rewardToken: 15

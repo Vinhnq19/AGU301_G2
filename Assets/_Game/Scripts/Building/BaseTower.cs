@@ -44,7 +44,7 @@ namespace DungeonBuilder.Building
         private TowerPresenter _presenter;
         private TowerView _view;
 
-        [Inject] private INetworkPool _pool;
+        private INetworkPool _pool;
 
         public int CurrentLevel => _currentLevel.Value;
         public bool CanUpgrade  => _data != null && _currentLevel.Value < _data.maxLevel;
@@ -70,6 +70,12 @@ namespace DungeonBuilder.Building
                     if (GetPaid(pair.Key) < pair.Value) return false;
                 return true;
             }
+        }
+
+        [Inject]
+        public void Construct(INetworkPool pool)
+        {
+            _pool = pool;
         }
 
         private void Awake()

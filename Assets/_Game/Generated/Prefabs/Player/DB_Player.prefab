@@ -113,7 +113,7 @@ GameObject:
   - component: {fileID: 4054209775680089584}
   - component: {fileID: 1849949193075671389}
   - component: {fileID: 8807089381628071931}
-  - component: {fileID: -7282846414778442763}
+  - component: {fileID: 7643274910012310047}
   m_Layer: 0
   m_Name: DB_Player
   m_TagString: Untagged
@@ -426,7 +426,7 @@ MonoBehaviour:
   _playerController: {fileID: 1461838641408866494}
   _playerStats: {fileID: 3480464486488942739}
   _toolController: {fileID: 1849949193075671389}
---- !u!114 &-7282846414778442763
+--- !u!114 &7643274910012310047
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -435,18 +435,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 2463603221317342654}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a8f68afdbaeea0479185fe7b18fb3b8, type: 3}
+  m_Script: {fileID: 11500000, guid: c138e563bbda47cd90203616fcfbbad7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CameraController
-  target: {fileID: 0}
-  followSpeed: 5
-  offset: {x: 0, y: 0}
-  lookAheadDistance: 2
-  lookAheadSpeed: 3
-  useBounds: 0
-  minX: -50
-  maxX: 50
-  minY: -50
-  maxY: 50
-  defaultShakeDuration: 0.3
-  defaultShakeIntensity: 0.2
+  m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Gameplay.Camera.LocalPlayerCameraBinder

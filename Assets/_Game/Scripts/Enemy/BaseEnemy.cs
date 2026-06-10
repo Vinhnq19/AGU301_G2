@@ -104,11 +104,6 @@ namespace Assets._Game.Scripts.Enemy
                 _visual.localPosition = Vector3.zero;
                 _visual.localScale = Vector3.one;
             }
-
-            if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer)
-            {
-                ResetEnemy();
-            }
         }
 
         public void OnReturnToPool()

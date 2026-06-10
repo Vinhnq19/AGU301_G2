@@ -13,22 +13,13 @@ namespace DungeonBuilder.Player.Tools
         [SerializeField] private GridManager _gridManager;
         [SerializeField] private TowerSelectionView _towerSelectionView;
 
-        // True khi panel vua duoc mo boi UseAction.
-        // CancelAction duoc goi ca khi tha chuot va khi doi tool.
-        // Flag nay giup bo qua lan cancel dau tien (mouse-up) — chi dong panel khi doi tool.
-        private bool _panelJustOpened;
+        // Luu vi tri grid du dinh mo panel (validate khi mouse-down, mo khi mouse-up)
+        private bool _hasPendingOpen;
+        private Vector2Int _pendingGridPos;
 
         public ToolType ToolType => ToolType.Builder;
 
-        // True neu pointer dang tren UI element trong frame hien tai.
-        // Duoc cap nhat trong Update() — IsPointerOverGameObject() chi dung
-        // khi goi tu Update, KHONG dung khi goi tu InputAction callback.
         private bool _isPointerOverUI;
-
-        private void Awake()
-        {
-            EnsureReferences();
-        }
 
         private void Update()
         {
@@ -43,19 +34,21 @@ namespace DungeonBuilder.Player.Tools
             EnsureReferences();
         }
 
+        /// <summary>
+        /// Goi khi mouse DOWN. Chi validate va luu grid position —
+        /// chua mo panel de tranh click-through vao TowerOptionButton.
+        /// </summary>
         public void UseAction(Vector3 targetPosition)
         {
+            _hasPendingOpen = false;
+
             if (!IsOwner)
             {
                 DBLog.Warning($"build.tool.not-owner.{NetworkObjectId}", $"Builder use ignored. owner={OwnerClientId}.", 1f, this);
                 return;
             }
-            // Neu chuot tren UI (panel, button...) → bo qua.
-            // Doc cache tu Update() thay vi goi truc tiep — tranh warning New Input System.
-            if (_isPointerOverUI)
-            {
-                return;
-            }
+
+            if (_isPointerOverUI) return;
 
             EnsureReferences();
 
@@ -63,7 +56,6 @@ namespace DungeonBuilder.Player.Tools
                 ? _gridManager.WorldToGrid(targetPosition)
                 : Vector2Int.RoundToInt(new Vector2(targetPosition.x, targetPosition.y));
 
-            // Khong mo panel neu o da bi chiem hoac out of bounds
             if (_gridManager != null && !_gridManager.IsValidPlacement(gridPos))
             {
                 DBLog.Info($"build.tool.invalid.{NetworkObjectId}", $"Cell {gridPos} is occupied or out of bounds.", 0.5f, this);
@@ -72,48 +64,50 @@ namespace DungeonBuilder.Player.Tools
 
             if (_towerSelectionView == null)
             {
-                DBLog.Warning($"build.tool.no-panel.{NetworkObjectId}", "TowerSelectionView not found. Panel will not open.", 1f, this);
+                DBLog.Warning($"build.tool.no-panel.{NetworkObjectId}", "TowerSelectionView not found.", 1f, this);
                 return;
             }
 
-            DBLog.Info($"build.tool.open-panel.{NetworkObjectId}", $"Opening tower selection. grid={gridPos}.", 0.2f, this);
-            _panelJustOpened = true;
-            _towerSelectionView.RequestShowAt(gridPos);
+            // Luu lai de mo panel khi mouse-up (CancelAction)
+            _pendingGridPos = gridPos;
+            _hasPendingOpen = true;
+            DBLog.Info($"build.tool.pending.{NetworkObjectId}", $"Panel open pending. grid={gridPos}.", 0.2f, this);
         }
 
+        /// <summary>
+        /// Goi khi mouse UP. Neu co pending open → mo panel. Neu khong → dong panel.
+        /// </summary>
         public void CancelAction()
         {
             EnsureReferences();
 
-            if (_isPointerOverUI)
+            if (_hasPendingOpen)
             {
-                return;
-            }
-            if (_panelJustOpened)
-            {
-                _panelJustOpened = false;
+                _hasPendingOpen = false;
+
+                if (!_isPointerOverUI)
+                {
+                    DBLog.Info($"build.tool.open-panel.{NetworkObjectId}", $"Opening tower selection. grid={_pendingGridPos}.", 0.2f, this);
+                    _towerSelectionView?.RequestShowAt(_pendingGridPos);
+                }
                 return;
             }
 
-            _towerSelectionView?.RequestHide();
+            // Khong co pending → dong panel (click ngoai panel)
+            if (!_isPointerOverUI)
+            {
+                _towerSelectionView?.RequestHide();
+            }
         }
 
         private void EnsureReferences()
         {
             if (_buildingController == null)
-            {
                 _buildingController = FindFirstObjectByType<BuildingController>();
-            }
-
             if (_gridManager == null)
-            {
                 _gridManager = FindFirstObjectByType<GridManager>();
-            }
-
             if (_towerSelectionView == null)
-            {
                 _towerSelectionView = FindFirstObjectByType<TowerSelectionView>();
-            }
         }
     }
 }

@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7d564c5af3a08e44e9743dd8e2e793b6, type: 3}
-  m_Name: DB_MinerBugData
+  m_Name: DB_SpitterData
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.EnemyDataSO
-  enemyType: 2
-  maxHealth: 90
-  moveSpeed: 2.2
-  rewardGold: 10
+  enemyType: 1
+  maxHealth: 60
+  moveSpeed: 3
+  rewardToken: 3

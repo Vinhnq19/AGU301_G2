@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a37ebe35cee1e8e419160ee9b655a2e6, type: 3}
-  m_Name: DB_OreNodeData
+  m_Name: DB_BlueGemData
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.ResourceNodeDataSO
-  resourceType: 2
-  hitsToBreak: 6
-  amountPerHit: 10
-  maxAmount: 70
-  respawnTime: 12
+  resourceType: 6
+  hitsToBreak: 4
+  amountPerHit: 20
+  maxAmount: 100
+  respawnTime: 8

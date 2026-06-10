@@ -1,5 +1,6 @@
 using DungeonBuilder.Building;
 using DungeonBuilder.Core;
+using DungeonBuilder.Core.Interfaces;
 using DungeonBuilder.Data;
 using DungeonBuilder.Harvesting;
 using DungeonBuilder.Networking.Pool;
@@ -42,7 +43,7 @@ namespace DungeonBuilder.Networking.Scopes
 
             if (_sharedResourceManager != null)
             {
-                builder.RegisterComponent(_sharedResourceManager);
+                builder.RegisterComponent(_sharedResourceManager).As<IResourceService>();
             }
 
             if (_coreManager != null)

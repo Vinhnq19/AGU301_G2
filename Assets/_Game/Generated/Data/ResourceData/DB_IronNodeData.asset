@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a37ebe35cee1e8e419160ee9b655a2e6, type: 3}
-  m_Name: DB_CrystalNodeData
+  m_Name: DB_IronNodeData
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.ResourceNodeDataSO
-  resourceType: 3
+  resourceType: 5
   hitsToBreak: 8
   amountPerHit: 5
   maxAmount: 50

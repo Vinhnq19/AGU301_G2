@@ -14,33 +14,33 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.WaveSO
   buildPhaseDuration: 15
   spawnGroups:
-  - enemyType: 2
+  - enemyType: 0
     count: 10
-    spawnInterval: 1.0
+    spawnInterval: 1
+    spawnPointIndex: 0
+    pathIndex: 0
+  - enemyType: 1
+    count: 2
+    spawnInterval: 2
     spawnPointIndex: 0
     pathIndex: 0
   - enemyType: 0
-    count: 2
-    spawnInterval: 2.0
-    spawnPointIndex: 0
-    pathIndex: 0
-  - enemyType: 2
     count: 10
-    spawnInterval: 1.0
-    spawnPointIndex: 2
+    spawnInterval: 1
+    spawnPointIndex: 1
     pathIndex: 0
-  - enemyType: 0
+  - enemyType: 1
     count: 2
-    spawnInterval: 2.0
-    spawnPointIndex: 2
-    pathIndex: 0
-  - enemyType: 2
-    count: 10
-    spawnInterval: 1.0
+    spawnInterval: 2
     spawnPointIndex: 1
     pathIndex: 0
   - enemyType: 0
+    count: 10
+    spawnInterval: 1
+    spawnPointIndex: 2
+    pathIndex: 0
+  - enemyType: 1
     count: 2
-    spawnInterval: 2.0
-    spawnPointIndex: 1
+    spawnInterval: 2
+    spawnPointIndex: 2
     pathIndex: 0

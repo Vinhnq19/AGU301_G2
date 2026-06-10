@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.WaveSO
   buildPhaseDuration: 15
   spawnGroups:
-  - enemyType: 2
+  - enemyType: 0
     count: 15
     spawnInterval: 1.2
     spawnPointIndex: 0
     pathIndex: 0
-  - enemyType: 2
+  - enemyType: 0
     count: 15
     spawnInterval: 1.2
     spawnPointIndex: 2

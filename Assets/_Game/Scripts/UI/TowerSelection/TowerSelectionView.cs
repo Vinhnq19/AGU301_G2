@@ -14,6 +14,7 @@ namespace DungeonBuilder.UI.TowerSelection
         [SerializeField] private TowerOptionButton[] _towerButtons;
 
         private TowerSelectionPresenter _presenter;
+        private bool _ignoreNextClick;
 
         private void Awake()
         {
@@ -39,22 +40,21 @@ namespace DungeonBuilder.UI.TowerSelection
         public void Show()
         {
             _panelRoot?.SetActive(true);
-            // Bat backdrop khi panel mo: click ngoai panel se dong panel
             if (_backdropButton != null)
             {
                 _backdropButton.gameObject.SetActive(true);
             }
+            _ignoreNextClick = true;
         }
 
         public void Hide()
         {
             _panelRoot?.SetActive(false);
-            // Tat backdrop khi panel dong: tranh block IsPointerOverGameObject()
-            // tren toan man hinh khien BuilderTool.UseAction() khong chay duoc
             if (_backdropButton != null)
             {
                 _backdropButton.gameObject.SetActive(false);
             }
+            _ignoreNextClick = false;
         }
 
         /// <summary>
@@ -98,8 +98,14 @@ namespace DungeonBuilder.UI.TowerSelection
             }
         }
 
+        private void LateUpdate()
+        {
+            _ignoreNextClick = false;
+        }
+
         private void OnTowerSelected(TowerType towerType)
         {
+            if (_ignoreNextClick) return;
             _presenter?.OnTowerSelected(towerType);
         }
     }

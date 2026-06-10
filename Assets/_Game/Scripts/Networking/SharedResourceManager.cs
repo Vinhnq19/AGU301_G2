@@ -1,143 +1,195 @@
+using System;
 using System.Collections.Generic;
+using Assets._Game.Scripts.Data;
 using DungeonBuilder.Core;
 using DungeonBuilder.Core.Debugging;
 using DungeonBuilder.Core.Enums;
+using DungeonBuilder.Core.Interfaces;
 using Unity.Netcode;
-using UnityEngine;
-using VContainer;
 
 namespace DungeonBuilder.Networking
 {
     /// <summary>
-    /// Quan ly tai nguyen chung toan doi. Moi loai tai nguyen la 1 NetworkVariable
-    /// de dam bao dong bo real-time tren tat ca client.
-    /// Server la nguon su that duy nhat (WritePermission.Server).
+    /// Server-authoritative shared resource inventory for the current match.
+    /// ResourceType is the source of truth for the available resource kinds.
     /// </summary>
-    public sealed class SharedResourceManager : NetworkBehaviour
+    public sealed class SharedResourceManager : NetworkBehaviour, IResourceService
     {
-        private readonly NetworkVariable<int> _wood       = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-        private readonly NetworkVariable<int> _stone      = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-        private readonly NetworkVariable<int> _ore        = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-        private readonly NetworkVariable<int> _crystal    = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-        private readonly NetworkVariable<int> _copper     = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-        private readonly NetworkVariable<int> _iron       = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-        private readonly NetworkVariable<int> _blueGems   = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-        private readonly NetworkVariable<int> _purpleGems = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        private readonly NetworkList<ResourceAmount> _resources = new(
+            null,
+            NetworkVariableReadPermission.Everyone,
+            NetworkVariableWritePermission.Server);
 
-        private Dictionary<ResourceType, NetworkVariable<int>> _resources;
+        private readonly ResourceStore _store = new();
 
-        // Luu tham chieu delegate de co the unsubscribe chinh xac
-        private readonly Dictionary<ResourceType, NetworkVariable<int>.OnValueChangedDelegate> _handlers = new();
-
-        private EventBus _eventBus;
-
-        private void Awake()
-        {
-            BuildResourceMap();
-        }
-
-        [Inject]
-        public void Construct(EventBus eventBus)
-        {
-            _eventBus = eventBus;
-        }
+        public event Action<ResourceChanged> ResourceChanged;
 
         public override void OnNetworkSpawn()
         {
-            foreach (var pair in _resources)
+            if (IsServer)
             {
-                ResourceType type = pair.Key;
-                NetworkVariable<int> variable = pair.Value;
-
-                NetworkVariable<int>.OnValueChangedDelegate handler = (_, newValue) =>
-                {
-                    _eventBus?.RaiseResourceUpdated(type, newValue);
-                    DBLog.Info($"resource.update.{type}", $"[SharedResourceManager] Updated. type={type}, value={newValue}.", 0.5f, this);
-                };
-
-                _handlers[type] = handler;
-                variable.OnValueChanged += handler;
+                InitializeNetworkList();
             }
 
+            SyncStoreFromNetworkList();
+            _resources.OnListChanged += HandleListChanged;
             RaiseAllCurrentValues();
         }
 
         public override void OnNetworkDespawn()
         {
-            foreach (var pair in _resources)
-            {
-                if (_handlers.TryGetValue(pair.Key, out var handler))
-                {
-                    pair.Value.OnValueChanged -= handler;
-                }
-            }
-
-            _handlers.Clear();
-        }
-
-        public void AddResource(ResourceType type, int amount)
-        {
-            if (!IsServer || amount <= 0) return;
-
-            NetworkVariable<int> variable = GetVariable(type);
-            variable.Value += amount;
-            DBLog.Info($"resource.add.{type}", $"[SharedResourceManager] Added. type={type}, amount={amount}, total={variable.Value}.", 0.2f, this);
-        }
-
-        public bool TrySpend(ResourceType type, int amount)
-        {
-            if (!IsServer || amount < 0) return false;
-
-            NetworkVariable<int> variable = GetVariable(type);
-            if (variable.Value < amount) return false;
-
-            variable.Value -= amount;
-            DBLog.Info($"resource.spend.{type}", $"[SharedResourceManager] Spent. type={type}, amount={amount}, total={variable.Value}.", 0.2f, this);
-            return true;
-        }
-
-        public bool CanAfford(ResourceType type, int amount)
-        {
-            return GetAmount(type) >= amount;
+            _resources.OnListChanged -= HandleListChanged;
         }
 
         public int GetAmount(ResourceType type)
         {
-            return GetVariable(type).Value;
+            return _store.GetAmount(type);
         }
 
-        private NetworkVariable<int> GetVariable(ResourceType type)
+        public IReadOnlyDictionary<ResourceType, int> GetSnapshot()
         {
-            if (_resources == null) BuildResourceMap();
-
-            if (_resources.TryGetValue(type, out NetworkVariable<int> variable))
-                return variable;
-
-            Debug.LogError($"[SharedResourceManager] No NetworkVariable for ResourceType.{type}. Check BuildResourceMap().", this);
-            return _wood;
+            return _store.GetSnapshot();
         }
 
-        private void BuildResourceMap()
+        public bool CanAfford(IReadOnlyList<ResourceCost> costs)
         {
-            _resources = new Dictionary<ResourceType, NetworkVariable<int>>
+            return _store.CanAfford(costs);
+        }
+
+        public bool TrySet(ResourceType type, int amount)
+        {
+            if (!IsServer || !_store.TrySet(type, amount))
             {
-                [ResourceType.Wood]       = _wood,
-                [ResourceType.Stone]      = _stone,
-                [ResourceType.Ore]        = _ore,
-                [ResourceType.Crystal]    = _crystal,
-                [ResourceType.Copper]     = _copper,
-                [ResourceType.Iron]       = _iron,
-                [ResourceType.BlueGems]   = _blueGems,
-                [ResourceType.PurpleGems] = _purpleGems,
-            };
+                return false;
+            }
+
+            SyncNetworkListFromStore();
+            DBLog.Info($"resource.set.{type}", $"[SharedResourceManager] Set. type={type}, total={amount}.", 0.2f, this);
+            return true;
+        }
+
+        public bool TryAdd(ResourceType type, int amount)
+        {
+            if (!IsServer || !_store.TryAdd(type, amount))
+            {
+                return false;
+            }
+
+            SyncNetworkListFromStore();
+            DBLog.Info($"resource.add.{type}", $"[SharedResourceManager] Added. type={type}, amount={amount}, total={GetAmount(type)}.", 0.2f, this);
+            return true;
+        }
+
+        public bool TrySpend(IReadOnlyList<ResourceCost> costs)
+        {
+            if (!IsServer || !_store.TrySpend(costs))
+            {
+                return false;
+            }
+
+            SyncNetworkListFromStore();
+            DBLog.Info("resource.spend", "[SharedResourceManager] Atomic resource spend completed.", 0.2f, this);
+            return true;
+        }
+
+        public bool TryReset(ResourceType type)
+        {
+            if (!IsServer || !_store.TryReset(type))
+            {
+                return false;
+            }
+
+            SyncNetworkListFromStore();
+            return true;
+        }
+
+        public bool TryResetAll()
+        {
+            if (!IsServer)
+            {
+                return false;
+            }
+
+            _store.ResetAll();
+            SyncNetworkListFromStore();
+            return true;
+        }
+
+        private void InitializeNetworkList()
+        {
+            var existing = new HashSet<ResourceType>();
+            for (int i = _resources.Count - 1; i >= 0; i--)
+            {
+                ResourceType type = _resources[i].Type;
+                if (!ResourceTypeUtility.IsValid(type) || !existing.Add(type))
+                {
+                    _resources.RemoveAt(i);
+                }
+            }
+
+            foreach (ResourceType type in ResourceTypeUtility.All)
+            {
+                if (!existing.Contains(type))
+                {
+                    _resources.Add(new ResourceAmount(type, 0));
+                }
+            }
+        }
+
+        private void SyncStoreFromNetworkList()
+        {
+            _store.ResetAll();
+            foreach (ResourceAmount resource in _resources)
+            {
+                _store.TrySet(resource.Type, resource.Amount);
+            }
+        }
+
+        private void SyncNetworkListFromStore()
+        {
+            for (int i = 0; i < _resources.Count; i++)
+            {
+                ResourceAmount resource = _resources[i];
+                int amount = _store.GetAmount(resource.Type);
+                if (resource.Amount != amount)
+                {
+                    _resources[i] = new ResourceAmount(resource.Type, amount);
+                }
+            }
+        }
+
+        private void HandleListChanged(NetworkListEvent<ResourceAmount> changeEvent)
+        {
+            if (changeEvent.Type != NetworkListEvent<ResourceAmount>.EventType.Value)
+            {
+                SyncStoreFromNetworkList();
+                RaiseAllCurrentValues();
+                return;
+            }
+
+            _store.TrySet(changeEvent.Value.Type, changeEvent.Value.Amount);
+            RaiseChanged(
+                changeEvent.Value.Type,
+                changeEvent.PreviousValue.Amount,
+                changeEvent.Value.Amount);
         }
 
         private void RaiseAllCurrentValues()
         {
-            foreach (var pair in _resources)
+            foreach (var pair in _store.GetSnapshot())
             {
-                _eventBus?.RaiseResourceUpdated(pair.Key, pair.Value.Value);
+                RaiseChanged(pair.Key, pair.Value, pair.Value);
             }
+        }
+
+        private void RaiseChanged(ResourceType type, int previousAmount, int currentAmount)
+        {
+            ResourceChanged?.Invoke(new ResourceChanged(type, previousAmount, currentAmount));
+            DBLog.Info(
+                $"resource.update.{type}",
+                $"[SharedResourceManager] Updated. type={type}, value={currentAmount}.",
+                0.5f,
+                this);
         }
     }
 }

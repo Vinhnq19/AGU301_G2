@@ -2,7 +2,6 @@ using DG.Tweening;
 using DungeonBuilder.Core.Debugging;
 using DungeonBuilder.Core.Enums;
 using DungeonBuilder.Core.Interfaces;
-using DungeonBuilder.Networking;
 using DungeonBuilder.Networking.Pool;
 using DungeonBuilder.Player;
 using Unity.Netcode;
@@ -18,12 +17,12 @@ namespace DungeonBuilder.Harvesting
         private readonly NetworkVariable<ResourceType> _resourceType = new(ResourceType.Wood, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         private readonly NetworkVariable<int> _amount = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
-        private SharedResourceManager _sharedResources;
+        private IResourceService _sharedResources;
         private INetworkPool _pool;
         private bool _canPickup;
 
         [Inject]
-        public void Construct(SharedResourceManager sharedResources, INetworkPool pool)
+        public void Construct(IResourceService sharedResources, INetworkPool pool)
         {
             _sharedResources = sharedResources;
             _pool = pool;
@@ -96,7 +95,7 @@ namespace DungeonBuilder.Harvesting
             _canPickup = false;
             SetCollisionActive(false);
             DBLog.Info($"drop.pickup.{NetworkObjectId}", $"ResourceDrop picked up. type={_resourceType.Value}, amount={_amount.Value}, by={other.name}.", 0.2f, this);
-            _sharedResources.AddResource(_resourceType.Value, _amount.Value);
+            _sharedResources.TryAdd(_resourceType.Value, _amount.Value);
             _pool.Return(NetworkObject);
         }
 

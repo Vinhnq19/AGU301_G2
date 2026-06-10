@@ -7,6 +7,7 @@ using DungeonBuilder.Building;
 using DungeonBuilder.Core.Enums;
 using DungeonBuilder.Data;
 using DungeonBuilder.Enemy.Types;
+using DungeonBuilder.Gameplay.Camera;
 using DungeonBuilder.Harvesting;
 using DungeonBuilder.Networking;
 using DungeonBuilder.Networking.Pool;
@@ -307,6 +308,7 @@ namespace DungeonBuilder.Editor
 
             InputReader inputReader = root.AddComponent<InputReader>();
             PlayerController playerController = root.AddComponent<PlayerController>();
+            root.AddComponent<LocalPlayerCameraBinder>();
             PlayerStats playerStats = root.AddComponent<PlayerStats>();
             AxeTool axeTool = root.AddComponent<AxeTool>();
             PickaxeTool pickaxeTool = root.AddComponent<PickaxeTool>();

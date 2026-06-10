@@ -4,7 +4,6 @@ using System.IO;
 using Assets._Game.Scripts.Data;
 using Assets._Game.Scripts.Enemy;
 using DungeonBuilder.Building;
-using DungeonBuilder.Core;
 using DungeonBuilder.Core.Enums;
 using DungeonBuilder.Data;
 using DungeonBuilder.Enemy.Types;
@@ -16,7 +15,6 @@ using DungeonBuilder.Networking.Scopes;
 using DungeonBuilder.Player;
 using DungeonBuilder.Player.Tools;
 using DungeonBuilder.UI.HUD;
-using DungeonBuilder.UI.TowerSelection;
 using DungeonBuilder.Wave;
 using TMPro;
 using Unity.Netcode;
@@ -201,9 +199,6 @@ namespace DungeonBuilder.Editor
                 ArrowTower = LoadOrCreate<TowerDataSO>($"{DataRoot}/DB_ArrowTowerData.asset"),
                 CannonTower = LoadOrCreate<TowerDataSO>($"{DataRoot}/DB_CannonTowerData.asset"),
                 FrostTower = LoadOrCreate<TowerDataSO>($"{DataRoot}/DB_FrostTowerData.asset"),
-                TowerCatalog = LoadOrCreate<TowerCatalogSO>($"{DataRoot}/DB_TowerCatalog.asset"),
-                BuildAuthoritySettings = LoadOrCreate<BuildAuthoritySettingsSO>($"{DataRoot}/DB_BuildAuthoritySettings.asset"),
-                WaveCatalog = LoadOrCreate<WaveCatalogSO>($"{DataRoot}/DB_WaveCatalog.asset"),
                 WoodNode = LoadOrCreate<ResourceNodeDataSO>($"{DataRoot}/DB_WoodNodeData.asset"),
                 StoneNode = LoadOrCreate<ResourceNodeDataSO>($"{DataRoot}/DB_StoneNodeData.asset"),
                 OreNode = LoadOrCreate<ResourceNodeDataSO>($"{DataRoot}/DB_OreNodeData.asset"),
@@ -222,7 +217,6 @@ namespace DungeonBuilder.Editor
             ConfigureTower(data.ArrowTower, TowerType.Arrow, 12f, 4f, 1.2f, 25, 0);
             ConfigureTower(data.CannonTower, TowerType.Cannon, 35f, 3.5f, 0.55f, 40, 15);
             ConfigureTower(data.FrostTower, TowerType.Frost, 6f, 3.8f, 0.8f, 25, 10);
-            ConfigureTowerCatalog(data.TowerCatalog, data.ArrowTower, data.CannonTower, data.FrostTower);
 
             ConfigureResource(data.WoodNode, ResourceType.Wood, 4, 20, 100, 8f);
             ConfigureResource(data.StoneNode, ResourceType.Stone, 5, 15, 90, 10f);
@@ -232,9 +226,6 @@ namespace DungeonBuilder.Editor
             MarkDirty(
                 data.Player, data.Drone, data.Brute, data.MinerBug,
                 data.ArrowTower, data.CannonTower, data.FrostTower,
-                data.TowerCatalog,
-                data.BuildAuthoritySettings,
-                data.WaveCatalog,
                 data.WoodNode, data.StoneNode, data.OreNode, data.CrystalNode);
 
             return data;
@@ -272,11 +263,6 @@ namespace DungeonBuilder.Editor
             if (wood > 0) costs.Add(new ResourceCost(ResourceType.Wood, wood));
             if (ore  > 0) costs.Add(new ResourceCost(ResourceType.Ore,  ore));
             data.buildCost = costs.ToArray();
-        }
-
-        private static void ConfigureTowerCatalog(TowerCatalogSO catalog, params TowerDataSO[] towers)
-        {
-            SetObjectArray(catalog, "_towers", towers);
         }
 
         private static void ConfigureResource(ResourceNodeDataSO data, ResourceType type, int hits, int amount, int max, float respawn)
@@ -480,7 +466,6 @@ namespace DungeonBuilder.Editor
             NetworkObjectPool pool = gameRoot.AddComponent<NetworkObjectPool>();
             SharedResourceManager sharedResources = gameRoot.AddComponent<SharedResourceManager>();
             gameRoot.AddComponent<NetworkStatusDebugger>();
-            CoreManager coreManager = gameRoot.AddComponent<CoreManager>();
             GridManager grid = gameRoot.AddComponent<GridManager>();
             BuildingController building = gameRoot.AddComponent<BuildingController>();
             WaveManager wave = gameRoot.AddComponent<WaveManager>();
@@ -489,20 +474,15 @@ namespace DungeonBuilder.Editor
             Transform poolRoot = CreateEmptyChild(gameRoot.transform, "PoolRoot", Vector3.zero);
             ConfigurePool(pool, poolRoot, prefabs);
             ConfigureBuildingController(building, data, prefabs);
-            ConfigureWaveManager(wave, sceneObjects.Core, sceneObjects.SpawnPoints, data, prefabs);
+            ConfigureWaveManager(wave, sceneObjects.Core, sceneObjects.SpawnPoints, prefabs);
 
             HUDView hudView = CreateHUD();
-            TowerSelectionView towerSelectionView = Object.FindFirstObjectByType<TowerSelectionView>(FindObjectsInactive.Include);
             SetObject(lifetimeScope, "_networkObjectPool", pool);
             SetObject(lifetimeScope, "_sharedResourceManager", sharedResources);
-            SetObject(lifetimeScope, "_coreManager", coreManager);
             SetObject(lifetimeScope, "_gridManager", grid);
             SetObject(lifetimeScope, "_buildingController", building);
             SetObject(lifetimeScope, "_waveManager", wave);
             SetObject(lifetimeScope, "_hudView", hudView);
-            SetObject(lifetimeScope, "_towerSelectionView", towerSelectionView);
-            SetObject(lifetimeScope, "_towerCatalog", data.TowerCatalog);
-            SetObject(lifetimeScope, "_buildAuthoritySettings", data.BuildAuthoritySettings);
 
             CreateEventSystem();
 
@@ -571,31 +551,11 @@ namespace DungeonBuilder.Editor
             entry.FindPropertyRelative("_prefab").objectReferenceValue = prefab;
         }
 
-        private static void ConfigureWaveManager(
-            WaveManager wave,
-            Transform core,
-            Transform[] spawnPoints,
-            GeneratedData data,
-            GeneratedPrefabs prefabs)
+        private static void ConfigureWaveManager(WaveManager wave, Transform core, Transform[] spawnPoints, GeneratedPrefabs prefabs)
         {
             SetObject(wave, "_coreTarget", core);
             SetObjectArray(wave, "_spawnPoints", spawnPoints);
-            SetObject(wave, "_waveCatalog", data.WaveCatalog);
-
-            SerializedObject serialized = new SerializedObject(wave);
-            SerializedProperty mappings = serialized.FindProperty("_enemyPrefabMappings");
-            mappings.arraySize = 3;
-            SetEnemyPrefabMapping(mappings.GetArrayElementAtIndex(0), EnemyType.Drone, prefabs.Drone);
-            SetEnemyPrefabMapping(mappings.GetArrayElementAtIndex(1), EnemyType.Brute, prefabs.Brute);
-            SetEnemyPrefabMapping(mappings.GetArrayElementAtIndex(2), EnemyType.MinerBug, prefabs.MinerBug);
-            serialized.ApplyModifiedPropertiesWithoutUndo();
-            EditorUtility.SetDirty(wave);
-        }
-
-        private static void SetEnemyPrefabMapping(SerializedProperty mapping, EnemyType type, NetworkObject prefab)
-        {
-            mapping.FindPropertyRelative("enemyType").enumValueIndex = (int)type;
-            mapping.FindPropertyRelative("prefab").objectReferenceValue = prefab;
+            SetObjectArray(wave, "_enemyPrefabs", new Object[] { prefabs.Drone, prefabs.Brute, prefabs.MinerBug });
         }
 
         private static void SetPoolEntries(NetworkObjectPool pool, IReadOnlyList<PoolConfig> configs)
@@ -833,9 +793,6 @@ namespace DungeonBuilder.Editor
             public TowerDataSO ArrowTower;
             public TowerDataSO CannonTower;
             public TowerDataSO FrostTower;
-            public TowerCatalogSO TowerCatalog;
-            public BuildAuthoritySettingsSO BuildAuthoritySettings;
-            public WaveCatalogSO WaveCatalog;
             public ResourceNodeDataSO WoodNode;
             public ResourceNodeDataSO StoneNode;
             public ResourceNodeDataSO OreNode;

@@ -50,7 +50,8 @@ namespace DungeonBuilder.UI.TowerSelection
 
         public bool CanAfford(TowerType type)
         {
-            return _affordability.TryGetValue(type, out bool can) && can;
+            if (!_affordability.TryGetValue(type, out bool can)) return true;
+            return can;
         }
     }
 }

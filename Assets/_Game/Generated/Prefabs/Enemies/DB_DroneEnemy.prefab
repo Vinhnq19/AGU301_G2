@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7794510355619725346}
   - component: {fileID: 8018893798705530647}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Visual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -105,7 +105,7 @@ GameObject:
   - component: {fileID: 1821280075056569211}
   - component: {fileID: 3164050498377199483}
   - component: {fileID: 4405597778337768074}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: DB_DroneEnemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -140,7 +140,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 2774964764
+  GlobalObjectIdHash: 824350359
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1

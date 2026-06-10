@@ -14,6 +14,8 @@ namespace DungeonBuilder.Player.Tools
         [SerializeField, Min(0.1f)] private float _fallbackSearchRadius = 2f;
         [SerializeField, Min(0.1f)] private float _serverInteractionRange = 2f;
 
+        private readonly Collider2D[] _fallbackResults = new Collider2D[16];
+
         public abstract ToolType ToolType { get; }
 
         public void UseAction(Vector3 targetPosition)
@@ -90,17 +92,14 @@ namespace DungeonBuilder.Player.Tools
                 DBLog.Warning($"{ToolType}.click.too-far.{NetworkObjectId}", $"{ToolType} clicked harvest target too far from player. target={clickedTarget.name}, distance={clickedDistance:0.00}, max={_fallbackSearchRadius:0.00}. Searching nearest valid target instead.", 0.5f, clickedTarget);
             }
 
-            Collider2D[] nearbyColliders = Physics2D.OverlapCircleAll(transform.position, _fallbackSearchRadius, _targetMask);
+            int fallbackCount = Physics2D.OverlapCircleNonAlloc(transform.position, _fallbackSearchRadius, _fallbackResults, _targetMask);
             NetworkObject nearestTarget = null;
             float nearestDistance = float.MaxValue;
 
-            foreach (Collider2D nearbyCollider in nearbyColliders)
+            for (int i = 0; i < fallbackCount; i++)
             {
-                NetworkObject candidate = nearbyCollider.GetComponentInParent<NetworkObject>();
-                if (!IsHarvestable(candidate))
-                {
-                    continue;
-                }
+                NetworkObject candidate = _fallbackResults[i].GetComponentInParent<NetworkObject>();
+                if (!IsHarvestable(candidate)) continue;
 
                 float distance = Vector3.Distance(transform.position, candidate.transform.position);
                 if (distance < nearestDistance)

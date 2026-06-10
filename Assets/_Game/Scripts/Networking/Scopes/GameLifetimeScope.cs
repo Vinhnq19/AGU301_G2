@@ -29,7 +29,6 @@ namespace DungeonBuilder.Networking.Scopes
 
         [Header("Data")]
         [SerializeField] private TowerCatalogSO _towerCatalog;
-        [SerializeField] private BuildAuthoritySettingsSO _buildAuthoritySettings;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -57,14 +56,6 @@ namespace DungeonBuilder.Networking.Scopes
                 builder.RegisterComponent(_gridManager);
             }
 
-            if (_buildAuthoritySettings != null)
-            {
-                builder.RegisterInstance(_buildAuthoritySettings);
-            }
-
-            builder.Register<NetworkEntityResolver>(Lifetime.Singleton).As<INetworkEntityResolver>();
-            builder.Register<BuildCommandValidator>(Lifetime.Singleton).As<IBuildCommandValidator>();
-
             if (_buildingController != null)
             {
                 builder.RegisterComponent(_buildingController);
@@ -72,7 +63,7 @@ namespace DungeonBuilder.Networking.Scopes
 
             if (_waveManager != null)
             {
-                builder.RegisterComponent(_waveManager).AsSelf().As<IGamePhaseProvider>();
+                builder.RegisterComponent(_waveManager);
             }
 
             if (_hudView != null)
@@ -80,24 +71,18 @@ namespace DungeonBuilder.Networking.Scopes
                 builder.RegisterComponent(_hudView);
             }
 
-            if (_towerSelectionView != null
-                && _towerCatalog != null
-                && _buildingController != null
-                && _sharedResourceManager != null)
+            builder.Register<TowerSelectionModel>(Lifetime.Singleton);
+            builder.Register<TowerSelectionPresenter>(Lifetime.Singleton).AsSelf();
+            builder.RegisterBuildCallback(resolver => resolver.Resolve<TowerSelectionPresenter>().Initialize());
+
+            if (_towerSelectionView != null)
             {
                 builder.RegisterComponent(_towerSelectionView);
-                builder.RegisterInstance(_towerCatalog);
-                builder.Register<TowerSelectionModel>(Lifetime.Singleton);
-                builder.Register<TowerSelectionPresenter>(Lifetime.Singleton).AsSelf();
-                builder.RegisterBuildCallback(resolver => resolver.Resolve<TowerSelectionPresenter>().Initialize());
             }
-            else
+
+            if (_towerCatalog != null)
             {
-                Debug.LogWarning(
-                    $"[{nameof(GameLifetimeScope)}] Tower Selection UI disabled because one or more references are missing. " +
-                    $"view={_towerSelectionView != null}, catalog={_towerCatalog != null}, " +
-                    $"building={_buildingController != null}, resources={_sharedResourceManager != null}.",
-                    this);
+                builder.RegisterInstance(_towerCatalog);
             }
 
             builder.RegisterBuildCallback(resolver =>

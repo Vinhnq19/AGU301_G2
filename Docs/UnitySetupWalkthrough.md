@@ -104,14 +104,10 @@ Dieu kien de dat duoc tower:
 
 - Dang chay Host hoac Client da connect vao Host.
 - Player local da spawn va la owner.
-- Dang o `Build` phase.
 - Da chon dung tool `Builder`.
 - Co du resource cho tower dang chon.
-- Player cach cell toi da `6` world units. Gia tri nay nam trong `DB_BuildAuthoritySettings`.
 - Click vao cell nam trong bounds va chua co tower.
 - `BuildingController`, `GridManager`, `SharedResourceManager`, `NetworkObjectPool` inject duoc qua VContainer.
-
-Khi server chap nhan place, toan bo build cost bi tru ngay va tower hoat dong ngay. Luong blueprint/contribute khong con la luong su dung chinh.
 
 Cost mac dinh:
 
@@ -141,16 +137,13 @@ Cost mac dinh:
 11. Click chuot trai vao vi tri trong gan player, tranh click trung node/resource/tower.
 12. Expected:
     - HUD tru Wood.
-    - Tower square spawn dung grid tren ca server va hoat dong ngay.
+    - Tower square spawn dung grid tren ca server.
     - Console co log `build.accept`.
 
 Neu khong dat duoc, doc Console theo cac log sau:
 
 - `build.reject.cost`: thieu resource. Harvest them Wood/Ore.
-- `build.reject.authority.NotBuildPhase`: dang o Combat phase. Doi toi Build phase.
-- `build.reject.authority.OutOfRange`: player cach cell/tower qua xa. Di lai gan hon.
-- `build.reject.authority.InvalidGridPosition`: click ngoai bounds hoac cell da occupied. Click vi tri khac.
-- `build.reject.authority.SenderPlayerNotFound`: server khong tim thay PlayerObject cua client gui request.
+- `build.reject.grid`: click ngoai bounds hoac cell da occupied. Click vi tri khac.
 - `build.reject.refs`: thieu reference/injection. Kiem tra `GameRoot > GameLifetimeScope`, `BuildingController`, `NetworkObjectPool`.
 - `build.reject.pool`: pool khong tra ve tower. Kiem tra pool entries va network prefab list.
 - Khong thay `build.send`: chua chon Builder, chua spawn player owner, hoac input attack khong vao.
@@ -249,21 +242,13 @@ Neu Client khong connect:
 7. Harvest toi it nhat 25 Wood.
 8. Tren Client clone, bam `2` den Builder, roi click cell trong.
 9. Expected:
-    - Tower spawn tren ca Host va Client.
-    - HUD resource bi tru tren ca hai.
-    - Host Console co `build.recv` va `build.accept`.
+   - Tower spawn tren ca Host va Client.
+   - HUD resource bi tru tren ca hai.
+   - Host Console co `build.recv` va `build.accept`.
 10. Tren Host, thu click dung cell vua co tower.
 11. Expected:
     - Khong spawn tower thu hai cung cell.
-    - Console co `build.reject.authority.InvalidGridPosition`.
-12. Di player xa hon `6` world units khoi mot cell trong va thu place.
-13. Expected:
-    - Tower khong spawn, resource khong bi tru.
-    - Host Console co `build.reject.authority.OutOfRange`.
-14. Trong `Combat` phase, thu place/upgrade/remove.
-15. Expected:
-    - Server tu choi thao tac.
-    - Host Console co `build.reject.authority.NotBuildPhase`.
+    - Console co `build.reject.grid`.
 
 ### 6.6. Test Wave Va Enemy
 

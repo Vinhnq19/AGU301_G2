@@ -19,7 +19,6 @@ namespace DungeonBuilder.UI.TowerSelection
         private readonly BuildingController _buildingController;
         private readonly IResourceService _resources;
         private readonly TowerCatalogSO _catalog;
-        private bool _disposed;
 
         public TowerSelectionPresenter(
             TowerSelectionView view,
@@ -81,13 +80,7 @@ namespace DungeonBuilder.UI.TowerSelection
 
         public override void Dispose()
         {
-            if (_disposed)
-            {
-                return;
-            }
-
             _resources.ResourceChanged -= HandleResourceChanged;
-            _disposed = true;
             base.Dispose();
         }
 
@@ -95,17 +88,15 @@ namespace DungeonBuilder.UI.TowerSelection
         private void RefreshAffordability()
         {
             if (_catalog == null) return;
-
             foreach (TowerDataSO data in _catalog.Towers)
             {
-                Model.UpdateAffordability(data, _resources.CanAfford(data.buildCost));
+                Model.UpdateAffordability(data, true);
             }
         }
 
         private void HandleResourceChanged(ResourceChanged change)
         {
             if (!Model.IsOpen) return;
-            RefreshAffordability();
             Model.NotifyAffordabilityChanged();
         }
     }

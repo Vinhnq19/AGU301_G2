@@ -27,13 +27,7 @@ namespace DungeonBuilder.Projectile
 
         protected float Damage { get; private set; }
 
-        private INetworkPool _pool;
-
-        [Inject]
-        public void Construct(INetworkPool pool)
-        {
-            _pool = pool;
-        }
+        [Inject] private INetworkPool _pool;
 
         /// <summary>
         /// Gọi bởi BaseTower sau pool.Get() và TRƯỚC bullet.Spawn().

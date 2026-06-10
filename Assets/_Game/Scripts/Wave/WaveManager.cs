@@ -13,7 +13,7 @@ using VContainer;
 
 namespace DungeonBuilder.Wave
 {
-    public sealed class WaveManager : NetworkBehaviour, IGamePhaseProvider
+    public sealed class WaveManager : NetworkBehaviour
     {
         [System.Serializable]
         public struct EnemyPrefabMapping
@@ -36,8 +36,6 @@ namespace DungeonBuilder.Wave
         private INetworkPool _pool;
         private readonly HashSet<ulong> _activeEnemyIds = new();
         private readonly Dictionary<EnemyType, NetworkObject> _prefabLookup = new();
-
-        public GamePhase CurrentPhase => _gamePhase.Value;
 
         [Inject]
         public void Construct(EventBus eventBus, INetworkPool pool)

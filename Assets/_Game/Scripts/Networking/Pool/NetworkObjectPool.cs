@@ -18,13 +18,7 @@ namespace DungeonBuilder.Networking.Pool
         private readonly HashSet<NetworkObject> _pooledObjects = new();
         private bool _handlersRegistered;
 
-        private IObjectResolver _resolver;
-
-        [Inject]
-        public void Construct(IObjectResolver resolver)
-        {
-            _resolver = resolver;
-        }
+        [Inject] private IObjectResolver _resolver;
 
         private void Awake()
         {

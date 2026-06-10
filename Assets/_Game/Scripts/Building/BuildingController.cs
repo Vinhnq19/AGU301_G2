@@ -20,20 +20,16 @@ namespace DungeonBuilder.Building
         private IResourceService _sharedResources;
         private GridManager _grid;
         private INetworkPool _pool;
-        private IBuildCommandValidator _validator;
 
         [Inject]
-        public void Construct(
-            IResourceService sharedResources,
-            GridManager grid,
-            INetworkPool pool,
-            IBuildCommandValidator validator)
+        public void Construct(IResourceService sharedResources, GridManager grid, INetworkPool pool)
         {
             _sharedResources = sharedResources;
             _grid = grid;
             _pool = pool;
-            _validator = validator;
         }
+
+        // ─── Place ──────────────────────────────────────────────────────
 
         public void RequestPlaceTower(Vector2Int gridPosition, TowerType towerType)
         {
@@ -44,76 +40,46 @@ namespace DungeonBuilder.Building
         [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
         private void PlaceTowerServerRpc(Vector2Int gridPosition, TowerType towerType, RpcParams rpcParams = default)
         {
-            ulong senderClientId = rpcParams.Receive.SenderClientId;
-            DBLog.Info($"build.recv.{senderClientId}", $"[BuildingController] Place received. grid={gridPosition}, type={towerType}.", 0.25f, this);
+            DBLog.Info($"build.recv.{rpcParams.Receive.SenderClientId}", $"[BuildingController] Place received. grid={gridPosition}, type={towerType}.", 0.25f, this);
 
-            TowerDataSO data = GetTowerData(towerType);
+            TowerDataSO data   = GetTowerData(towerType);
             NetworkObject prefab = GetTowerPrefab(towerType);
-            if (data == null || prefab == null || _grid == null || _pool == null || _sharedResources == null || _validator == null)
+
+            if (data == null || prefab == null || _grid == null || _pool == null)
             {
-                DBLog.Warning($"build.reject.refs.{towerType}", "[BuildingController] Place rejected: missing refs or invalid tower type.", 1f, this);
+                DBLog.Warning($"build.reject.refs.{towerType}", "[BuildingController] Place rejected: missing refs.", 1f, this);
                 return;
             }
 
-            BuildValidationResult validation = _validator.ValidatePlacement(senderClientId, gridPosition);
-            if (!validation.IsAllowed)
+            if (!_grid.IsValidPlacement(gridPosition))
             {
-                LogValidationRejected("build", gridPosition, validation);
-                return;
-            }
-
-            NetworkObject towerObject = _pool.Get(prefab, _grid.GridToWorld(gridPosition), Quaternion.identity);
-            if (towerObject == null)
-            {
-                DBLog.Warning($"build.reject.pool.{gridPosition}", "[BuildingController] Place failed: pool returned null.", 1f, this);
-                return;
-            }
-
-            BaseTower tower = towerObject.GetComponent<BaseTower>();
-            if (tower == null)
-            {
-                _pool.Return(towerObject);
-                DBLog.Warning($"build.reject.component.{gridPosition}", "[BuildingController] Place failed: BaseTower not found.", 1f, this);
-                return;
-            }
-
-            if (!_sharedResources.TrySpend(data.buildCost))
-            {
-                _pool.Return(towerObject);
-                DBLog.Warning($"build.reject.cost.{gridPosition}", "[BuildingController] Place rejected: not enough resources.", 0.5f, this);
+                DBLog.Warning($"build.reject.grid.{gridPosition}", $"[BuildingController] Place rejected: invalid grid {gridPosition}.", 0.5f, this);
                 return;
             }
 
             if (!_grid.PlaceTower(gridPosition, data))
             {
-                RefundCosts(data.buildCost);
-                _pool.Return(towerObject);
                 DBLog.Warning($"build.reject.occupied.{gridPosition}", $"[BuildingController] Place rejected: cell occupied {gridPosition}.", 0.5f, this);
                 return;
             }
 
-            try
-            {
-                if (!towerObject.IsSpawned)
-                {
-                    towerObject.Spawn();
-                }
-
-                _grid.SetTowerNetworkObjectId(gridPosition, towerObject.NetworkObjectId);
-                tower.OnPlaced(gridPosition);
-                tower.CompleteConstruction();
-            }
-            catch (Exception exception)
+            NetworkObject tower = _pool.Get(prefab, _grid.GridToWorld(gridPosition), Quaternion.identity);
+            if (tower == null)
             {
                 _grid.ClearTower(gridPosition);
-                RefundCosts(data.buildCost);
-                _pool.Return(towerObject);
-                Debug.LogError($"[BuildingController] Place failed and was rolled back at {gridPosition}: {exception}", this);
+                DBLog.Warning($"build.reject.pool.{gridPosition}", "[BuildingController] Place failed: pool null.", 1f, this);
                 return;
             }
 
-            DBLog.Info($"build.accept.{gridPosition}", $"[BuildingController] Tower placed and paid in full. type={towerType}, networkId={towerObject.NetworkObjectId}.", 0.25f, towerObject);
+            if (!tower.IsSpawned) tower.Spawn();
+
+            _grid.SetTowerNetworkObjectId(gridPosition, tower.NetworkObjectId);
+            tower.GetComponent<BaseTower>()?.OnPlaced(gridPosition);
+
+            DBLog.Info($"build.accept.{gridPosition}", $"[BuildingController] Tower placed (under construction). type={towerType}, networkId={tower.NetworkObjectId}.", 0.25f, tower);
         }
+
+        // ─── Contribute ─────────────────────────────────────────────────
 
         public void RequestContributeTower(Vector2Int gridPosition)
         {
@@ -124,17 +90,32 @@ namespace DungeonBuilder.Building
         [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
         private void ContributeTowerServerRpc(Vector2Int gridPosition, RpcParams rpcParams = default)
         {
-            if (!TryGetTower(rpcParams.Receive.SenderClientId, gridPosition, "contribute", out BaseTower tower, out _))
+            if (!TryGetTower(gridPosition, "contribute", out BaseTower tower, out TowerDataSO data)) return;
+
+            if (tower.IsConstructed)
             {
+                DBLog.Warning($"contribute.reject.done.{gridPosition}", "[BuildingController] Contribute rejected: already constructed.", 0.5f, this);
                 return;
             }
 
-            DBLog.Warning(
-                $"contribute.reject.done.{gridPosition}",
-                "[BuildingController] Contribution rejected: towers are paid in full when placed.",
-                0.5f,
-                tower);
+            if (!_sharedResources.TrySpend(data.buildCost))
+            {
+                DBLog.Warning(
+                    $"tower.contribute.reject.cost.{gridPosition}",
+                    "[BuildingController] Contribution rejected: not enough resources.",
+                    0.5f,
+                    tower);
+                return;
+            }
+
+            tower.CompleteConstruction();
+            DBLog.Info($"tower.contribute.{gridPosition}", "[BuildingController] Construction paid in full.", 0.25f, tower);
+
+            if (tower.IsConstructed)
+                DBLog.Info($"tower.activated.{gridPosition}", $"[BuildingController] Tower activated at {gridPosition}.", 0.25f, tower);
         }
+
+        // ─── Upgrade ────────────────────────────────────────────────────
 
         public void RequestUpgradeTower(Vector2Int gridPosition)
         {
@@ -145,10 +126,7 @@ namespace DungeonBuilder.Building
         [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
         private void UpgradeTowerServerRpc(Vector2Int gridPosition, RpcParams rpcParams = default)
         {
-            if (!TryGetTower(rpcParams.Receive.SenderClientId, gridPosition, "upgrade", out BaseTower tower, out TowerDataSO data))
-            {
-                return;
-            }
+            if (!TryGetTower(gridPosition, "upgrade", out BaseTower tower, out TowerDataSO data)) return;
 
             if (!tower.IsConstructed)
             {
@@ -163,11 +141,6 @@ namespace DungeonBuilder.Building
             }
 
             ResourceCost[] upgradeCost = data.GetUpgradeCostForLevel(tower.CurrentLevel);
-            if (upgradeCost.Length == 0)
-            {
-                DBLog.Warning($"upgrade.reject.config.{gridPosition}", "[BuildingController] Upgrade rejected: upgrade cost is not configured.", 0.5f, this);
-                return;
-            }
 
             if (!_sharedResources.TrySpend(upgradeCost))
             {
@@ -179,6 +152,8 @@ namespace DungeonBuilder.Building
             DBLog.Info($"upgrade.accept.{gridPosition}", $"[BuildingController] Tower upgraded to level {tower.CurrentLevel}.", 0.25f, this);
         }
 
+        // ─── Remove ─────────────────────────────────────────────────────
+
         public void RequestRemoveTower(Vector2Int gridPosition)
         {
             DBLog.Info($"remove.send.{gridPosition}", $"[BuildingController] Remove request sent. grid={gridPosition}.", 0.25f, this);
@@ -188,63 +163,60 @@ namespace DungeonBuilder.Building
         [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
         private void RemoveTowerServerRpc(Vector2Int gridPosition, RpcParams rpcParams = default)
         {
-            if (_grid == null || _sharedResources == null || _pool == null || _validator == null)
+            if (_grid == null || _sharedResources == null || _pool == null)
             {
                 DBLog.Warning("remove.reject.refs", "[BuildingController] Remove rejected: missing refs.", 1f, this);
                 return;
             }
 
-            if (!TryGetTower(rpcParams.Receive.SenderClientId, gridPosition, "remove", out BaseTower tower, out TowerDataSO data))
+            if (!_grid.TryGetCell(gridPosition, out GridCell cell))
             {
+                DBLog.Warning($"remove.reject.grid.{gridPosition}", $"[BuildingController] Remove rejected: no tower at {gridPosition}.", 0.5f, this);
                 return;
             }
 
-            var refundedTypes = new HashSet<ResourceType>();
-            var refundSummary = new StringBuilder();
-            foreach (ResourceCost cost in data.buildCost)
-            {
-                if (!refundedTypes.Add(cost.type))
-                {
-                    continue;
-                }
+            NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(cell.TowerNetworkObjectId, out NetworkObject netObj);
 
-                int refund = Mathf.RoundToInt(tower.GetPaid(cost.type) * 0.5f);
-                if (refund > 0 && _sharedResources.TryAdd(cost.type, refund))
-                {
-                    refundSummary.Append($"{refund}{ResourceCost.Abbr(cost.type)} ");
-                }
-            }
-
-            if (refundSummary.Length > 0)
+            if (netObj != null)
             {
-                DBLog.Info($"remove.refund.{gridPosition}", $"[BuildingController] Refunded: {refundSummary.ToString().Trim()} (50% of build cost).", 0.25f, this);
+                BaseTower tower = netObj.GetComponent<BaseTower>();
+                TowerDataSO data = GetTowerData(cell.OccupiedBy);
+                if (tower != null && data != null)
+                {
+                    var sb = new StringBuilder();
+                    var refundedTypes = new HashSet<ResourceType>();
+                    foreach (ResourceCost cost in data.buildCost)
+                    {
+                        if (!refundedTypes.Add(cost.type))
+                            continue;
+
+                        int refund = Mathf.RoundToInt(tower.GetPaid(cost.type) * 0.5f);
+                        if (refund > 0)
+                        {
+                            _sharedResources.TryAdd(cost.type, refund);
+                            sb.Append($"{refund}{ResourceCost.Abbr(cost.type)} ");
+                        }
+                    }
+                    if (sb.Length > 0)
+                        DBLog.Info($"remove.refund.{gridPosition}", $"[BuildingController] Refunded: {sb.ToString().Trim()} (50% of contributed).", 0.25f, this);
+                }
             }
 
             _grid.ClearTower(gridPosition);
-            _pool.Return(tower.NetworkObject);
+            if (netObj != null) _pool.Return(netObj);
             DBLog.Info($"remove.accept.{gridPosition}", $"[BuildingController] Tower removed at {gridPosition}.", 0.25f, this);
         }
 
-        private bool TryGetTower(
-            ulong senderClientId,
-            Vector2Int gridPosition,
-            string action,
-            out BaseTower tower,
-            out TowerDataSO data)
+        // ─── Helpers ────────────────────────────────────────────────────
+
+        private bool TryGetTower(Vector2Int gridPosition, string action, out BaseTower tower, out TowerDataSO data)
         {
             tower = null;
-            data = null;
+            data  = null;
 
-            if (_grid == null || _sharedResources == null || _validator == null)
+            if (_grid == null || _sharedResources == null)
             {
                 DBLog.Warning($"{action}.reject.refs.{gridPosition}", $"[BuildingController] {action} rejected: missing refs.", 1f, this);
-                return false;
-            }
-
-            BuildValidationResult validation = _validator.ValidateTowerAction(senderClientId, gridPosition, out NetworkObject towerObject);
-            if (!validation.IsAllowed)
-            {
-                LogValidationRejected(action, gridPosition, validation);
                 return false;
             }
 
@@ -254,7 +226,13 @@ namespace DungeonBuilder.Building
                 return false;
             }
 
-            tower = towerObject.GetComponent<BaseTower>();
+            if (!NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(cell.TowerNetworkObjectId, out NetworkObject netObj))
+            {
+                DBLog.Warning($"{action}.reject.notfound.{cell.TowerNetworkObjectId}", $"[BuildingController] {action} rejected: NetworkObject not found.", 1f, this);
+                return false;
+            }
+
+            tower = netObj.GetComponent<BaseTower>();
             if (tower == null)
             {
                 DBLog.Warning($"{action}.reject.component.{gridPosition}", $"[BuildingController] {action} rejected: BaseTower not found.", 1f, this);
@@ -271,54 +249,17 @@ namespace DungeonBuilder.Building
             return true;
         }
 
-        private void RefundCosts(IReadOnlyList<ResourceCost> costs)
-        {
-            if (costs == null || _sharedResources == null)
-            {
-                return;
-            }
-
-            foreach (ResourceCost cost in costs)
-            {
-                if (cost.amount > 0)
-                {
-                    _sharedResources.TryAdd(cost.type, cost.amount);
-                }
-            }
-        }
-
-        private void LogValidationRejected(string action, Vector2Int gridPosition, BuildValidationResult validation)
-        {
-            DBLog.Warning(
-                $"{action}.reject.authority.{validation.Code}.{gridPosition}",
-                $"[BuildingController] {action} rejected: authority={validation.Code}, grid={gridPosition}.",
-                0.5f,
-                this);
-        }
-
         private TowerDataSO GetTowerData(TowerType towerType)
         {
-            foreach (TowerDataSO data in _towerData)
-            {
-                if (data != null && data.towerType == towerType)
-                {
-                    return data;
-                }
-            }
-
+            foreach (TowerDataSO d in _towerData)
+                if (d != null && d.towerType == towerType) return d;
             return null;
         }
 
         private NetworkObject GetTowerPrefab(TowerType towerType)
         {
             foreach (TowerPrefabEntry entry in _towerPrefabs)
-            {
-                if (entry.TowerType == towerType)
-                {
-                    return entry.Prefab;
-                }
-            }
-
+                if (entry.TowerType == towerType) return entry.Prefab;
             return null;
         }
 
@@ -327,7 +268,6 @@ namespace DungeonBuilder.Building
         {
             [SerializeField] private TowerType _towerType;
             [SerializeField] private NetworkObject _prefab;
-
             public TowerType TowerType => _towerType;
             public NetworkObject Prefab => _prefab;
         }

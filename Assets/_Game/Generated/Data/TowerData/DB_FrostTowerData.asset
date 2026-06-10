@@ -14,17 +14,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.TowerDataSO
   towerType: 2
   damage: 30
-  range: 5
+  range: 12
   attackRate: 1.5
   bulletSpeed: 8
-  bulletLifetime: 2
+  bulletLifetime: 3
   buildCost:
-  - type: 0
-    amount: 25
+  - type: 6
+    amount: 20
+  - type: 1
+    amount: 20
   maxLevel: 3
   damagePerLevel: 5
   rangePerLevel: 0.5
   upgradeLevels:
   - costs:
-    - type: 0
-      amount: 40
+    - type: 6
+      amount: 25
+    - type: 5
+      amount: 25
+  - costs:
+    - type: 1
+      amount: 30
+    - type: 1
+      amount: 30

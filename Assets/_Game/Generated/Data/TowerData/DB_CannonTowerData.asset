@@ -21,7 +21,7 @@ MonoBehaviour:
   buildCost:
   - type: 0
     amount: 45
-  - type: 4
+  - type: 1
     amount: 5
   maxLevel: 3
   damagePerLevel: 7

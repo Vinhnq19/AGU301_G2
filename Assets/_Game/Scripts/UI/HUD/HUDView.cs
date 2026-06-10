@@ -10,13 +10,14 @@ namespace DungeonBuilder.UI.HUD
         [Header("Resources")]
         [SerializeField] private TMP_Text _woodText;
         [SerializeField] private TMP_Text _stoneText;
-        [SerializeField] private TMP_Text _oreText;
-        [SerializeField] private TMP_Text _crystalText;
+        [SerializeField] private TMP_Text _ironText;
+        [SerializeField] private TMP_Text _blueGemsText;
+        [SerializeField] private TMP_Text _copperText;
 
         [Header("Wave")]
         [SerializeField] private TMP_Text _waveText;
         [SerializeField] private TMP_Text _countdownText;
-        [SerializeField] private TMP_Text _coreHealthText;
+        [SerializeField] private TMP_Text _coreHealthText;  
 
         private void OnDestroy()
         {
@@ -32,8 +33,9 @@ namespace DungeonBuilder.UI.HUD
 
             SetText(_woodText, Presenter.GetResource(ResourceType.Wood).ToString());
             SetText(_stoneText, Presenter.GetResource(ResourceType.Stone).ToString());
-            SetText(_oreText, Presenter.GetResource(ResourceType.Ore).ToString());
-            SetText(_crystalText, Presenter.GetResource(ResourceType.Crystal).ToString());
+            SetText(_ironText, Presenter.GetResource(ResourceType.Iron).ToString());
+            SetText(_blueGemsText, Presenter.GetResource(ResourceType.BlueGems).ToString());
+            SetText(_copperText, Presenter.GetResource(ResourceType.Copper).ToString());
             SetText(_waveText, Presenter.GetWave().ToString());
             SetText(_countdownText, Mathf.CeilToInt(Presenter.GetCountdown()).ToString());
             SetText(_coreHealthText, Presenter.GetCoreHealth().ToString());

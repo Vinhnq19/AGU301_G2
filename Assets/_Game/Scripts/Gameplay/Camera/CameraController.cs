@@ -3,6 +3,7 @@
 // Mỗi player gắn 1 CameraController riêng — hỗ trợ multi-camera / split-screen.
 // Gắn script này lên GameObject chứa Camera component.
 
+using DungeonBuilder.Core.Debugging;
 using UnityEngine;
 
 /// <summary>
@@ -103,15 +104,19 @@ public class CameraController : MonoBehaviour
 
     #endregion
 
+    // Cache camera component để tránh GetComponent mỗi frame
+    private Camera _camera;
+
     // ═══════════════════════════════════════════════
     //  UNITY LIFECYCLE
     // ═══════════════════════════════════════════════
 
     /// <summary>
-    /// Khởi tạo: tính kích thước camera, lưu vị trí ban đầu của target.
+    /// Khởi tạo: cache Camera, tính kích thước camera, lưu vị trí ban đầu của target.
     /// </summary>
     private void Start()
     {
+        _camera = GetComponent<Camera>();
         CalculateCameraSize();
 
         if (target != null)
@@ -217,11 +222,10 @@ public class CameraController : MonoBehaviour
     /// </summary>
     private void CalculateCameraSize()
     {
-        Camera cam = GetComponent<Camera>();
-        if (cam != null && cam.orthographic)
+        if (_camera != null && _camera.orthographic)
         {
-            _camHalfHeight = cam.orthographicSize;
-            _camHalfWidth = _camHalfHeight * cam.aspect;
+            _camHalfHeight = _camera.orthographicSize;
+            _camHalfWidth  = _camHalfHeight * _camera.aspect;
         }
     }
 
@@ -247,7 +251,7 @@ public class CameraController : MonoBehaviour
             _currentLookAhead = Vector2.zero;
         }
 
-        Debug.Log($"[CameraController] Target changed → {(newTarget != null ? newTarget.name : "null")}");
+        DBLog.Info("camera.target", $"[CameraController] Target changed → {(newTarget != null ? newTarget.name : "null")}.", 1f, this);
     }
 
     /// <summary>
@@ -267,7 +271,7 @@ public class CameraController : MonoBehaviour
         maxY = newMaxY;
         useBounds = true;
 
-        Debug.Log($"[CameraController] Bounds updated → X[{minX}, {maxX}] Y[{minY}, {maxY}]");
+        DBLog.Info("camera.bounds", $"[CameraController] Bounds updated → X[{minX}, {maxX}] Y[{minY}, {maxY}].", 1f, this);
     }
 
     /// <summary>
@@ -296,7 +300,7 @@ public class CameraController : MonoBehaviour
     public void DisableBounds()
     {
         useBounds = false;
-        Debug.Log("[CameraController] Bounds disabled.");
+        DBLog.Info("camera.bounds.off", "[CameraController] Bounds disabled.", 1f, this);
     }
 
     /// <summary>
@@ -308,7 +312,7 @@ public class CameraController : MonoBehaviour
     public void SetFollowSpeed(float speed)
     {
         followSpeed = Mathf.Max(0.1f, speed); // Không cho phép <= 0
-        Debug.Log($"[CameraController] Follow speed → {followSpeed}");
+        DBLog.Info("camera.speed", $"[CameraController] Follow speed → {followSpeed}.", 1f, this);
     }
 
     /// <summary>

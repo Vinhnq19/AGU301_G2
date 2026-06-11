@@ -18,10 +18,14 @@ namespace Assets._Game.Scripts.Building
         public event Action OnChanged;
 
         public int Level { get; private set; } = 1;
+        public float CurrentHealth { get; private set; }
 
-        public float Damage     => _data != null ? _data.damage     + _data.damagePerLevel * (Level - 1) : 0f;
-        public float Range      => _data != null ? _data.range      + _data.rangePerLevel  * (Level - 1) : 0f;
-        public float AttackRate => _data != null ? _data.attackRate : 1f;
+        private float GetMultiplier() => Level == 1 ? 1f : (Level == 2 ? 1.5f : 2f);
+
+        public float MaxHealth  => _data != null ? _data.maxHealth * GetMultiplier() : 100f;
+        public float Damage     => _data != null ? _data.damage * GetMultiplier() : 0f;
+        public float Range      => _data != null ? _data.range * GetMultiplier() : 0f;
+        public float AttackRate => _data != null ? _data.attackRate * GetMultiplier() : 1f;
         public bool CanUpgrade  => _data != null && Level < _data.maxLevel;
 
         public IReadOnlyList<ResourceCost> BuildCost   => _data?.buildCost   ?? Array.Empty<ResourceCost>();
@@ -41,6 +45,12 @@ namespace Assets._Game.Scripts.Building
         public void SetLevel(int level)
         {
             Level = level;
+            OnChanged?.Invoke();
+        }
+
+        public void SetHealth(float health)
+        {
+            CurrentHealth = health;
             OnChanged?.Invoke();
         }
 

@@ -25,6 +25,7 @@ namespace Assets._Game.Scripts.Data
     {
         [Header("Base Stats")]
         public TowerType towerType;
+        public float maxHealth  = 100f;
         public float damage     = 10f;
         public float range      = 4f;
         public float attackRate = 1f;
@@ -37,9 +38,7 @@ namespace Assets._Game.Scripts.Data
         public ResourceCost[] buildCost = { new ResourceCost(ResourceType.Wood, 25) };
 
         [Header("Upgrade")]
-        public int maxLevel         = 3;
-        public float damagePerLevel = 5f;
-        public float rangePerLevel  = 0.5f;
+        public int maxLevel = 3;
 
         [Tooltip("Index 0 = lv1→lv2, index 1 = lv2→lv3. Size nen bang maxLevel - 1.")]
         public UpgradeLevel[] upgradeLevels;

@@ -2,8 +2,10 @@ using System.Linq;
 using Assets._Game.Scripts.Building;
 using DungeonBuilder.Building;
 using Assets._Game.Scripts.Data;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Assets._Game.Scripts.Building
@@ -33,6 +35,39 @@ namespace Assets._Game.Scripts.Building
         [SerializeField] private Button _constructionRemoveButton;
 
         private TowerPresenter _presenter;
+        private bool _isProximityUiVisible = false;
+        private CanvasGroup _actionPanelGroup;
+        private Vector3 _baseRangeScale = Vector3.one;
+
+        private void Awake()
+        {
+            if (_rangeCircle != null)
+            {
+                Color c = _rangeCircle.color;
+                c.a = 0f;
+                _rangeCircle.color = c;
+            }
+
+            if (_levelText != null)
+            {
+                Color c = _levelText.color;
+                c.a = 0f;
+                _levelText.color = c;
+            }
+
+            if (_actionPanel != null)
+            {
+                _actionPanelGroup = _actionPanel.GetComponent<CanvasGroup>();
+                if (_actionPanelGroup == null) _actionPanelGroup = _actionPanel.AddComponent<CanvasGroup>();
+
+                EventTrigger trigger = _actionPanel.GetComponent<EventTrigger>() ?? _actionPanel.AddComponent<EventTrigger>();
+                EventTrigger.Entry exitEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerExit };
+                exitEntry.callback.AddListener((_) => HidePanel());
+                trigger.triggers.Add(exitEntry);
+                
+                _actionPanel.SetActive(false);
+            }
+        }
 
         /// <summary>
         /// Wire buttons vao presenter. Goi boi TowerPresenter.Initialize().
@@ -75,10 +110,28 @@ namespace Assets._Game.Scripts.Building
 
             SetText(_levelText, $"Lv{model.Level}");
 
-            if (_rangeCircle != null)
+            if (_rangeCircle != null && _rangeCircle.sprite != null)
             {
                 float diameter = model.Range * 2f;
-                _rangeCircle.transform.localScale = new Vector3(diameter, diameter, 1f);
+                float spriteSize = _rangeCircle.sprite.bounds.size.x;
+                float targetScale = spriteSize > 0f ? diameter / spriteSize : diameter;
+
+                // Bù trừ scale của parent để vòng tròn không bị méo (hình bầu dục)
+                Vector3 parentScale = _rangeCircle.transform.parent != null ? _rangeCircle.transform.parent.lossyScale : Vector3.one;
+                _baseRangeScale = new Vector3(
+                    targetScale / (parentScale.x != 0 ? Mathf.Abs(parentScale.x) : 1f),
+                    targetScale / (parentScale.y != 0 ? Mathf.Abs(parentScale.y) : 1f),
+                    1f
+                );
+
+                _rangeCircle.transform.DOKill();
+                _rangeCircle.transform.localScale = _baseRangeScale;
+
+                if (_isProximityUiVisible)
+                {
+                    _rangeCircle.transform.DOScale(_baseRangeScale * 1.05f, 1f)
+                        .SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);
+                }
             }
 
             if (_upgradeButton != null)
@@ -130,14 +183,76 @@ namespace Assets._Game.Scripts.Building
         public void TogglePanel()
         {
             if (_actionPanel == null) return;
-            _actionPanel.SetActive(!_actionPanel.activeSelf);
+            if (_actionPanel.activeSelf)
+            {
+                HidePanel();
+            }
+            else
+            {
+                _actionPanel.SetActive(true);
+                if (_actionPanelGroup != null)
+                {
+                    _actionPanelGroup.DOKill();
+                    _actionPanelGroup.alpha = 0f;
+                    _actionPanelGroup.DOFade(1f, 0.2f);
+                }
+            }
         }
 
         public void HidePanel()
         {
-            if (_actionPanel != null)
+            if (_actionPanel != null && _actionPanel.activeSelf)
             {
-                _actionPanel.SetActive(false);
+                if (_actionPanelGroup != null)
+                {
+                    _actionPanelGroup.DOKill();
+                    _actionPanelGroup.DOFade(0f, 0.2f).OnComplete(() => _actionPanel.SetActive(false));
+                }
+                else
+                {
+                    _actionPanel.SetActive(false);
+                }
+            }
+        }
+
+        public void ShowProximityUI()
+        {
+            if (_isProximityUiVisible) return;
+            _isProximityUiVisible = true;
+
+            if (_rangeCircle != null)
+            {
+                _rangeCircle.DOKill();
+                _rangeCircle.DOFade(0.15f, 0.3f);
+                _rangeCircle.transform.DOKill();
+                _rangeCircle.transform.localScale = _baseRangeScale; // Reset về scale chuẩn trước khi anim
+                _rangeCircle.transform.DOScale(_baseRangeScale * 1.05f, 1f)
+                    .SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);
+            }
+
+            if (_levelText != null)
+            {
+                _levelText.DOKill();
+                _levelText.DOFade(1f, 0.3f);
+            }
+        }
+
+        public void HideProximityUI()
+        {
+            if (!_isProximityUiVisible) return;
+            _isProximityUiVisible = false;
+
+            if (_rangeCircle != null)
+            {
+                _rangeCircle.DOKill();
+                _rangeCircle.DOFade(0f, 0.3f);
+                _rangeCircle.transform.DOKill();
+            }
+
+            if (_levelText != null)
+            {
+                _levelText.DOKill();
+                _levelText.DOFade(0f, 0.3f);
             }
         }
 

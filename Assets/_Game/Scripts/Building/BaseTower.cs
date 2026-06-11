@@ -9,6 +9,7 @@ using DungeonBuilder.Core.Enums;
 using DungeonBuilder.Networking;
 using DungeonBuilder.Networking.Pool;
 using DungeonBuilder.Projectile;
+using DungeonBuilder.Core.Interfaces;
 using Unity.Netcode;
 using UnityEngine;
 using VContainer;
@@ -21,7 +22,7 @@ namespace DungeonBuilder.Building
     /// Attack loop chi bat dau sau khi IsConstructed == true.
     /// </summary>
     [RequireComponent(typeof(NetworkObject))]
-    public class BaseTower : NetworkBehaviour
+    public class BaseTower : NetworkBehaviour, IDamageable
     {
         [Header("Tower Config")]
         [SerializeField] protected TowerDataSO _data;
@@ -32,6 +33,7 @@ namespace DungeonBuilder.Building
         [SerializeField] private SpriteRenderer _visual;
 
         private readonly NetworkVariable<int> _currentLevel = new(1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        private readonly NetworkVariable<float> _health = new(100f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         private readonly NetworkList<ResourceAmount> _paidResources = new(
             null,
             NetworkVariableReadPermission.Everyone,
@@ -90,12 +92,19 @@ namespace DungeonBuilder.Building
                 ResetConstructionProgress();
 
             _currentLevel.OnValueChanged += HandleLevelChanged;
+            _health.OnValueChanged += HandleHealthChanged;
             _paidResources.OnListChanged += HandlePaidChanged;
 
             if (_presenter != null)
                 _presenter.Initialize(_model, _view);
 
             _model.SetLevel(_currentLevel.Value);
+            
+            if (IsServer && _health.Value == 100f && _currentLevel.Value == 1) // Just initialized
+            {
+                _health.Value = _model.MaxHealth;
+            }
+            _model.SetHealth(_health.Value);
             foreach (ResourceAmount resource in _paidResources)
                 _model.SetPaid(resource.Type, resource.Amount);
 
@@ -115,6 +124,7 @@ namespace DungeonBuilder.Building
         public override void OnNetworkDespawn()
         {
             _currentLevel.OnValueChanged -= HandleLevelChanged;
+            _health.OnValueChanged -= HandleHealthChanged;
             _paidResources.OnListChanged -= HandlePaidChanged;
         }
 
@@ -139,12 +149,40 @@ namespace DungeonBuilder.Building
             }
         }
 
-        /// <summary>Tang level tower. Chi goi tu server.</summary>
         public void UpgradeLevel()
         {
             if (!IsServer || !CanUpgrade) return;
             _currentLevel.Value++;
+            _model.SetLevel(_currentLevel.Value); // Force model update before getting MaxHealth
+            _health.Value = _model.MaxHealth; // Heal to full on upgrade
             DBLog.Info($"tower.upgrade.{NetworkObjectId}", $"[BaseTower] Upgraded to level {_currentLevel.Value}.", 0f, this);
+        }
+
+        public void TakeDamage(float amount, ulong attackerClientId = 0)
+        {
+            if (!IsServer || !IsConstructed) return;
+            
+            _health.Value -= amount;
+            DBLog.Info($"tower.damage.{NetworkObjectId}", $"[BaseTower] Took {amount} damage. HP: {_health.Value}/{_model.MaxHealth}.", 0.2f, this);
+
+            if (_health.Value <= 0f)
+            {
+                Die();
+            }
+        }
+
+        private void Die()
+        {
+            if (!IsServer) return;
+            DBLog.Info($"tower.die.{NetworkObjectId}", $"[BaseTower] Destroyed.", 0f, this);
+            if (_pool != null)
+            {
+                _pool.Return(NetworkObject);
+            }
+            else
+            {
+                NetworkObject.Despawn();
+            }
         }
 
         private async UniTaskVoid StartAttackLoopAsync()
@@ -264,6 +302,7 @@ namespace DungeonBuilder.Building
         }
 
         private void HandleLevelChanged(int _, int newVal) => _model?.SetLevel(newVal);
+        private void HandleHealthChanged(float _, float newVal) => _model?.SetHealth(newVal);
 
         private void UpdateVisualAlpha()
         {

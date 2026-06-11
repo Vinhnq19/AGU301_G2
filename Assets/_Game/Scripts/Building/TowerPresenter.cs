@@ -113,5 +113,24 @@ namespace Assets._Game.Scripts.Building
                 _model.OnChanged -= OnModelChanged;
             }
         }
+
+        private void Update()
+        {
+            if (_view == null || NetworkManager.Singleton == null || !NetworkManager.Singleton.IsClient) return;
+
+            var localClient = NetworkManager.Singleton.LocalClient;
+            if (localClient?.PlayerObject != null)
+            {
+                float dist = Vector3.Distance(transform.position, localClient.PlayerObject.transform.position);
+                if (dist < 4f)
+                {
+                    _view.ShowProximityUI();
+                }
+                else
+                {
+                    _view.HideProximityUI();
+                }
+            }
+        }
     }
 }

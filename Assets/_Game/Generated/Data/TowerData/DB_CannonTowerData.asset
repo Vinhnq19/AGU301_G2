@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: DB_CannonTowerData
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.TowerDataSO
   towerType: 1
+  maxHealth: 150
   damage: 30
   range: 10
   attackRate: 0.5
@@ -24,8 +25,6 @@ MonoBehaviour:
   - type: 1
     amount: 5
   maxLevel: 3
-  damagePerLevel: 7
-  rangePerLevel: 0.5
   upgradeLevels:
   - costs:
     - type: 0

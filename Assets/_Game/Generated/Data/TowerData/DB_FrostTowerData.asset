@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: DB_FrostTowerData
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.TowerDataSO
   towerType: 2
+  maxHealth: 150
   damage: 30
   range: 12
   attackRate: 1.5
@@ -24,8 +25,6 @@ MonoBehaviour:
   - type: 1
     amount: 20
   maxLevel: 3
-  damagePerLevel: 5
-  rangePerLevel: 0.5
   upgradeLevels:
   - costs:
     - type: 6

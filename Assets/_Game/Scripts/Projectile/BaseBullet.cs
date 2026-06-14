@@ -24,6 +24,7 @@ namespace DungeonBuilder.Projectile
         private ulong _targetNetworkObjectId;
         private Vector3 _lastKnownTargetPos;
         private bool _isActive;
+        private float _lifetimeTimer;
 
         protected float Damage { get; private set; }
 
@@ -44,18 +45,28 @@ namespace DungeonBuilder.Projectile
 
         public override void OnNetworkSpawn()
         {
+            _isActive = true;
             if (IsServer)
             {
-                _isActive = true;
-                StartLifetimeAsync().Forget();
+                _lifetimeTimer = _lifetime;
             }
         }
 
         private void Update()
         {
-            if (!IsServer || !_isActive) return;
+            if (!_isActive) return;
 
-            // Cập nhật vị trí target nếu còn sống
+            if (IsServer)
+            {
+                _lifetimeTimer -= Time.deltaTime;
+                if (_lifetimeTimer <= 0f)
+                {
+                    ReturnToPool();
+                    return;
+                }
+            }
+
+            // Cập nhật vị trí target nếu còn sống (cho cả Server và Client)
             if (NetworkManager.Singleton?.SpawnManager?.SpawnedObjects != null
                 && NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(_targetNetworkObjectId, out NetworkObject targetObj)
                 && targetObj != null)
@@ -63,18 +74,31 @@ namespace DungeonBuilder.Projectile
                 _lastKnownTargetPos = targetObj.transform.position;
             }
 
-            // Di chuyển về phía target
-            transform.position = Vector3.MoveTowards(transform.position, _lastKnownTargetPos, _speed * Time.deltaTime);
+            // Tính toán khoảng cách và bước di chuyển (step)
+            float distanceToTarget = Vector3.Distance(transform.position, _lastKnownTargetPos);
+            float step = _speed * Time.deltaTime;
 
-            // Kiểm tra hit
-            if (Vector3.Distance(transform.position, _lastKnownTargetPos) < _hitRadius)
+            // Nếu khoảng cách đến mục tiêu nhỏ hơn hoặc bằng bước di chuyển trong frame này
+            // -> Chắc chắn đạn đã chạm mục tiêu
+            if (distanceToTarget <= step)
             {
-                BaseEnemy enemy = NetworkManager.Singleton?.SpawnManager?.SpawnedObjects != null
-                    && NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(_targetNetworkObjectId, out NetworkObject obj)
-                    ? obj?.GetComponent<BaseEnemy>()
-                    : null;
-                OnHit(enemy);
+                transform.position = _lastKnownTargetPos;
+
+                // Chỉ Server chịu trách nhiệm phân xử sát thương
+                if (IsServer)
+                {
+                    BaseEnemy enemy = NetworkManager.Singleton?.SpawnManager?.SpawnedObjects != null
+                        && NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(_targetNetworkObjectId, out NetworkObject obj)
+                        ? obj?.GetComponent<BaseEnemy>()
+                        : null;
+                    
+                    OnHit(enemy);
+                }
+                return;
             }
+
+            // Di chuyển về phía target (Client tự mô phỏng nội bộ)
+            transform.position = Vector3.MoveTowards(transform.position, _lastKnownTargetPos, step);
         }
 
         /// <summary>
@@ -105,16 +129,6 @@ namespace DungeonBuilder.Projectile
                    {
                        if (_visual != null) _visual.localScale = Vector3.one;
                    });
-        }
-
-        private async UniTaskVoid StartLifetimeAsync()
-        {
-            try
-            {
-                await UniTask.Delay(TimeSpan.FromSeconds(_lifetime), cancellationToken: destroyCancellationToken);
-                if (_isActive) ReturnToPool();
-            }
-            catch (OperationCanceledException) { }
         }
 
         public void OnGetFromPool()

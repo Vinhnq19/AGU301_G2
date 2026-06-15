@@ -63,6 +63,14 @@ namespace DungeonBuilder.Building
                 return;
             }
 
+            // Tru tai nguyen ngay lap tuc
+            if (!_sharedResources.TrySpend(data.buildCost))
+            {
+                _grid.ClearTower(gridPosition);
+                DBLog.Warning($"build.reject.cost.{gridPosition}", "[BuildingController] Place rejected: not enough resources.", 0.5f, this);
+                return;
+            }
+
             NetworkObject tower = _pool.Get(prefab, _grid.GridToWorld(gridPosition), Quaternion.identity);
             if (tower == null)
             {
@@ -79,41 +87,6 @@ namespace DungeonBuilder.Building
             DBLog.Info($"build.accept.{gridPosition}", $"[BuildingController] Tower placed (under construction). type={towerType}, networkId={tower.NetworkObjectId}.", 0.25f, tower);
         }
 
-        // ─── Contribute ─────────────────────────────────────────────────
-
-        public void RequestContributeTower(Vector2Int gridPosition)
-        {
-            DBLog.Info($"contribute.send.{OwnerClientId}", $"[BuildingController] Contribute intent sent. grid={gridPosition}.", 0.25f, this);
-            ContributeTowerServerRpc(gridPosition);
-        }
-
-        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
-        private void ContributeTowerServerRpc(Vector2Int gridPosition, RpcParams rpcParams = default)
-        {
-            if (!TryGetTower(gridPosition, "contribute", out BaseTower tower, out TowerDataSO data)) return;
-
-            if (tower.IsConstructed)
-            {
-                DBLog.Warning($"contribute.reject.done.{gridPosition}", "[BuildingController] Contribute rejected: already constructed.", 0.5f, this);
-                return;
-            }
-
-            if (!_sharedResources.TrySpend(data.buildCost))
-            {
-                DBLog.Warning(
-                    $"tower.contribute.reject.cost.{gridPosition}",
-                    "[BuildingController] Contribution rejected: not enough resources.",
-                    0.5f,
-                    tower);
-                return;
-            }
-
-            tower.CompleteConstruction();
-            DBLog.Info($"tower.contribute.{gridPosition}", "[BuildingController] Construction paid in full.", 0.25f, tower);
-
-            if (tower.IsConstructed)
-                DBLog.Info($"tower.activated.{gridPosition}", $"[BuildingController] Tower activated at {gridPosition}.", 0.25f, tower);
-        }
 
         // ─── Upgrade ────────────────────────────────────────────────────
 
@@ -127,12 +100,6 @@ namespace DungeonBuilder.Building
         private void UpgradeTowerServerRpc(Vector2Int gridPosition, RpcParams rpcParams = default)
         {
             if (!TryGetTower(gridPosition, "upgrade", out BaseTower tower, out TowerDataSO data)) return;
-
-            if (!tower.IsConstructed)
-            {
-                DBLog.Warning($"upgrade.reject.construction.{gridPosition}", "[BuildingController] Upgrade rejected: not constructed.", 0.5f, this);
-                return;
-            }
 
             if (!tower.CanUpgrade)
             {
@@ -190,15 +157,35 @@ namespace DungeonBuilder.Building
                         if (!refundedTypes.Add(cost.type))
                             continue;
 
-                        int refund = Mathf.RoundToInt(tower.GetPaid(cost.type) * 0.5f);
+                        // Tinh toan hoan tra truc tiep tu data vi thap luon duoc xay hoan chinh
+                        int refund = Mathf.RoundToInt(cost.amount * 0.5f);
                         if (refund > 0)
                         {
                             _sharedResources.TryAdd(cost.type, refund);
                             sb.Append($"{refund}{ResourceCost.Abbr(cost.type)} ");
                         }
                     }
+                    
+                    // Hoan tra ca tien nang cap (neu co)
+                    for (int lvl = 1; lvl < tower.CurrentLevel; lvl++)
+                    {
+                        ResourceCost[] upgCost = data.GetUpgradeCostForLevel(lvl);
+                        if (upgCost != null)
+                        {
+                            foreach (ResourceCost cost in upgCost)
+                            {
+                                int refund = Mathf.RoundToInt(cost.amount * 0.5f);
+                                if (refund > 0)
+                                {
+                                    _sharedResources.TryAdd(cost.type, refund);
+                                    sb.Append($"{refund}{ResourceCost.Abbr(cost.type)} ");
+                                }
+                            }
+                        }
+                    }
+
                     if (sb.Length > 0)
-                        DBLog.Info($"remove.refund.{gridPosition}", $"[BuildingController] Refunded: {sb.ToString().Trim()} (50% of contributed).", 0.25f, this);
+                        DBLog.Info($"remove.refund.{gridPosition}", $"[BuildingController] Refunded: {sb.ToString().Trim()} (50% total cost).", 0.25f, this);
                 }
             }
 

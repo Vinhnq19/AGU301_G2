@@ -73,30 +73,18 @@ namespace Assets._Game.Scripts.Building
         }
 
         /// <summary>
-        /// Goi tu TowerView.ContributeButton.onClick.
-        /// </summary>
-        public void RequestContribute()
-        {
-            Vector2Int gridPos = GetGridPosition();
-            DBLog.Info($"tower.contribute.request.{gridPos}", $"[TowerPresenter] Contribute request. grid={gridPos}.", 0.25f, this);
-            _buildingController?.RequestContributeTower(gridPos);
-        }
-
-        /// <summary>
         /// Physics2D Raycaster hit BoxCollider2D tren root.
-        /// Chi mo ActionPanel khi Builder tool active va tower da IsConstructed.
+        /// Chi mo ActionPanel khi Builder tool active.
         /// </summary>
         public void OnPointerClick(PointerEventData eventData)
         {
             if (ToolController.LocalActiveTool != ToolType.Builder) return;
-            if (_model != null && !_model.IsConstructed) return;
             _view?.TogglePanel();
         }
 
         private void OnModelChanged()
         {
             _view?.Render(_model);
-            _view?.RenderConstruction(_model);
         }
 
         private Vector2Int GetGridPosition()

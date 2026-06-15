@@ -14,10 +14,34 @@ namespace DungeonBuilder.Building
         [SerializeField] private Vector2Int _minBounds = new(-50, -50);
         [SerializeField] private Vector2Int _maxBounds = new(50, 50);
 
+        [Header("Placement Restriction")]
+        [SerializeField] private bool _usePredefinedSpotsOnly = true;
+        [Tooltip("Kéo thả các GameObject đóng vai trò là 'điểm đặt tháp' vào đây")]
+        [SerializeField] private Transform[] _predefinedSpotTransforms;
+
         private readonly Dictionary<Vector2Int, GridCell> _cells = new();
+        private readonly HashSet<Vector2Int> _allowedTowerSpots = new();
+
+        private void Awake()
+        {
+            if (_predefinedSpotTransforms != null)
+            {
+                foreach (Transform spot in _predefinedSpotTransforms)
+                {
+                    if (spot != null)
+                    {
+                        Vector2Int gridPos = WorldToGrid(spot.position);
+                        _allowedTowerSpots.Add(gridPos);
+                    }
+                }
+            }
+        }
 
         public bool IsValidPlacement(Vector2Int position)
         {
+            if (_usePredefinedSpotsOnly && !_allowedTowerSpots.Contains(position))
+                return false;
+
             return IsInsideBounds(position)
                 && (!_cells.TryGetValue(position, out GridCell cell) || !cell.IsOccupied);
         }

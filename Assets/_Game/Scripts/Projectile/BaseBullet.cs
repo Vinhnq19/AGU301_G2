@@ -17,7 +17,6 @@ namespace DungeonBuilder.Projectile
     public class BaseBullet : NetworkBehaviour, IPoolable
     {
         [SerializeField] private Transform _visual;
-        [SerializeField, Min(0.01f)] private float _hitRadius = 0.2f;
 
         private float _speed;
         private float _lifetime;

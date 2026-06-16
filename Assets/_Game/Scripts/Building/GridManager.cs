@@ -24,26 +24,39 @@ namespace DungeonBuilder.Building
 
         private void Awake()
         {
-            if (_predefinedSpotTransforms != null)
+            if (_predefinedSpotTransforms == null) return;
+
+            foreach (Transform spot in _predefinedSpotTransforms)
             {
-                foreach (Transform spot in _predefinedSpotTransforms)
-                {
-                    if (spot != null)
-                    {
-                        Vector2Int gridPos = WorldToGrid(spot.position);
-                        _allowedTowerSpots.Add(gridPos);
-                    }
-                }
+                if (spot == null) continue;
+
+                // Snap chính xác vị trí Visual về giao điểm lưới gần nhất
+                // -> Đảm bảo visual và điểm đặt tháp luôn trùng nhau
+                Vector2Int gridPos  = WorldToGrid(spot.position);
+                spot.position       = GridToWorld(gridPos);
+
+                _allowedTowerSpots.Add(gridPos);
             }
         }
 
         public bool IsValidPlacement(Vector2Int position)
         {
             if (_usePredefinedSpotsOnly && !_allowedTowerSpots.Contains(position))
+            {
+                // Thêm log de trace li do
+                DungeonBuilder.Core.Debugging.DBLog.Info($"grid.invalid.spot", $"Position {position} is not in predefined spots.", 0.5f, this);
                 return false;
+            }
 
-            return IsInsideBounds(position)
-                && (!_cells.TryGetValue(position, out GridCell cell) || !cell.IsOccupied);
+            if (!IsInsideBounds(position)) return false;
+            
+            if (_cells.TryGetValue(position, out GridCell cell) && cell.IsOccupied)
+            {
+                DungeonBuilder.Core.Debugging.DBLog.Info($"grid.invalid.occupied", $"Position {position} is already occupied.", 0.5f, this);
+                return false;
+            }
+
+            return true;
         }
 
         public bool PlaceTower(Vector2Int position, TowerDataSO data)
@@ -113,6 +126,31 @@ namespace DungeonBuilder.Building
                 && position.y >= _minBounds.y
                 && position.x <= _maxBounds.x
                 && position.y <= _maxBounds.y;
+        }
+        private void OnDrawGizmosSelected()
+        {
+            if (_predefinedSpotTransforms == null) return;
+
+            foreach (Transform spot in _predefinedSpotTransforms)
+            {
+                if (spot == null) continue;
+
+                // Tính toán ví trí snap đúng (không dùng _allowedTowerSpots vì Awake chưa chạy trong Editor)
+                Vector2Int gridPos     = WorldToGrid(spot.position);
+                Vector3    snappedPos  = GridToWorld(gridPos);
+
+                // Vẽ ô lưới đã snapped - màu xanh lá nếu khớp visual, đỏ nếu lệch
+                bool isAligned = Vector3.Distance(spot.position, snappedPos) < 0.01f;
+                Gizmos.color = isAligned ? new Color(0f, 1f, 0f, 0.4f) : new Color(1f, 0f, 0f, 0.5f);
+                Gizmos.DrawCube(snappedPos, new Vector3(_cellSize, _cellSize, 0.01f));
+
+                // Vẽ đường nối visual → snapped nếu đang lệch
+                if (!isAligned)
+                {
+                    Gizmos.color = Color.yellow;
+                    Gizmos.DrawLine(spot.position, snappedPos);
+                }
+            }
         }
     }
 }

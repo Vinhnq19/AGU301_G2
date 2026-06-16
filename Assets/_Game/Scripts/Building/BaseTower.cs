@@ -27,7 +27,7 @@ namespace DungeonBuilder.Building
         [Header("Tower Config")]
         [SerializeField] protected TowerDataSO _data;
         [SerializeField] private NetworkObject _bulletPrefab;
-        [SerializeField] private Transform _firePoint;
+        [SerializeField] protected Transform _firePoint;
 
 
         private readonly NetworkVariable<int> _currentLevel = new(1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
@@ -36,16 +36,16 @@ namespace DungeonBuilder.Building
         private readonly Collider2D[] _overlapResults = new Collider2D[16];
         private ContactFilter2D _enemyFilter;
 
-        private TowerModel _model;
+        protected TowerModel _model;
         private TowerPresenter _presenter;
         private TowerView _view;
 
-        [Inject] private INetworkPool _pool;
+        [Inject] protected INetworkPool _pool;
 
         public int CurrentLevel => _currentLevel.Value;
         public bool CanUpgrade  => _data != null && _currentLevel.Value < _data.maxLevel;
 
-        private void Awake()
+        protected virtual void Awake()
         {
             _enemyFilter = new ContactFilter2D();
             _enemyFilter.SetLayerMask(LayerMask.GetMask("Enemy"));

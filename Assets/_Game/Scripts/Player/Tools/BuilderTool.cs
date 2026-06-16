@@ -52,13 +52,17 @@ namespace DungeonBuilder.Player.Tools
 
             EnsureReferences();
 
-            Vector2Int gridPos = _gridManager != null
-                ? _gridManager.WorldToGrid(targetPosition)
-                : Vector2Int.RoundToInt(new Vector2(targetPosition.x, targetPosition.y));
-
-            if (_gridManager != null && !_gridManager.IsValidPlacement(gridPos))
+            if (_gridManager == null)
             {
-                DBLog.Info($"build.tool.invalid.{NetworkObjectId}", $"Cell {gridPos} is occupied or out of bounds.", 0.5f, this);
+                DBLog.Warning($"build.tool.no-grid.{NetworkObjectId}", "GridManager is missing! Cannot validate placement.", 1f, this);
+                return;
+            }
+
+            Vector2Int gridPos = _gridManager.WorldToGrid(targetPosition);
+
+            if (!_gridManager.IsValidPlacement(gridPos))
+            {
+                DBLog.Info($"build.tool.invalid.{NetworkObjectId}", $"Cell {gridPos} is invalid for placement.", 0.5f, this);
                 return;
             }
 

@@ -47,9 +47,11 @@ namespace DungeonBuilder.Enemy.Types
 
         private Transform FindNearestTarget()
         {
+            int layerMask = ~LayerMask.GetMask("Enemy");
             ContactFilter2D filter = new ContactFilter2D();
-            filter.SetLayerMask(~LayerMask.GetMask("Enemy"));
+            filter.SetLayerMask(layerMask);
             filter.useLayerMask = true;
+            filter.useTriggers = true;
             int count = Physics2D.OverlapCircle(transform.position, _attackRange, filter, _targetScanResults);
 
             Transform bestTarget = null;

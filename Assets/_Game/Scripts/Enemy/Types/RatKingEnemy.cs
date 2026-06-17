@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Assets._Game.Scripts.Enemy;
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using DungeonBuilder.Core.Interfaces;
 using Unity.Netcode;
@@ -9,17 +10,31 @@ using UnityEngine;
 namespace DungeonBuilder.Enemy.Types
 {
     /// <summary>
-    /// Rat King (Boss): Trùm chương 1, HP 3000, DMG 15.
+    /// Rat King (Boss): Trùm chương 1.
     /// Kỹ năng:
-    /// - Melee: Vả cận chiến gây 15 DMG mỗi 1.5s (dựa trên BaseEnemy).
-    /// - Magic Lasers: Bắn 6 tia ma pháp tức thời (LineRenderer) gây 30 DMG (200% phép), cooldown 5s.
-    /// - Self-Healing: Gục 5s hồi 2 HP/s khi HP < 75% (cooldown 10s).
-    /// - Summon: Triệu hồi 10 Runner ngay xung quanh bản thân mỗi 30s.
+    /// - Melee: Vả cận chiến.
+    /// - Magic Lasers: Bắn 6 tia ma pháp tức thời (LineRenderer).
+    /// - Self-Healing: Gục hồi máu khi HP thấp.
+    /// - Summon: Triệu hồi Runner tuần tự tại các cổng.
     /// </summary>
     public sealed class RatKingEnemy : BaseEnemy
     {
-        [Header("Boss Config")]
+        [Header("Boss Prefabs")]
         [SerializeField] private NetworkObject _runnerPrefab;
+
+        [Header("Boss Balancing Configs")]
+        [SerializeField, Min(0.1f)] private float _magicCooldown = 5f;
+        [SerializeField, Min(0.1f)] private float _magicRange = 12f;
+        [SerializeField, Min(0f)] private float _magicDamage = 30f;
+        
+        [SerializeField, Min(0.1f)] private float _summonInterval = 30f;
+        [SerializeField, Min(1)] private int _summonCount = 10;
+        [SerializeField, Min(0.01f)] private float _summonDelayBetweenRunners = 0.35f;
+
+        [SerializeField, Range(0.1f, 0.9f)] private float _selfHealThreshold = 0.75f;
+        [SerializeField, Min(0.1f)] private float _selfHealDuration = 5f;
+        [SerializeField, Min(0.1f)] private float _selfHealCooldown = 10f;
+        [SerializeField, Min(0.1f)] private float _selfHealRate = 2f;
 
         private const float _bossScale = 2.2f;
 
@@ -94,14 +109,14 @@ namespace DungeonBuilder.Enemy.Types
                 if (_healTickTimer <= 0f)
                 {
                     _healTickTimer = 1f;
-                    Heal(2f); // Hồi 2 HP theo đúng GDD
+                    Heal(_selfHealRate);
                 }
 
                 if (_healDurationTimer <= 0f)
                 {
                     _isHealing = false;
                     _slowMultiplier = 1f; // Phục hồi di chuyển
-                    _healCooldownTimer = 10f; // Reset cooldown hồi máu
+                    _healCooldownTimer = _selfHealCooldown; // Reset cooldown hồi máu
                     StopHealVisualClientRpc();
                 }
                 return; // Đang hồi phục sẽ không di chuyển/tấn công
@@ -113,30 +128,30 @@ namespace DungeonBuilder.Enemy.Types
             _summonCooldownTimer -= Time.deltaTime;
 
             // Kiểm tra HP để kích hoạt hồi máu
-            if (CurrentHP < MaxHealth * 0.75f && _healCooldownTimer <= 0f)
+            if (CurrentHP < MaxHealth * _selfHealThreshold && _healCooldownTimer <= 0f)
             {
                 _isHealing = true;
-                _healDurationTimer = 5f;
+                _healDurationTimer = _selfHealDuration;
                 _healTickTimer = 0f;
                 _slowMultiplier = 0f; // Đứng yên
                 StartHealVisualClientRpc();
                 return;
             }
 
-            // Triệu hồi Runner mỗi 30s
+            // Triệu hồi Runner tuần tự
             if (_summonCooldownTimer <= 0f)
             {
-                _summonCooldownTimer = 30f;
-                SummonRunners();
+                _summonCooldownTimer = _summonInterval;
+                SummonRunnersAsync().Forget();
             }
 
-            // Bắn 6 tia ma pháp (Magic Lasers) mỗi 5s
+            // Bắn 6 tia ma pháp (Magic Lasers)
             if (_magicCooldownTimer <= 0f)
             {
                 Transform target = FindNearestMagicTarget();
                 if (target != null)
                 {
-                    _magicCooldownTimer = 5f;
+                    _magicCooldownTimer = _magicCooldown;
                     CastMagicLasers(target);
                 }
             }
@@ -159,7 +174,7 @@ namespace DungeonBuilder.Enemy.Types
             for (int i = 0; i < 6; i++)
             {
                 Vector2 dir = RotateVector(baseDir, angles[i]);
-                RaycastHit2D hit = Physics2D.Raycast(startPos, dir, 12f, ~LayerMask.GetMask("Enemy"));
+                RaycastHit2D hit = Physics2D.Raycast(startPos, dir, _magicRange, ~LayerMask.GetMask("Enemy"));
 
                 startPositions[i] = startPos;
                 if (hit.collider != null)
@@ -171,13 +186,13 @@ namespace DungeonBuilder.Enemy.Types
                     {
                         if (damagedTargets.Add(damageable))
                         {
-                            damageable.TakeDamage(30f, 0); // 200% DMG = 30
+                            damageable.TakeDamage(_magicDamage, 0);
                         }
                     }
                 }
                 else
                 {
-                    endPositions[i] = startPos + (Vector3)(dir * 12f);
+                    endPositions[i] = startPos + (Vector3)(dir * _magicRange);
                 }
             }
 
@@ -234,7 +249,7 @@ namespace DungeonBuilder.Enemy.Types
             filter.SetLayerMask(~LayerMask.GetMask("Enemy"));
             filter.useLayerMask = true;
 
-            int count = Physics2D.OverlapCircle(transform.position, 12f, filter, _magicScanResults);
+            int count = Physics2D.OverlapCircle(transform.position, _magicRange, filter, _magicScanResults);
 
             Transform bestTarget = null;
             float closestDist = float.MaxValue;
@@ -259,7 +274,7 @@ namespace DungeonBuilder.Enemy.Types
             if (bestTarget == null && _coreTarget != null)
             {
                 float coreDist = Vector3.Distance(transform.position, _coreTarget.position);
-                if (coreDist <= 12f)
+                if (coreDist <= _magicRange)
                 {
                     bestTarget = _coreTarget;
                 }
@@ -276,7 +291,7 @@ namespace DungeonBuilder.Enemy.Types
             return new Vector2(cos * v.x - sin * v.y, sin * v.x + cos * v.y);
         }
 
-        private void SummonRunners()
+        private async UniTaskVoid SummonRunnersAsync()
         {
             if (_runnerPrefab == null || _pool == null) return;
             if (_gates == null || _gates.Length == 0)
@@ -289,9 +304,11 @@ namespace DungeonBuilder.Enemy.Types
             Transform randomGate = _gates[UnityEngine.Random.Range(0, _gates.Length)];
             if (randomGate == null) return;
 
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < _summonCount; i++)
             {
-                Vector3 spawnPos = randomGate.position + (Vector3)(UnityEngine.Random.insideUnitCircle * 0.6f);
+                if (_isDying || !IsServer) return;
+
+                Vector3 spawnPos = randomGate.position + (Vector3)(UnityEngine.Random.insideUnitCircle * 0.4f);
                 NetworkObject runnerObj = _pool.Get(_runnerPrefab, spawnPos, Quaternion.identity);
                 if (runnerObj != null)
                 {
@@ -306,6 +323,11 @@ namespace DungeonBuilder.Enemy.Types
                         runnerObj.Spawn();
                     }
                 }
+
+                // Chờ khoảng thời gian giữa mỗi con chui ra
+                await UniTask.Delay(
+                    TimeSpan.FromSeconds(_summonDelayBetweenRunners),
+                    cancellationToken: destroyCancellationToken);
             }
         }
 
@@ -383,11 +405,11 @@ namespace DungeonBuilder.Enemy.Types
         {
             base.OnDrawGizmosSelected(); // Vẽ tầm vả cận chiến 1.8f màu đỏ của Base
 
-            // Vẽ thêm tầm bắn ma pháp 12f màu tím
+            // Vẽ thêm tầm bắn ma pháp
             Gizmos.color = new Color(0.6f, 0.1f, 0.8f, 0.1f);
-            Gizmos.DrawSphere(transform.position, 12f);
+            Gizmos.DrawSphere(transform.position, _magicRange);
             Gizmos.color = new Color(0.6f, 0.1f, 0.8f, 0.6f);
-            Gizmos.DrawWireSphere(transform.position, 12f);
+            Gizmos.DrawWireSphere(transform.position, _magicRange);
         }
     }
 }

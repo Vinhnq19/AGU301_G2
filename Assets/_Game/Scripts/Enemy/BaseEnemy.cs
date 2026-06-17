@@ -377,6 +377,15 @@ namespace Assets._Game.Scripts.Enemy
             if (_projectilePrefab == null || _pool == null || targetTransform == null) return;
 
             NetworkObject targetNetObj = targetTransform.GetComponentInParent<NetworkObject>();
+            if (targetNetObj == null)
+            {
+                var tower = targetTransform.GetComponentInParent<DungeonBuilder.Building.BaseTower>();
+                if (tower != null)
+                {
+                    targetNetObj = tower.NetworkObject;
+                }
+            }
+
             if (targetNetObj == null && targetTransform == _coreTarget && _coreManager != null)
             {
                 targetNetObj = _coreManager.NetworkObject;

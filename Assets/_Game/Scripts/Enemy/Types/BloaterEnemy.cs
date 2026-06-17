@@ -1,19 +1,31 @@
 using Assets._Game.Scripts.Enemy;
+using DG.Tweening;
 using Unity.Netcode;
 using UnityEngine;
 
 namespace DungeonBuilder.Enemy.Types
 {
     /// <summary>
-    /// Bloater: Quái vật trâu bò, cận chiến gây 20 DMG mỗi 2s.
-    /// Có kĩ năng bị động xả khí độc xung quanh gây 5 DMG/s cho người chơi trong phạm vi, kéo dài 3s, cooldown 5s.
+    /// Bloater: Quái vật trâu bò, cận chiến.
+    /// Có kĩ năng bị động xả khí độc xung quanh gây sát thương cho người chơi trong phạm vi.
     /// </summary>
     public sealed class BloaterEnemy : BaseEnemy
     {
+        [Header("Bloater Config")]
+        [SerializeField, Min(0.1f)] private float _gasRadius = 2.5f;
+        [SerializeField, Min(0f)] private float _gasDamage = 5f;
+        [SerializeField, Min(0.1f)] private float _gasDuration = 3f;
+        [SerializeField, Min(0.1f)] private float _gasCooldown = 5f;
+        [SerializeField, Min(0.1f)] private float _gasTickInterval = 1f;
+
         private float _gasActiveTimer;
         private float _gasCooldownTimer;
         private bool _isGasActive;
         private float _damageTickTimer;
+
+        private LineRenderer _gasIndicator;
+        private Tween _pulseTween;
+        private Tween _fadeTween;
 
         protected override void Update()
         {
@@ -27,14 +39,14 @@ namespace DungeonBuilder.Enemy.Types
 
                 if (_damageTickTimer <= 0f)
                 {
-                    _damageTickTimer = 1f;
+                    _damageTickTimer = _gasTickInterval;
                     ApplyGasDamage();
                 }
 
                 if (_gasActiveTimer <= 0f)
                 {
                     _isGasActive = false;
-                    _gasCooldownTimer = 5f;
+                    _gasCooldownTimer = _gasCooldown;
                     StopGasVisualClientRpc();
                 }
             }
@@ -44,7 +56,7 @@ namespace DungeonBuilder.Enemy.Types
                 if (_gasCooldownTimer <= 0f)
                 {
                     _isGasActive = true;
-                    _gasActiveTimer = 3f;
+                    _gasActiveTimer = _gasDuration;
                     _damageTickTimer = 0f; // Gây sát thương ngay lập tức khi kích hoạt
                     StartGasVisualClientRpc();
                 }
@@ -53,29 +65,100 @@ namespace DungeonBuilder.Enemy.Types
 
         private void ApplyGasDamage()
         {
-            // Tìm tất cả Player trong phạm vi 2.5f và gây 5 sát thương
-            Collider2D[] hitPlayers = Physics2D.OverlapCircleAll(transform.position, 2.5f, LayerMask.GetMask("Player"));
+            // Tìm tất cả Player trong phạm vi _gasRadius và gây sát thương
+            Collider2D[] hitPlayers = Physics2D.OverlapCircleAll(transform.position, _gasRadius, LayerMask.GetMask("Player"));
             foreach (var col in hitPlayers)
             {
                 if (col == null) continue;
                 var playerStats = col.GetComponentInParent<DungeonBuilder.Player.PlayerStats>();
                 if (playerStats != null)
                 {
-                    playerStats.TakeDamage(5f, 0);
+                    playerStats.TakeDamage(_gasDamage, 0);
                 }
             }
         }
 
-        [ClientRpc]
-        private void StartGasVisualClientRpc()
+        public override void OnReturnToPool()
         {
-            // Hiển thị vòng độc bằng cách nhuộm xanh nhẹ visual của Bloater để biểu hiện khí độc tỏa ra
+            base.OnReturnToPool();
+            _pulseTween?.Kill();
+            _fadeTween?.Kill();
+            if (_gasIndicator != null)
+            {
+                _gasIndicator.enabled = false;
+            }
             if (_visual != null)
             {
                 var sr = _visual.GetComponent<SpriteRenderer>();
                 if (sr != null)
                 {
-                    sr.color = new Color(0.4f, 0.9f, 0.4f, 1f); // Nhuộm xanh lá
+                    sr.color = new Color(0.95f, 0.65f, 0.2f, 1f);
+                }
+            }
+        }
+
+        private void EnsureGasIndicator()
+        {
+            if (_gasIndicator != null) return;
+
+            GameObject obj = new GameObject("GasIndicator");
+            obj.transform.SetParent(transform, false);
+            _gasIndicator = obj.AddComponent<LineRenderer>();
+            _gasIndicator.useWorldSpace = false;
+            _gasIndicator.loop = true;
+            _gasIndicator.startWidth = 0.08f;
+            _gasIndicator.endWidth = 0.08f;
+
+            Color c = new Color(0.2f, 0.8f, 0.2f, 0f);
+            _gasIndicator.startColor = c;
+            _gasIndicator.endColor = c;
+
+            Shader spriteShader = Shader.Find("Sprites/Default");
+            if (spriteShader != null)
+            {
+                _gasIndicator.material = new Material(spriteShader);
+            }
+
+            int segments = 32;
+            _gasIndicator.positionCount = segments;
+            float angle = 0f;
+            for (int i = 0; i < segments; i++)
+            {
+                float x = Mathf.Sin(angle) * _gasRadius;
+                float y = Mathf.Cos(angle) * _gasRadius;
+                _gasIndicator.SetPosition(i, new Vector3(x, y, 0f));
+                angle += (2f * Mathf.PI) / segments;
+            }
+
+            _gasIndicator.enabled = false;
+        }
+
+        [ClientRpc]
+        private void StartGasVisualClientRpc()
+        {
+            EnsureGasIndicator();
+            if (_gasIndicator == null) return;
+
+            _gasIndicator.enabled = true;
+            
+            _fadeTween?.Kill();
+            _fadeTween = DOTween.To(() => _gasIndicator.startColor, color => {
+                _gasIndicator.startColor = color;
+                _gasIndicator.endColor = color;
+            }, new Color(0.2f, 0.8f, 0.2f, 0.35f), 0.5f);
+
+            _pulseTween?.Kill();
+            _pulseTween = DOTween.To(() => _gasIndicator.startWidth, w => {
+                _gasIndicator.startWidth = w;
+                _gasIndicator.endWidth = w;
+            }, 0.14f, 0.5f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);
+
+            if (_visual != null)
+            {
+                var sr = _visual.GetComponent<SpriteRenderer>();
+                if (sr != null)
+                {
+                    sr.color = new Color(0.4f, 0.9f, 0.4f, 1f);
                 }
             }
         }
@@ -83,7 +166,20 @@ namespace DungeonBuilder.Enemy.Types
         [ClientRpc]
         private void StopGasVisualClientRpc()
         {
-            // Trả về màu gốc (vàng đất của Bloater)
+            _pulseTween?.Kill();
+            _fadeTween?.Kill();
+            
+            if (_gasIndicator != null)
+            {
+                _fadeTween = DOTween.To(() => _gasIndicator.startColor, color => {
+                    _gasIndicator.startColor = color;
+                    _gasIndicator.endColor = color;
+                }, new Color(0.2f, 0.8f, 0.2f, 0f), 0.4f)
+                .OnComplete(() => {
+                    if (_gasIndicator != null) _gasIndicator.enabled = false;
+                });
+            }
+
             if (_visual != null)
             {
                 var sr = _visual.GetComponent<SpriteRenderer>();

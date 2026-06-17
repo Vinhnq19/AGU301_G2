@@ -1784,11 +1784,13 @@ MonoBehaviour:
   _waveCatalog: {fileID: 11400000, guid: 2f3d0b3c66da4663a8a3c613e5519db3, type: 2}
   _enemyPrefabMappings:
   - enemyType: 0
-    prefab: {fileID: 4663314838043120436, guid: 66be538882501b149ae4c21c82e67e50, type: 3}
-  - enemyType: 1
     prefab: {fileID: 1860617485065313912, guid: 39a5f7e9b5755bd478ebe7d2ea518059, type: 3}
+  - enemyType: 1
+    prefab: {fileID: 4663314838043120436, guid: 66be538882501b149ae4c21c82e67e50, type: 3}
   - enemyType: 2
     prefab: {fileID: 3611466090651016692, guid: 26a2134d735ca374893c9f44c4549367, type: 3}
+  - enemyType: 3
+    prefab: {fileID: 1860617485065313912, guid: 6c3887cf0bd4da24aa5812e012144715, type: 3}
   _enemyPaths: []
   _coreTarget: {fileID: 108622721}
   _spawnPoints:
@@ -1899,25 +1901,16 @@ MonoBehaviour:
     _prewarmCount: 8
     _parent: {fileID: 1082793120}
   - _prefab: {fileID: 7814044685541324748, guid: 65e07c66ad48b06438bfe509a875a254, type: 3}
-    _prewarmCount: 5
+    _prewarmCount: 4
     _parent: {fileID: 1082793120}
   - _prefab: {fileID: 3067609359649219834, guid: a688e0c4fbdd68c4fa53d5a0a9b5f586, type: 3}
-    _prewarmCount: 5
+    _prewarmCount: 4
     _parent: {fileID: 1082793120}
-  - _prefab: {fileID: 392532428047427896, guid: 1601bf57df0d0244290d50b3c7305649, type: 3}
-    _prewarmCount: 15
+  - _prefab: {fileID: 1860617485065313912, guid: 6c3887cf0bd4da24aa5812e012144715, type: 3}
+    _prewarmCount: 1
     _parent: {fileID: 1082793120}
-  - _prefab: {fileID: 6289070109708318588, guid: b9fd7acf55c83894d929ae09124a4957, type: 3}
-    _prewarmCount: 10
-    _parent: {fileID: 1082793120}
-  - _prefab: {fileID: 8682717592639433023, guid: 87238b58b122a834e851008700cfaefc, type: 3}
-    _prewarmCount: 15
-    _parent: {fileID: 1082793120}
-  - _prefab: {fileID: 3067609359649219834, guid: 1cdf61d81872f404d9b19c54ec31b266, type: 3}
-    _prewarmCount: 15
-    _parent: {fileID: 1082793120}
-  - _prefab: {fileID: 8053572840094665102, guid: b7d2449369f9fad419a8ac33896abf39, type: 3}
-    _prewarmCount: 15
+  - _prefab: {fileID: 392532428047427896, guid: a5b78ca9b244ca18a36c13e5519abcdf, type: 3}
+    _prewarmCount: 20
     _parent: {fileID: 1082793120}
 --- !u!114 &211244837
 MonoBehaviour:

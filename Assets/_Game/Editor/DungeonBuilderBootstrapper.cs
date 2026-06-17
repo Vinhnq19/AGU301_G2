@@ -287,9 +287,9 @@ namespace DungeonBuilder.Editor
             prefabs.OreNode = CreateResourceNodePrefab("DB_OreNode", data.OreNode, prefabs.ResourceDrop, sprites.Square, new Color(0.35f, 0.45f, 0.75f));
             prefabs.CrystalNode = CreateResourceNodePrefab("DB_CrystalNode", data.CrystalNode, prefabs.ResourceDrop, sprites.Square, new Color(0.7f, 0.3f, 1f));
 
-            prefabs.Drone = CreateEnemyPrefab<DroneEnemy>("DB_DroneEnemy", data.Drone, sprites.Circle, new Color(0.95f, 0.35f, 0.35f));
-            prefabs.Brute = CreateEnemyPrefab<BruteEnemy>("DB_BruteEnemy", data.Brute, sprites.Capsule, new Color(0.8f, 0.2f, 0.15f));
-            prefabs.MinerBug = CreateEnemyPrefab<MinerBugEnemy>("DB_MinerBugEnemy", data.MinerBug, sprites.Capsule, new Color(0.95f, 0.65f, 0.2f));
+            prefabs.Drone = CreateEnemyPrefab<SpitterEnemy>("DB_SpitterEnemy", data.Drone, sprites.Circle, new Color(0.95f, 0.35f, 0.35f));
+            prefabs.Brute = CreateEnemyPrefab<RunnerEnemy>("DB_RunnerEnemy", data.Brute, sprites.Capsule, new Color(0.8f, 0.2f, 0.15f));
+            prefabs.MinerBug = CreateEnemyPrefab<BloaterEnemy>("DB_BloaterEnemy", data.MinerBug, sprites.Capsule, new Color(0.95f, 0.65f, 0.2f));
 
             prefabs.ArrowTower = CreateTowerPrefab("DB_ArrowTower", sprites.Square, new Color(0.2f, 0.65f, 1f));
             prefabs.CannonTower = CreateTowerPrefab("DB_CannonTower", sprites.Square, new Color(0.15f, 0.15f, 0.18f));

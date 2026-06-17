@@ -18,25 +18,27 @@ namespace Assets._Game.Scripts.Enemy
     public class BaseEnemy : NetworkBehaviour, IDamageable, IPoolable
     {
         [SerializeField] private EnemyDataSO _data;
-        [SerializeField] private Transform _coreTarget;
-        [SerializeField] private Transform _visual;
-        [SerializeField, Min(0.1f)] private float _attackRange = 1.25f;
-        [SerializeField, Min(0f)] private float _attackDamage = 10f;
-        [SerializeField, Min(0.1f)] private float _attackInterval = 1f;
+        [SerializeField] protected Transform _coreTarget;
+        [SerializeField] protected Transform _visual;
+        [SerializeField, Min(0.1f)] protected float _attackRange = 1.25f;
+        [SerializeField, Min(0f)] protected float _attackDamage = 10f;
+        [SerializeField, Min(0.1f)] protected float _attackInterval = 1f;
+        [SerializeField] protected NetworkObject _projectilePrefab;
 
         private readonly NetworkVariable<float> _currentHP = new(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
         private EventBus _eventBus;
-        private INetworkPool _pool;
+        protected INetworkPool _pool;
         private CoreManager _coreManager;
         private EnemyStateMachine _stateMachine;
         private Collider2D[] _colliders;
         private Rigidbody2D[] _rigidbodies;
-        private bool _isDying;
-        private float _lastAttackTime;
-        private float _slowMultiplier = 1f;
+        protected bool _isDying;
+        protected float _lastAttackTime;
+        protected float _slowMultiplier = 1f;
         private Transform[] _currentPathWaypoints;
         private int _currentWaypointIndex;
+        protected DungeonBuilder.Building.BaseTower _currentBlocker;
 
         public EnemyType EnemyType => _data != null ? _data.enemyType : EnemyType.Drone;
         public float MoveSpeed => (_data != null ? _data.moveSpeed : 2f) * _slowMultiplier;
@@ -50,11 +52,26 @@ namespace Assets._Game.Scripts.Enemy
             _coreManager = coreManager;
         }
 
-        private void Awake()
+        protected virtual void Awake()
         {
             _stateMachine = new EnemyStateMachine(this);
             _colliders = GetComponentsInChildren<Collider2D>(true);
             _rigidbodies = GetComponentsInChildren<Rigidbody2D>(true);
+
+            foreach (Rigidbody2D body in _rigidbodies)
+            {
+                if (body != null)
+                {
+                    body.bodyType = RigidbodyType2D.Kinematic;
+                    body.useFullKinematicContacts = true;
+                }
+            }
+
+            int enemyLayer = LayerMask.NameToLayer("Enemy");
+            if (enemyLayer >= 0)
+            {
+                Physics2D.IgnoreLayerCollision(enemyLayer, enemyLayer, true);
+            }
         }
 
         public override void OnNetworkSpawn()
@@ -65,7 +82,7 @@ namespace Assets._Game.Scripts.Enemy
             }
         }
 
-        private void Update()
+        protected virtual void Update()
         {
             if (!IsServer || _isDying)
             {
@@ -84,6 +101,7 @@ namespace Assets._Game.Scripts.Enemy
 
             _currentHP.Value = Mathf.Max(0f, _currentHP.Value - amount);
             ApplyKnockbackClientRpc(Vector3.up * 0.1f, 0.1f);
+            PlayDamageFlashClientRpc();
 
             if (_currentHP.Value <= 0f)
             {
@@ -91,7 +109,17 @@ namespace Assets._Game.Scripts.Enemy
             }
         }
 
-        public void OnGetFromPool()
+        public void Heal(float amount)
+        {
+            if (!IsServer || _isDying || amount <= 0f) return;
+            float maxHealth = _data != null ? _data.maxHealth : 100f;
+            _currentHP.Value = Mathf.Min(maxHealth, _currentHP.Value + amount);
+        }
+
+        public float CurrentHP => _currentHP.Value;
+        public float MaxHealth => _data != null ? _data.maxHealth : 100f;
+
+        public virtual void OnGetFromPool()
         {
             _isDying = false;
             _currentPathWaypoints = null;
@@ -106,7 +134,7 @@ namespace Assets._Game.Scripts.Enemy
             }
         }
 
-        public void OnReturnToPool()
+        public virtual void OnReturnToPool()
         {
             _isDying = false;
             _slowMultiplier = 1f;
@@ -143,10 +171,37 @@ namespace Assets._Game.Scripts.Enemy
 
         public virtual bool IsBlockedByWall()
         {
+            Vector3 targetPos = GetCurrentTargetPosition();
+            Vector3 dir = (targetPos - transform.position).normalized;
+
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, dir, 0.6f, ~LayerMask.GetMask("Enemy", "Player"));
+            if (hit.collider != null)
+            {
+                DungeonBuilder.Building.BaseTower tower = hit.collider.GetComponentInParent<DungeonBuilder.Building.BaseTower>();
+                if (tower != null)
+                {
+                    _currentBlocker = tower;
+                    return true;
+                }
+            }
+            _currentBlocker = null;
             return false;
         }
 
-        public bool IsCoreInAttackRange()
+        protected Vector3 GetCurrentTargetPosition()
+        {
+            if (_currentPathWaypoints != null && _currentWaypointIndex < _currentPathWaypoints.Length)
+            {
+                Transform waypoint = _currentPathWaypoints[_currentWaypointIndex];
+                if (waypoint != null)
+                {
+                    return waypoint.position;
+                }
+            }
+            return _coreTarget != null ? _coreTarget.position : transform.position;
+        }
+
+        public virtual bool IsCoreInAttackRange()
         {
             return _coreTarget != null && Vector3.Distance(transform.position, _coreTarget.position) <= _attackRange;
         }
@@ -181,6 +236,13 @@ namespace Assets._Game.Scripts.Enemy
 
         public virtual void AttackCurrentBlocker()
         {
+            if (_currentBlocker == null) return;
+
+            if (Time.time - _lastAttackTime >= _attackInterval)
+            {
+                _lastAttackTime = Time.time;
+                _currentBlocker.TakeDamage(_attackDamage, 0);
+            }
         }
 
         public virtual void AttackCore()
@@ -294,6 +356,50 @@ namespace Assets._Game.Scripts.Enemy
             }
         }
 
+        [ClientRpc]
+        public void PlayDamageFlashClientRpc()
+        {
+            if (_visual != null)
+            {
+                var sr = _visual.GetComponent<SpriteRenderer>();
+                if (sr != null)
+                {
+                    sr.DOKill();
+                    Color original = sr.color;
+                    sr.color = new Color(1f, 0.4f, 0.4f, 1f);
+                    sr.DOColor(original, 0.15f);
+                }
+            }
+        }
+
+        protected void ShootProjectileAt(Transform targetTransform, Color color, float sizeMultiplier = 1f)
+        {
+            if (_projectilePrefab == null || _pool == null || targetTransform == null) return;
+
+            NetworkObject targetNetObj = targetTransform.GetComponentInParent<NetworkObject>();
+            if (targetNetObj == null && targetTransform == _coreTarget && _coreManager != null)
+            {
+                targetNetObj = _coreManager.NetworkObject;
+            }
+
+            if (targetNetObj == null) return;
+
+            NetworkObject bulletObj = _pool.Get(_projectilePrefab, transform.position, Quaternion.identity);
+            if (bulletObj != null)
+            {
+                DungeonBuilder.Projectile.EnemyProjectile bullet = bulletObj.GetComponent<DungeonBuilder.Projectile.EnemyProjectile>();
+                if (bullet != null)
+                {
+                    bullet.Initialize(_attackDamage, 8f, 5f, targetNetObj.NetworkObjectId, targetTransform.position, color, Vector3.one * sizeMultiplier);
+                }
+
+                if (!bulletObj.IsSpawned)
+                {
+                    bulletObj.Spawn();
+                }
+            }
+        }
+
         private void SetPhysicsActive(bool active)
         {
             foreach (Collider2D col in _colliders)
@@ -315,6 +421,14 @@ namespace Assets._Game.Scripts.Enemy
                 body.angularVelocity = 0f;
                 body.simulated = active;
             }
+        }
+
+        protected virtual void OnDrawGizmosSelected()
+        {
+            Gizmos.color = new Color(0.9f, 0.15f, 0.15f, 0.08f); // Màu đỏ nhạt cho quái
+            Gizmos.DrawSphere(transform.position, _attackRange);
+            Gizmos.color = new Color(0.9f, 0.15f, 0.15f, 0.7f);
+            Gizmos.DrawWireSphere(transform.position, _attackRange);
         }
     }
 }

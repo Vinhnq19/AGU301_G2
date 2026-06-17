@@ -272,9 +272,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 4231451758958978513}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: af5cb06cf0b9bdd4abb89adf9b71e862, type: 3}
+  m_Script: {fileID: 11500000, guid: f2b05d12a64c4e97a3c613e5519ab001, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Enemy.Types.BruteEnemy
+  m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Enemy.Types.RatKingEnemy
   ShowTopMostFoldoutHeaderGroup: 1
   _data: {fileID: 11400000, guid: 049afe743019d5d46a9f22388cbf0406, type: 2}
   _coreTarget: {fileID: 0}
@@ -282,3 +282,5 @@ MonoBehaviour:
   _attackRange: 1.25
   _attackDamage: 20
   _attackInterval: 3
+  _runnerPrefab: {fileID: 11400000, guid: 39a5f7e9b5755bd478ebe7d2ea518059, type: 2}
+  _projectilePrefab: {fileID: 11400000, guid: a5b78ca9b244ca18a36c13e5519abcdf, type: 2}

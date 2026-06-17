@@ -106,7 +106,7 @@ GameObject:
   - component: {fileID: 3164050498377199483}
   - component: {fileID: 4405597778337768074}
   m_Layer: 9
-  m_Name: DB_DroneEnemy
+  m_Name: DB_SpitterEnemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -119,7 +119,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5141648294605898706}
-  serializedVersion: 2
+  m_serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -201,7 +201,6 @@ MonoBehaviour:
   SlerpPosition: 0
 --- !u!50 &1821280075056569211
 Rigidbody2D:
-  serializedVersion: 5
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -217,10 +216,10 @@ Rigidbody2D:
   m_GravityScale: 0
   m_Material: {fileID: 0}
   m_IncludeLayers:
-    serializedVersion: 2
+    m_serializedVersion: 2
     m_Bits: 0
   m_ExcludeLayers:
-    serializedVersion: 2
+    m_serializedVersion: 2
     m_Bits: 0
   m_Interpolate: 0
   m_SleepingMode: 1
@@ -234,27 +233,27 @@ CapsuleCollider2D:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5141648294605898706}
   m_Enabled: 1
-  serializedVersion: 3
+  m_serializedVersion: 3
   m_Density: 1
   m_Material: {fileID: 0}
   m_IncludeLayers:
-    serializedVersion: 2
+    m_serializedVersion: 2
     m_Bits: 0
   m_ExcludeLayers:
-    serializedVersion: 2
+    m_serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
   m_ForceSendLayers:
-    serializedVersion: 2
+    m_serializedVersion: 2
     m_Bits: 4294967295
   m_ForceReceiveLayers:
-    serializedVersion: 2
+    m_serializedVersion: 2
     m_Bits: 4294967295
   m_ContactCaptureLayers:
-    serializedVersion: 2
+    m_serializedVersion: 2
     m_Bits: 4294967295
   m_CallbackLayers:
-    serializedVersion: 2
+    m_serializedVersion: 2
     m_Bits: 4294967295
   m_IsTrigger: 0
   m_UsedByEffector: 0
@@ -274,7 +273,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a71872d2b5fbc0a47ad1aa177a8d2605, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Enemy.Types.DroneEnemy
+  m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Enemy.Types.SpitterEnemy
   ShowTopMostFoldoutHeaderGroup: 1
   _data: {fileID: 11400000, guid: b461a4b7f520b324ea69eb44f9e98cad, type: 2}
   _coreTarget: {fileID: 0}
@@ -282,3 +281,4 @@ MonoBehaviour:
   _attackRange: 1.25
   _attackDamage: 10
   _attackInterval: 1
+  _projectilePrefab: {fileID: 11400000, guid: a5b78ca9b244ca18a36c13e5519abcdf, type: 2}

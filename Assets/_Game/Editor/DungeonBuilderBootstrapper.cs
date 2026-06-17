@@ -64,6 +64,131 @@ namespace DungeonBuilder.Editor
             Bootstrap();
         }
 
+        [MenuItem("Dungeon Builder/Fix Network Mappings and Prefabs")]
+        public static void FixNetworkMappingsAndPrefabs()
+        {
+            EnsureFolders();
+
+            string prefabRoot = PrefabRoot;
+
+            NetworkObject playerPrefab = AssetDatabase.LoadAssetAtPath<NetworkObject>($"{prefabRoot}/Player/DB_Player.prefab");
+            NetworkObject resourceDropPrefab = AssetDatabase.LoadAssetAtPath<NetworkObject>($"{prefabRoot}/Harvesting/DB_ResourceDrop.prefab");
+            NetworkObject woodNode = AssetDatabase.LoadAssetAtPath<NetworkObject>($"{prefabRoot}/Harvesting/DB_WoodNode.prefab");
+            NetworkObject stoneNode = AssetDatabase.LoadAssetAtPath<NetworkObject>($"{prefabRoot}/Harvesting/DB_StoneNode.prefab");
+            NetworkObject oreNode = AssetDatabase.LoadAssetAtPath<NetworkObject>($"{prefabRoot}/Harvesting/DB_OreNode.prefab");
+            NetworkObject crystalNode = AssetDatabase.LoadAssetAtPath<NetworkObject>($"{prefabRoot}/Harvesting/DB_CrystalNode.prefab");
+
+            NetworkObject spitterPrefab = AssetDatabase.LoadAssetAtPath<NetworkObject>($"{prefabRoot}/Enemies/DB_SpitterEnemy.prefab");
+            NetworkObject runnerPrefab = AssetDatabase.LoadAssetAtPath<NetworkObject>($"{prefabRoot}/Enemies/DB_RunnerEnemy.prefab");
+            NetworkObject bloaterPrefab = AssetDatabase.LoadAssetAtPath<NetworkObject>($"{prefabRoot}/Enemies/DB_BloaterEnemy.prefab");
+            NetworkObject ratKingPrefab = AssetDatabase.LoadAssetAtPath<NetworkObject>($"{prefabRoot}/Enemies/DB_RatKingBoss.prefab");
+
+            NetworkObject arrowTowerPrefab = AssetDatabase.LoadAssetAtPath<NetworkObject>($"{prefabRoot}/Towers/DB_ArrowTower.prefab");
+            NetworkObject cannonTowerPrefab = AssetDatabase.LoadAssetAtPath<NetworkObject>($"{prefabRoot}/Towers/DB_CannonTower.prefab");
+            NetworkObject frostTowerPrefab = AssetDatabase.LoadAssetAtPath<NetworkObject>($"{prefabRoot}/Towers/DB_FrostTower.prefab");
+
+            NetworkObject projectilePrefab = AssetDatabase.LoadAssetAtPath<NetworkObject>($"{prefabRoot}/BulletPrefabs/DB_EnemyProjectile.prefab");
+
+            // 1. Set references inside prefabs
+            if (spitterPrefab != null && projectilePrefab != null)
+            {
+                SetObject(spitterPrefab.GetComponent<SpitterEnemy>(), "_projectilePrefab", projectilePrefab);
+            }
+
+            if (ratKingPrefab != null)
+            {
+                RatKingEnemy ratKing = ratKingPrefab.GetComponent<RatKingEnemy>();
+                if (ratKing != null)
+                {
+                    if (projectilePrefab != null) SetObject(ratKing, "_projectilePrefab", projectilePrefab);
+                    if (runnerPrefab != null) SetObject(ratKing, "_runnerPrefab", runnerPrefab);
+                }
+            }
+
+            // 2. Configure scene components
+            NetworkObjectPool pool = Object.FindFirstObjectByType<NetworkObjectPool>();
+            if (pool != null)
+            {
+                Transform poolRoot = pool.transform.Find("PoolRoot");
+                if (poolRoot == null) poolRoot = pool.transform;
+
+                var configs = new List<PoolConfig>();
+                if (resourceDropPrefab != null) configs.Add(new PoolConfig(resourceDropPrefab, 12, poolRoot));
+                if (spitterPrefab != null) configs.Add(new PoolConfig(spitterPrefab, 12, poolRoot));
+                if (runnerPrefab != null) configs.Add(new PoolConfig(runnerPrefab, 6, poolRoot));
+                if (bloaterPrefab != null) configs.Add(new PoolConfig(bloaterPrefab, 8, poolRoot));
+                if (arrowTowerPrefab != null) configs.Add(new PoolConfig(arrowTowerPrefab, 8, poolRoot));
+                if (cannonTowerPrefab != null) configs.Add(new PoolConfig(cannonTowerPrefab, 4, poolRoot));
+                if (frostTowerPrefab != null) configs.Add(new PoolConfig(frostTowerPrefab, 4, poolRoot));
+                if (ratKingPrefab != null) configs.Add(new PoolConfig(ratKingPrefab, 1, poolRoot));
+                if (projectilePrefab != null) configs.Add(new PoolConfig(projectilePrefab, 20, poolRoot));
+
+                SetPoolEntries(pool, configs);
+            }
+
+            WaveManager wave = Object.FindFirstObjectByType<WaveManager>();
+            if (wave != null)
+            {
+                SerializedObject serialized = new SerializedObject(wave);
+                SerializedProperty mappingsProperty = serialized.FindProperty("_enemyPrefabMappings");
+                
+                if (mappingsProperty != null)
+                {
+                    mappingsProperty.arraySize = 4;
+                    
+                    if (runnerPrefab != null)
+                    {
+                        var entry = mappingsProperty.GetArrayElementAtIndex(0);
+                        entry.FindPropertyRelative("enemyType").enumValueIndex = (int)EnemyType.Runner;
+                        entry.FindPropertyRelative("prefab").objectReferenceValue = runnerPrefab;
+                    }
+                    if (spitterPrefab != null)
+                    {
+                        var entry = mappingsProperty.GetArrayElementAtIndex(1);
+                        entry.FindPropertyRelative("enemyType").enumValueIndex = (int)EnemyType.Spitter;
+                        entry.FindPropertyRelative("prefab").objectReferenceValue = spitterPrefab;
+                    }
+                    if (bloaterPrefab != null)
+                    {
+                        var entry = mappingsProperty.GetArrayElementAtIndex(2);
+                        entry.FindPropertyRelative("enemyType").enumValueIndex = (int)EnemyType.Bloater;
+                        entry.FindPropertyRelative("prefab").objectReferenceValue = bloaterPrefab;
+                    }
+                    if (ratKingPrefab != null)
+                    {
+                        var entry = mappingsProperty.GetArrayElementAtIndex(3);
+                        entry.FindPropertyRelative("enemyType").enumValueIndex = (int)EnemyType.RatKing;
+                        entry.FindPropertyRelative("prefab").objectReferenceValue = ratKingPrefab;
+                    }
+                }
+                serialized.ApplyModifiedPropertiesWithoutUndo();
+                EditorUtility.SetDirty(wave);
+            }
+
+            // 3. Configure Network Prefabs Lists
+            GeneratedPrefabs generatedPrefabs = new GeneratedPrefabs
+            {
+                Player = playerPrefab,
+                ResourceDrop = resourceDropPrefab,
+                Drone = spitterPrefab,
+                Brute = runnerPrefab,
+                MinerBug = bloaterPrefab,
+                ArrowTower = arrowTowerPrefab,
+                CannonTower = cannonTowerPrefab,
+                FrostTower = frostTowerPrefab
+            };
+
+            ConfigureNetworkManager(generatedPrefabs);
+            ConfigureDefaultNetworkPrefabs(generatedPrefabs);
+
+            EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+            EditorSceneManager.SaveScene(SceneManager.GetActiveScene());
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
+            Debug.Log("Network mappings and prefabs fixed successfully without modifying scene layouts.");
+        }
+
         public static void Bootstrap()
         {
             EnsureFolders();

@@ -34,8 +34,9 @@ namespace DungeonBuilder.Enemy.Types
             FindGates();
         }
 
-        private void Update()
+        protected override void Update()
         {
+            base.Update();
             if (!IsServer || _isDying) return;
 
             // Xử lý cơ chế hồi máu tự trị

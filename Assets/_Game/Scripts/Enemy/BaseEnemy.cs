@@ -67,7 +67,7 @@ namespace Assets._Game.Scripts.Enemy
             }
         }
 
-        private void Update()
+        protected virtual void Update()
         {
             if (!IsServer || _isDying)
             {

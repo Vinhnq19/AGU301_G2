@@ -15,8 +15,9 @@ namespace DungeonBuilder.Enemy.Types
         private bool _isGasActive;
         private float _damageTickTimer;
 
-        private void Update()
+        protected override void Update()
         {
+            base.Update();
             if (!IsServer || _isDying) return;
 
             if (_isGasActive)

@@ -119,7 +119,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5141648294605898706}
-  m_serializedVersion: 2
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -201,6 +201,7 @@ MonoBehaviour:
   SlerpPosition: 0
 --- !u!50 &1821280075056569211
 Rigidbody2D:
+  serializedVersion: 5
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -212,14 +213,14 @@ Rigidbody2D:
   m_UseAutoMass: 0
   m_Mass: 1
   m_LinearDamping: 0
-  m_AngularDamping: 0.05
+  m_AngularDamping: 0
   m_GravityScale: 0
   m_Material: {fileID: 0}
   m_IncludeLayers:
-    m_serializedVersion: 2
+    serializedVersion: 2
     m_Bits: 0
   m_ExcludeLayers:
-    m_serializedVersion: 2
+    serializedVersion: 2
     m_Bits: 0
   m_Interpolate: 0
   m_SleepingMode: 1
@@ -233,27 +234,27 @@ CapsuleCollider2D:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5141648294605898706}
   m_Enabled: 1
-  m_serializedVersion: 3
+  serializedVersion: 3
   m_Density: 1
   m_Material: {fileID: 0}
   m_IncludeLayers:
-    m_serializedVersion: 2
+    serializedVersion: 2
     m_Bits: 0
   m_ExcludeLayers:
-    m_serializedVersion: 2
+    serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
   m_ForceSendLayers:
-    m_serializedVersion: 2
+    serializedVersion: 2
     m_Bits: 4294967295
   m_ForceReceiveLayers:
-    m_serializedVersion: 2
+    serializedVersion: 2
     m_Bits: 4294967295
   m_ContactCaptureLayers:
-    m_serializedVersion: 2
+    serializedVersion: 2
     m_Bits: 4294967295
   m_CallbackLayers:
-    m_serializedVersion: 2
+    serializedVersion: 2
     m_Bits: 4294967295
   m_IsTrigger: 0
   m_UsedByEffector: 0
@@ -281,4 +282,4 @@ MonoBehaviour:
   _attackRange: 1.25
   _attackDamage: 10
   _attackInterval: 1
-  _projectilePrefab: {fileID: 11400000, guid: a5b78ca9b244ca18a36c13e5519abcdf, type: 2}
+  _projectilePrefab: {fileID: 392532428047427896, guid: a5b78ca9b244ca18a36c13e5519abcdf, type: 3}

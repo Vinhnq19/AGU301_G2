@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d5b78599a977c843b12cef96b39d25a, type: 3}
   m_Name: DB_Wave_10
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.WaveSO
-  buildPhaseDuration: 180
+  buildPhaseDuration: 10
   spawnGroups:
   - enemyType: 0
-    count: 20
+    count: 5
     spawnInterval: 1
     spawnPointIndex: 0
     pathIndex: 0
@@ -25,7 +25,7 @@ MonoBehaviour:
     spawnPointIndex: 0
     pathIndex: 0
   - enemyType: 0
-    count: 20
+    count: 5
     spawnInterval: 1
     spawnPointIndex: 2
     pathIndex: 0

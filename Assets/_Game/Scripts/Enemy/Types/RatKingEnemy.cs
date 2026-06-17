@@ -125,19 +125,10 @@ namespace DungeonBuilder.Enemy.Types
         private void SummonRunners()
         {
             if (_runnerPrefab == null || _pool == null) return;
-            if (_gates == null || _gates.Length == 0)
-            {
-                FindGates();
-                if (_gates == null || _gates.Length == 0) return;
-            }
-
-            // Chọn cổng ngẫu nhiên trong 3 cổng
-            Transform randomGate = _gates[UnityEngine.Random.Range(0, _gates.Length)];
-            if (randomGate == null) return;
 
             for (int i = 0; i < 10; i++)
             {
-                Vector3 spawnPos = randomGate.position + (Vector3)(UnityEngine.Random.insideUnitCircle * 0.6f);
+                Vector3 spawnPos = transform.position + (Vector3)(UnityEngine.Random.insideUnitCircle * 1.5f);
                 NetworkObject runnerObj = _pool.Get(_runnerPrefab, spawnPos, Quaternion.identity);
                 if (runnerObj != null)
                 {

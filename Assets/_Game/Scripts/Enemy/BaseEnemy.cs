@@ -57,6 +57,12 @@ namespace Assets._Game.Scripts.Enemy
             _stateMachine = new EnemyStateMachine(this);
             _colliders = GetComponentsInChildren<Collider2D>(true);
             _rigidbodies = GetComponentsInChildren<Rigidbody2D>(true);
+
+            int enemyLayer = LayerMask.NameToLayer("Enemy");
+            if (enemyLayer >= 0)
+            {
+                Physics2D.IgnoreLayerCollision(enemyLayer, enemyLayer, true);
+            }
         }
 
         public override void OnNetworkSpawn()
@@ -186,7 +192,7 @@ namespace Assets._Game.Scripts.Enemy
             return _coreTarget != null ? _coreTarget.position : transform.position;
         }
 
-        public bool IsCoreInAttackRange()
+        public virtual bool IsCoreInAttackRange()
         {
             return _coreTarget != null && Vector3.Distance(transform.position, _coreTarget.position) <= _attackRange;
         }

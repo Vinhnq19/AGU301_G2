@@ -17,12 +17,14 @@ namespace DungeonBuilder.Projectile
     public class BaseBullet : NetworkBehaviour, IPoolable
     {
         [SerializeField] private Transform _visual;
+        [Tooltip("Nếu true, đạn sẽ tự xoay đầu (trục Y) về phía mục tiêu. False cho đạn tròn/đại bác.")]
+        [SerializeField] protected bool _autoRotate = true;
 
         private float _speed;
         private float _lifetime;
         private ulong _targetNetworkObjectId;
         private Vector3 _lastKnownTargetPos;
-        private bool _isActive;
+        protected bool _isActive;
         private float _lifetimeTimer;
 
         protected float Damage { get; private set; }
@@ -48,6 +50,20 @@ namespace DungeonBuilder.Projectile
             if (IsServer)
             {
                 _lifetimeTimer = _lifetime;
+            }
+
+            // Đảm bảo reset kích thước, vị trí và góc xoay visual trên mọi Client
+            // Khi đạn tái sử dụng từ Pool, tween hit cũ có thể bị đứt quãng khiến scale bị thu nhỏ
+            if (_visual != null)
+            {
+                _visual.DOKill();
+                _visual.localPosition = Vector3.zero;
+                _visual.localScale = Vector3.one;
+            }
+
+            if (!_autoRotate)
+            {
+                transform.rotation = Quaternion.identity;
             }
         }
 
@@ -96,6 +112,16 @@ namespace DungeonBuilder.Projectile
                 return;
             }
 
+            // Cập nhật hướng xoay để đầu đạn (trục Y) luôn hướng về phía mục tiêu
+            if (_autoRotate)
+            {
+                Vector3 direction = (_lastKnownTargetPos - transform.position).normalized;
+                if (direction != Vector3.zero)
+                {
+                    transform.rotation = Quaternion.FromToRotation(Vector3.up, direction);
+                }
+            }
+
             // Di chuyển về phía target (Client tự mô phỏng nội bộ)
             transform.position = Vector3.MoveTowards(transform.position, _lastKnownTargetPos, step);
         }
@@ -113,7 +139,6 @@ namespace DungeonBuilder.Projectile
 
         protected void ReturnToPool()
         {
-            if (!_isActive) return;
             _isActive = false;
             _pool?.Return(NetworkObject);
         }
@@ -130,7 +155,7 @@ namespace DungeonBuilder.Projectile
                    });
         }
 
-        public void OnGetFromPool()
+        public virtual void OnGetFromPool()
         {
             _isActive = false;
             if (_visual == null) return;
@@ -139,7 +164,7 @@ namespace DungeonBuilder.Projectile
             _visual.localScale = Vector3.one;
         }
 
-        public void OnReturnToPool()
+        public virtual void OnReturnToPool()
         {
             _isActive = false;
             if (_visual == null) return;

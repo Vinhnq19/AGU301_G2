@@ -28,8 +28,8 @@ Transform:
   m_GameObject: {fileID: 1310226126076274395}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4, y: 2, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 379521306016053045}
@@ -74,8 +74,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Projectile.CannonBullet
   ShowTopMostFoldoutHeaderGroup: 0
   _visual: {fileID: 379521306016053045}
-  _hitRadius: 0.8
-  _aoeRadius: 1
+  _autoRotate: 1
+  _aoeRadius: 2
+  _explosionAnimator: {fileID: 7400244870046010692}
+  _explosionDuration: 0.5
 --- !u!58 &4890727589544320008
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -122,6 +124,7 @@ GameObject:
   m_Component:
   - component: {fileID: 379521306016053045}
   - component: {fileID: 6525664203877416173}
+  - component: {fileID: 7400244870046010692}
   m_Layer: 8
   m_Name: Visual
   m_TagString: Untagged
@@ -139,8 +142,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 3, y: 3, z: 3}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 4283803766333943080}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -189,12 +192,12 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingLayerID: -1415411323
+  m_SortingLayer: 2
+  m_SortingOrder: 100
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: 6635da6bcb4bfdc43ba102cd3dc0f000, type: 3}
-  m_Color: {r: 0.028301895, g: 0.028301895, b: 0.028301895, a: 1}
+  m_Sprite: {fileID: 3507320763419132944, guid: 5a759264c8bc6c14da41de76eb596a5e, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -203,3 +206,25 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!95 &7400244870046010692
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4908201587049390104}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: bbd7b6c57ce340d4ebaf177bf95c3ee5, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

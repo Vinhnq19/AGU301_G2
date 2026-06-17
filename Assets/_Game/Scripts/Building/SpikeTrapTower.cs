@@ -22,6 +22,16 @@ namespace DungeonBuilder.Building
         // Buffer và filter được cache 1 lần - Zero GC, tuân thủ Agents.md
         private readonly Collider2D[] _aoeBuffer = new Collider2D[16];
         private ContactFilter2D _aoeFilter;
+        private Vector3 _initialScale;
+
+        protected override void Awake()
+        {
+            base.Awake();
+            if (_spikeVisual != null)
+            {
+                _initialScale = _spikeVisual.localScale;
+            }
+        }
 
         public override void OnNetworkSpawn()
         {
@@ -75,12 +85,12 @@ namespace DungeonBuilder.Building
 
             // BUG FIX: Kill trước để tween cũ không ghi đè scale reset
             DOTween.Kill(_spikeVisual);
-            _spikeVisual.localScale = Vector3.one;
+            _spikeVisual.localScale = _initialScale;
 
-            _spikeVisual.DOScale(_spikeAnimScale, _spikeAnimDuration)
+            _spikeVisual.DOScale(_initialScale * _spikeAnimScale, _spikeAnimDuration)
                 .SetEase(Ease.OutBack)
                 .OnComplete(() =>
-                    _spikeVisual.DOScale(1f, _spikeAnimDuration)
+                    _spikeVisual.DOScale(_initialScale, _spikeAnimDuration)
                         .SetEase(Ease.InBack));
         }
     }

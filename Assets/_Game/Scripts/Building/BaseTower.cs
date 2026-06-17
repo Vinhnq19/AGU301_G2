@@ -172,7 +172,7 @@ namespace DungeonBuilder.Building
             if (_bulletPrefab == null || _pool == null || target == null) return;
             Vector3 firePos   = _firePoint != null ? _firePoint.position : transform.position;
             Vector3 direction = (target.transform.position - firePos).normalized;
-            Quaternion rot    = direction != Vector3.zero ? Quaternion.FromToRotation(Vector3.right, direction) : Quaternion.identity;
+            Quaternion rot    = direction != Vector3.zero ? Quaternion.FromToRotation(Vector3.up, direction) : Quaternion.identity;
 
             NetworkObject bulletObj = _pool.Get(_bulletPrefab, firePos, rot);
             if (bulletObj == null) return;

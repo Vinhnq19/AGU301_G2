@@ -11,6 +11,12 @@ namespace DungeonBuilder.Projectile
         [SerializeField, Range(0.1f, 1f)] private float _slowMultiplier = 0.5f;
         [SerializeField, Min(0.1f)] private float _slowDuration = 2f;
 
+        private void Awake()
+        {
+            // Khóa xoay cho đạn băng vì nó hình tròn
+            _autoRotate = false;
+        }
+
         protected override void OnHit(BaseEnemy target)
         {
             base.OnHit(target);

@@ -75,7 +75,15 @@ namespace DungeonBuilder.Projectile
                 && NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(_targetNetworkObjectId, out NetworkObject targetObj)
                 && targetObj != null)
             {
-                _lastKnownTargetPos = targetObj.transform.position;
+                if (targetObj.TryGetComponent<DungeonBuilder.Core.CoreManager>(out _))
+                {
+                    GameObject visualCore = GameObject.Find("DB_Core");
+                    _lastKnownTargetPos = visualCore != null ? visualCore.transform.position : targetObj.transform.position;
+                }
+                else
+                {
+                    _lastKnownTargetPos = targetObj.transform.position;
+                }
             }
 
             float distanceToTarget = Vector3.Distance(transform.position, _lastKnownTargetPos);

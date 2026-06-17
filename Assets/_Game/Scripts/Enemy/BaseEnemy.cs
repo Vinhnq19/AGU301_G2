@@ -52,11 +52,20 @@ namespace Assets._Game.Scripts.Enemy
             _coreManager = coreManager;
         }
 
-        private void Awake()
+        protected virtual void Awake()
         {
             _stateMachine = new EnemyStateMachine(this);
             _colliders = GetComponentsInChildren<Collider2D>(true);
             _rigidbodies = GetComponentsInChildren<Rigidbody2D>(true);
+
+            foreach (Rigidbody2D body in _rigidbodies)
+            {
+                if (body != null)
+                {
+                    body.bodyType = RigidbodyType2D.Kinematic;
+                    body.useFullKinematicContacts = true;
+                }
+            }
 
             int enemyLayer = LayerMask.NameToLayer("Enemy");
             if (enemyLayer >= 0)
@@ -110,7 +119,7 @@ namespace Assets._Game.Scripts.Enemy
         public float CurrentHP => _currentHP.Value;
         public float MaxHealth => _data != null ? _data.maxHealth : 100f;
 
-        public void OnGetFromPool()
+        public virtual void OnGetFromPool()
         {
             _isDying = false;
             _currentPathWaypoints = null;
@@ -125,7 +134,7 @@ namespace Assets._Game.Scripts.Enemy
             }
         }
 
-        public void OnReturnToPool()
+        public virtual void OnReturnToPool()
         {
             _isDying = false;
             _slowMultiplier = 1f;
@@ -368,6 +377,11 @@ namespace Assets._Game.Scripts.Enemy
             if (_projectilePrefab == null || _pool == null || targetTransform == null) return;
 
             NetworkObject targetNetObj = targetTransform.GetComponentInParent<NetworkObject>();
+            if (targetNetObj == null && targetTransform == _coreTarget && _coreManager != null)
+            {
+                targetNetObj = _coreManager.NetworkObject;
+            }
+
             if (targetNetObj == null) return;
 
             NetworkObject bulletObj = _pool.Get(_projectilePrefab, transform.position, Quaternion.identity);
@@ -407,6 +421,14 @@ namespace Assets._Game.Scripts.Enemy
                 body.angularVelocity = 0f;
                 body.simulated = active;
             }
+        }
+
+        protected virtual void OnDrawGizmosSelected()
+        {
+            Gizmos.color = new Color(0.9f, 0.15f, 0.15f, 0.08f); // Màu đỏ nhạt cho quái
+            Gizmos.DrawSphere(transform.position, _attackRange);
+            Gizmos.color = new Color(0.9f, 0.15f, 0.15f, 0.7f);
+            Gizmos.DrawWireSphere(transform.position, _attackRange);
         }
     }
 }

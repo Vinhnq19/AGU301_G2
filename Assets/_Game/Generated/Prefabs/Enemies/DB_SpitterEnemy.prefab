@@ -279,7 +279,7 @@ MonoBehaviour:
   _data: {fileID: 11400000, guid: b461a4b7f520b324ea69eb44f9e98cad, type: 2}
   _coreTarget: {fileID: 0}
   _visual: {fileID: 7794510355619725346}
-  _attackRange: 1.25
+  _attackRange: 5
   _attackDamage: 10
   _attackInterval: 1
   _projectilePrefab: {fileID: 392532428047427896, guid: a5b78ca9b244ca18a36c13e5519abcdf, type: 3}

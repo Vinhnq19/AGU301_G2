@@ -284,3 +284,13 @@ MonoBehaviour:
   _attackInterval: 3
   _projectilePrefab: {fileID: 392532428047427896, guid: a5b78ca9b244ca18a36c13e5519abcdf, type: 3}
   _runnerPrefab: {fileID: 1860617485065313912, guid: 39a5f7e9b5755bd478ebe7d2ea518059, type: 3}
+  _magicCooldown: 5
+  _magicRange: 5
+  _magicDamage: 30
+  _summonInterval: 30
+  _summonCount: 10
+  _summonDelayBetweenRunners: 1
+  _selfHealThreshold: 0.75
+  _selfHealDuration: 5
+  _selfHealCooldown: 10
+  _selfHealRate: 2

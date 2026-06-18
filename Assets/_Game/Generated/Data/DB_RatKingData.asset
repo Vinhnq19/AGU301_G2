@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: DB_RatKingData
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.EnemyDataSO
   enemyType: 3
-  maxHealth: 60
-  moveSpeed: 3
-  rewardToken: 3
+  maxHealth: 3000
+  moveSpeed: 1.0
+  rewardToken: 500

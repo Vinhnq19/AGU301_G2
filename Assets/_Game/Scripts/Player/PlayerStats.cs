@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace DungeonBuilder.Player
 {
-    public sealed class PlayerStats : NetworkBehaviour
+    public sealed class PlayerStats : NetworkBehaviour, DungeonBuilder.Core.Interfaces.IDamageable
     {
         [SerializeField] private PlayerDataSO _data;
         [SerializeField, Min(0f)] private float _defaultManaUseCost = 10f;
@@ -75,6 +75,10 @@ namespace DungeonBuilder.Player
         private void HandleManaChanged(float previousValue, float newValue)
         {
             OnManaChanged?.Invoke(newValue, MaxMana);
+        }
+        public void TakeDamage(float amount, ulong attackerClientId = 0)
+        {
+            ApplyDamage(amount);
         }
     }
 }

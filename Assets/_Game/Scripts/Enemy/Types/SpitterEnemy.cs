@@ -68,6 +68,10 @@ namespace DungeonBuilder.Enemy.Types
                 // Không bắn quái khác
                 if (_targetScanResults[i].GetComponentInParent<BaseEnemy>() != null) continue;
 
+                // Bỏ qua các tháp không thể target (vd: bẫy gai)
+                var tower = damageable as DungeonBuilder.Building.BaseTower;
+                if (tower != null && !tower.IsTargetable) continue;
+
                 float dist = Vector3.Distance(transform.position, _targetScanResults[i].transform.position);
                 if (dist < closestDist)
                 {

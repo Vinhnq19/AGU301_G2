@@ -23,4 +23,4 @@ MonoBehaviour:
     count: 15
     spawnInterval: 1.2
     spawnPointIndex: 2
-    pathIndex: 0
+    pathIndex: 2

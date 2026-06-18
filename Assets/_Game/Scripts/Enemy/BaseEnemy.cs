@@ -197,7 +197,7 @@ namespace Assets._Game.Scripts.Enemy
             if (hit.collider != null)
             {
                 DungeonBuilder.Building.BaseTower tower = hit.collider.GetComponentInParent<DungeonBuilder.Building.BaseTower>();
-                if (tower != null)
+                if (tower != null && tower.IsTargetable)
                 {
                     _currentBlocker = tower;
                     return true;

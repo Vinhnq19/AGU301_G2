@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DB_SpikeTrapData
   m_EditorClassIdentifier: Assembly-CSharp::Assets._Game.Scripts.Data.TowerDataSO
   towerType: 3
-  maxHealth: 150
+  maxHealth: 750
   damage: 25
   range: 0.8
   attackRate: 3

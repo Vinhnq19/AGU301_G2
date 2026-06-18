@@ -1,8 +1,8 @@
 using System.Linq;
 using Assets._Game.Scripts.Building;
-using DungeonBuilder.Building;
 using Assets._Game.Scripts.Data;
 using DG.Tweening;
+using DungeonBuilder.Building;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -28,10 +28,15 @@ namespace Assets._Game.Scripts.Building
         [SerializeField] private Button _removeButton;
         [SerializeField] private TMP_Text _upgradeCostText;
 
+        [Header("Health Bar")]
+        [SerializeField] private Image _healthFillImage;
+        [SerializeField] private CanvasGroup _healthBarGroup;
+
         private TowerPresenter _presenter;
         private bool _isProximityUiVisible = false;
         private CanvasGroup _actionPanelGroup;
         private Vector3 _baseRangeScale = Vector3.one;
+        private Tween _autoCloseTween;
 
         private void Awake()
         {
@@ -58,7 +63,8 @@ namespace Assets._Game.Scripts.Building
                 EventTrigger.Entry exitEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerExit };
                 exitEntry.callback.AddListener((_) => HidePanel());
                 trigger.triggers.Add(exitEntry);
-                
+
+
                 _actionPanel.SetActive(false);
             }
         }
@@ -135,6 +141,19 @@ namespace Assets._Game.Scripts.Building
                     _upgradeCostText.text = "MAX";
                 }
             }
+
+            if (_healthFillImage != null && model.MaxHealth > 0)
+            {
+                float targetFill = Mathf.Clamp01(model.CurrentHealth / model.MaxHealth);
+                _healthFillImage.DOKill();
+                _healthFillImage.DOFillAmount(targetFill, 0.25f).SetEase(Ease.OutCubic);
+
+                if (_healthBarGroup != null && _healthBarGroup.alpha < 1f)
+                {
+                    _healthBarGroup.DOKill();
+                    _healthBarGroup.DOFade(1f, 0.3f);
+                }
+            }
         }
 
         public void TogglePanel()
@@ -153,11 +172,17 @@ namespace Assets._Game.Scripts.Building
                     _actionPanelGroup.alpha = 0f;
                     _actionPanelGroup.DOFade(1f, 0.2f);
                 }
+
+                // Tự động tắt panel sau 3 giây
+                _autoCloseTween?.Kill();
+                _autoCloseTween = DOVirtual.DelayedCall(3f, HidePanel);
             }
         }
 
         public void HidePanel()
         {
+            _autoCloseTween?.Kill();
+
             if (_actionPanel != null && _actionPanel.activeSelf)
             {
                 if (_actionPanelGroup != null)

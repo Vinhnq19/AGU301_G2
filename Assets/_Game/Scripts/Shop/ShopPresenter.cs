@@ -1,18 +1,30 @@
 using UnityEngine;
 
+[System.Serializable]
 public class ShopPresenter
 {
     private readonly ShopView view;
     private readonly ShopModel model;
+    private readonly Shop shopNetwork;
 
-    private CurrencyType currentCurrency = CurrencyType.Coin;
+    [SerializeField] private CurrencyType currentCurrency = CurrencyType.Coin;
 
-    public ShopPresenter(ShopView view, ShopModel model)
+    public ShopPresenter(ShopView view, ShopModel model, Shop shopNetwork = null)
     {
         this.view = view;
         this.model = model;
-
+        this.shopNetwork = shopNetwork;
+    
         view.OnTabChanged += HandleTabChanged;
+
+        var items = model.GetItemsByType(currentCurrency);
+        view.CreateItemPanels(items, HandleBuyItem);
+    }
+
+    public void RefreshShop()
+    {
+        var items = model.GetItemsByType(currentCurrency);
+        view.CreateItemPanels(items, HandleBuyItem);
     }
 
     private void HandleTabChanged(CurrencyType type)
@@ -24,11 +36,34 @@ public class ShopPresenter
         RefreshShop();
     }
 
-    private void RefreshShop()
+    private void HandleBuyItem(string itemId)
     {
-        var items = model.GetItems(currentCurrency);
+        Debug.Log($"Attempting to buy item: {itemId}");
 
-        // push data back to view
-        // view.ShowItems(items);
+        // Tìm item trong model
+        var allItems = model.GetAllItems();
+        var item = allItems.Find(x => x.Id == itemId);
+
+        if (item == null)
+        {
+            Debug.LogWarning($"Item not found: {itemId}");
+            return;
+        }
+
+        if (item.IsSoldOut)
+        {
+            Debug.LogWarning($"Item is sold out: {itemId}");
+            return;
+        }
+
+        // Gởi yêu cầu mua tới Server qua Shop network
+        if (shopNetwork != null)
+        {
+            shopNetwork.BuyItem(itemId);
+        }
+        else
+        {
+            Debug.LogWarning("Shop network not available");
+        }
     }
 }

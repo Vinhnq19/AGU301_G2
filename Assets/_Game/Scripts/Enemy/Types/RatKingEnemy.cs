@@ -4,6 +4,8 @@ using Assets._Game.Scripts.Enemy;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using DungeonBuilder.Core.Interfaces;
+using DungeonBuilder.Enemy;
+using DungeonBuilder.Wave;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -49,6 +51,7 @@ namespace DungeonBuilder.Enemy.Types
         private Transform[] _gates;
         private LineRenderer[] _laserRenderers;
         private readonly Collider2D[] _magicScanResults = new Collider2D[16];
+        private WaveManager _waveManager;
 
         protected override void Awake()
         {
@@ -93,6 +96,7 @@ namespace DungeonBuilder.Enemy.Types
         private void Start()
         {
             FindGates();
+            _waveManager = FindFirstObjectByType<WaveManager>();
         }
 
         protected override void Update()
@@ -304,11 +308,26 @@ namespace DungeonBuilder.Enemy.Types
             Transform randomGate = _gates[UnityEngine.Random.Range(0, _gates.Length)];
             if (randomGate == null) return;
 
+            // Tìm path tương ứng với cổng
+            EnemyPath matchedPath = null;
+            if (_waveManager != null && _waveManager.EnemyPaths != null)
+            {
+                string suffix = randomGate.name.Replace("Spawn_", "");
+                foreach (var path in _waveManager.EnemyPaths)
+                {
+                    if (path != null && path.name.Contains(suffix))
+                    {
+                        matchedPath = path;
+                        break;
+                    }
+                }
+            }
+
             for (int i = 0; i < _summonCount; i++)
             {
                 if (_isDying || !IsServer) return;
 
-                Vector3 spawnPos = randomGate.position + (Vector3)(UnityEngine.Random.insideUnitCircle * 0.4f);
+                Vector3 spawnPos = randomGate.position;
                 NetworkObject runnerObj = _pool.Get(_runnerPrefab, spawnPos, Quaternion.identity);
                 if (runnerObj != null)
                 {
@@ -316,6 +335,10 @@ namespace DungeonBuilder.Enemy.Types
                     if (enemy != null)
                     {
                         enemy.SetCoreTarget(_coreTarget);
+                        if (matchedPath != null && matchedPath.Waypoints != null)
+                        {
+                            enemy.SetPath(matchedPath.Waypoints);
+                        }
                     }
 
                     if (!runnerObj.IsSpawned)

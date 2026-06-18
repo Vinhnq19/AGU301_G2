@@ -18,3 +18,4 @@ MonoBehaviour:
   isUnlimited: 1
   CurrencyType: 1
   RemainingQuantity: 0
+  ResourceType: 10

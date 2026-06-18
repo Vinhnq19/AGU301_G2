@@ -1,4 +1,5 @@
 using UnityEngine;
+using DungeonBuilder.Core.Enums;
 
 [System.Serializable]
 public class ShopPresenter
@@ -56,10 +57,10 @@ public class ShopPresenter
             return;
         }
 
-        // Gởi yêu cầu mua tới Server qua Shop network
+        // Gởi yêu cầu mua tới Server qua Shop network sử dụng ResourceType
         if (shopNetwork != null)
         {
-            shopNetwork.BuyItem(itemId);
+            shopNetwork.BuyItem(item.ResourceType);
         }
         else
         {

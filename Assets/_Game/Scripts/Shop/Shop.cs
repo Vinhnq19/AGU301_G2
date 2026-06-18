@@ -1,6 +1,10 @@
 using Unity.Netcode;
 using UnityEngine;
 using System.Collections.Generic;
+using VContainer;
+using DungeonBuilder.Core.Interfaces;
+using DungeonBuilder.Core.Enums;
+using DungeonBuilder.Networking.Pool;
 
 public class Shop : NetworkBehaviour
 {
@@ -8,17 +12,20 @@ public class Shop : NetworkBehaviour
     [SerializeField] private ShopView view;
     [SerializeField] private ShopModel model;
 
+    private IResourceService _sharedResources;
+    private INetworkPool _pool;
+
     // Network synchronized shop item data
     private NetworkList<ShopItemData> networkItemData;
 
-    // Mapping ItemId -> ShopItemData Index
-    private Dictionary<string, int> itemDataIndexMap = new Dictionary<string, int>();
+    // Mapping ResourceType -> ShopItemData Index
+    private Dictionary<ResourceType, int> itemDataIndexMap = new Dictionary<ResourceType, int>();
 
     private void Awake()
     {
         // Initialize NetworkList
         networkItemData = new NetworkList<ShopItemData>();
-        
+
         view.Initialize();
         presenter = new ShopPresenter(view, model, this);
     }
@@ -59,8 +66,8 @@ public class Shop : NetworkBehaviour
 
         foreach (var item in model.items)
         {
-            var itemData = new ShopItemData(item.Id, item.RemainingQuantity);
-            itemDataIndexMap[item.Id] = networkItemData.Count;
+            var itemData = new ShopItemData(item.ResourceType, item.RemainingQuantity);
+            itemDataIndexMap[item.ResourceType] = networkItemData.Count;
             networkItemData.Add(itemData);
         }
     }
@@ -87,40 +94,40 @@ public class Shop : NetworkBehaviour
     }
 
     /// <summary>
-    /// Gọi từ Presenter để mua item và đồng bộ trên network
+    /// Gọi từ Presenter để mua item theo ResourceType và đồng bộ trên network
     /// </summary>
-    public void BuyItem(string itemId)
+    public void BuyItem(ResourceType resourceType)
     {
         if (!IsServer)
         {
             // Client gọi RPC tới Server
-            BuyItemServerRpc(itemId);
+            BuyItemServerRpc(resourceType);
         }
         else
         {
             // Server xử lý trực tiếp
-            ProcessBuyItem(itemId);
+            ProcessBuyItem(resourceType);
         }
     }
 
     [Rpc(SendTo.Server)]
-    private void BuyItemServerRpc(string itemId)
+    private void BuyItemServerRpc(ResourceType resourceType)
     {
-        ProcessBuyItem(itemId);
+        ProcessBuyItem(resourceType);
     }
 
-    private void ProcessBuyItem(string itemId)
+    private void ProcessBuyItem(ResourceType resourceType)
     {
-        if (!itemDataIndexMap.TryGetValue(itemId, out int index))
+        if (!itemDataIndexMap.TryGetValue(resourceType, out int index))
             return;
 
         if (index < 0 || index >= networkItemData.Count)
             return;
 
         var itemData = networkItemData[index];
-        
+
         // Tìm ShopItem tương ứng
-        var shopItem = model.items.Find(x => x.Id == itemId);
+        var shopItem = model.items.Find(x => x.ResourceType == resourceType);
         if (shopItem == null)
             return;
 
@@ -136,13 +143,25 @@ public class Shop : NetworkBehaviour
         }
 
         // Broadcast event tới tất cả clients
-        OnItemPurchasedClientRpc(itemId);
+        OnItemPurchasedClientRpc(resourceType);
+    }
+
+    [Inject]
+    public void Construct(IResourceService sharedResources, INetworkPool pool)
+    {
+        _sharedResources = sharedResources;
+        _pool = pool;
     }
 
     [Rpc(SendTo.ClientsAndHost)]
-    private void OnItemPurchasedClientRpc(string itemId)
+    private void OnItemPurchasedClientRpc(ResourceType resourceType)
     {
-        Debug.Log($"[Network] Item purchased: {itemId}");
+        Debug.Log($"[Network] Item purchased: {resourceType}");
+        // Cập nhật tài nguyên người chơi
+        if (_sharedResources != null)
+        {
+            _sharedResources.TryAdd(resourceType, 1);
+        }
     }
 
     public NetworkList<ShopItemData> GetNetworkItemData()

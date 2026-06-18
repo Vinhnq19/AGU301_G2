@@ -1,25 +1,24 @@
 using System;
-using Unity.Collections; // Chứa FixedString
 using Unity.Netcode;
+using DungeonBuilder.Core.Enums;
 
 [System.Serializable]
 public struct ShopItemData : IEquatable<ShopItemData>
 {
-    // THAY ĐỔI: Dùng FixedString thay cho string
-    // FixedString32Bytes hỗ trợ chuỗi dài tối đa 32 bytes (rất phù hợp cho ID)
-    public FixedString32Bytes ItemId; 
+    // Loại tài nguyên mà item này cung cấp
+    public ResourceType ResourceType;
     public int RemainingQuantity;
 
-    public ShopItemData(FixedString32Bytes itemId, int remainingQuantity)
+    public ShopItemData(ResourceType resourceType, int remainingQuantity)
     {
-        ItemId = itemId;
+        ResourceType = resourceType;
         RemainingQuantity = remainingQuantity;
     }
 
     // BẮT BUỘC: NetworkList cần hàm này để so sánh xem Item có bị thay đổi không
     public bool Equals(ShopItemData other)
     {
-        return ItemId == other.ItemId && 
+        return ResourceType == other.ResourceType && 
                RemainingQuantity == other.RemainingQuantity;
     }
 }

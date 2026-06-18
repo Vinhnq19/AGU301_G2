@@ -1929,7 +1929,8 @@ MonoBehaviour:
   parentReference:
     TypeName: 
   autoRun: 1
-  autoInjectGameObjects: []
+  autoInjectGameObjects:
+  - {fileID: 1165191036}
   _networkObjectPool: {fileID: 211244836}
   _sharedResourceManager: {fileID: 211244835}
   _coreManager: {fileID: 211244837}

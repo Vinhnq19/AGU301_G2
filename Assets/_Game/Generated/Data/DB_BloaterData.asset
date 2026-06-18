@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: DB_BloaterData
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.EnemyDataSO
   enemyType: 2
-  maxHealth: 90
-  moveSpeed: 2.2
+  maxHealth: 150
+  moveSpeed: 1.0
   rewardToken: 15

@@ -287,9 +287,9 @@ namespace DungeonBuilder.Editor
             prefabs.OreNode = CreateResourceNodePrefab("DB_OreNode", data.OreNode, prefabs.ResourceDrop, sprites.Square, new Color(0.35f, 0.45f, 0.75f));
             prefabs.CrystalNode = CreateResourceNodePrefab("DB_CrystalNode", data.CrystalNode, prefabs.ResourceDrop, sprites.Square, new Color(0.7f, 0.3f, 1f));
 
-            prefabs.Drone = CreateEnemyPrefab<DroneEnemy>("DB_DroneEnemy", data.Drone, sprites.Circle, new Color(0.95f, 0.35f, 0.35f));
-            prefabs.Brute = CreateEnemyPrefab<BruteEnemy>("DB_BruteEnemy", data.Brute, sprites.Capsule, new Color(0.8f, 0.2f, 0.15f));
-            prefabs.MinerBug = CreateEnemyPrefab<MinerBugEnemy>("DB_MinerBugEnemy", data.MinerBug, sprites.Capsule, new Color(0.95f, 0.65f, 0.2f));
+            prefabs.Drone = CreateEnemyPrefab<SpitterEnemy>("DB_SpitterEnemy", data.Drone, sprites.Circle, new Color(0.95f, 0.35f, 0.35f));
+            prefabs.Brute = CreateEnemyPrefab<RunnerEnemy>("DB_RunnerEnemy", data.Brute, sprites.Capsule, new Color(0.8f, 0.2f, 0.15f));
+            prefabs.MinerBug = CreateEnemyPrefab<BloaterEnemy>("DB_BloaterEnemy", data.MinerBug, sprites.Capsule, new Color(0.95f, 0.65f, 0.2f));
 
             prefabs.ArrowTower = CreateTowerPrefab("DB_ArrowTower", sprites.Square, new Color(0.2f, 0.65f, 1f));
             prefabs.CannonTower = CreateTowerPrefab("DB_CannonTower", sprites.Square, new Color(0.15f, 0.15f, 0.18f));
@@ -519,7 +519,14 @@ namespace DungeonBuilder.Editor
 
         private static void ConfigurePool(NetworkObjectPool pool, Transform poolRoot, GeneratedPrefabs prefabs)
         {
-            SetPoolEntries(pool, new[]
+            var arrowBullet = AssetDatabase.LoadAssetAtPath<GameObject>($"{PrefabRoot}/BulletPrefabs/DB_ArrowBullet.prefab")?.GetComponent<NetworkObject>();
+            var cannonBullet = AssetDatabase.LoadAssetAtPath<GameObject>($"{PrefabRoot}/BulletPrefabs/DB_CannonBullet.prefab")?.GetComponent<NetworkObject>();
+            var frostBullet = AssetDatabase.LoadAssetAtPath<GameObject>($"{PrefabRoot}/BulletPrefabs/DB_FrostBullet.prefab")?.GetComponent<NetworkObject>();
+            var enemyProjectile = AssetDatabase.LoadAssetAtPath<GameObject>($"{PrefabRoot}/BulletPrefabs/DB_EnemyProjectile.prefab")?.GetComponent<NetworkObject>();
+            var laserTower = AssetDatabase.LoadAssetAtPath<GameObject>($"{PrefabRoot}/Towers/DB_LaserTower.prefab")?.GetComponent<NetworkObject>();
+            var spikeTrap = AssetDatabase.LoadAssetAtPath<GameObject>($"{PrefabRoot}/Towers/DB_SpikeTrap.prefab")?.GetComponent<NetworkObject>();
+
+            var configs = new List<PoolConfig>
             {
                 new PoolConfig(prefabs.ResourceDrop, 12, poolRoot),
                 new PoolConfig(prefabs.Drone, 12, poolRoot),
@@ -528,19 +535,50 @@ namespace DungeonBuilder.Editor
                 new PoolConfig(prefabs.ArrowTower, 8, poolRoot),
                 new PoolConfig(prefabs.CannonTower, 4, poolRoot),
                 new PoolConfig(prefabs.FrostTower, 4, poolRoot)
-            });
+            };
+
+            if (arrowBullet != null) configs.Add(new PoolConfig(arrowBullet, 15, poolRoot));
+            if (cannonBullet != null) configs.Add(new PoolConfig(cannonBullet, 8, poolRoot));
+            if (frostBullet != null) configs.Add(new PoolConfig(frostBullet, 10, poolRoot));
+            if (enemyProjectile != null) configs.Add(new PoolConfig(enemyProjectile, 20, poolRoot));
+            if (laserTower != null) configs.Add(new PoolConfig(laserTower, 4, poolRoot));
+            if (spikeTrap != null) configs.Add(new PoolConfig(spikeTrap, 4, poolRoot));
+
+            SetPoolEntries(pool, configs);
         }
 
         private static void ConfigureBuildingController(BuildingController building, GeneratedData data, GeneratedPrefabs prefabs)
         {
-            SetObjectArray(building, "_towerData", new Object[] { data.ArrowTower, data.CannonTower, data.FrostTower });
+            var laserData = AssetDatabase.LoadAssetAtPath<TowerDataSO>($"{DataRoot}/TowerData/DB_LaserTowerData.asset");
+            var spikeData = AssetDatabase.LoadAssetAtPath<TowerDataSO>($"{DataRoot}/TowerData/DB_SpikeTrapData.asset");
+
+            var towerDataList = new List<Object> { data.ArrowTower, data.CannonTower, data.FrostTower };
+            if (spikeData != null) towerDataList.Add(spikeData);
+            if (laserData != null) towerDataList.Add(laserData);
+
+            SetObjectArray(building, "_towerData", towerDataList.ToArray());
+
+            var laserPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{PrefabRoot}/Towers/DB_LaserTower.prefab")?.GetComponent<NetworkObject>();
+            var spikePrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{PrefabRoot}/Towers/DB_SpikeTrap.prefab")?.GetComponent<NetworkObject>();
 
             SerializedObject serialized = new SerializedObject(building);
             SerializedProperty entries = serialized.FindProperty("_towerPrefabs");
-            entries.arraySize = 3;
-            SetTowerPrefabEntry(entries.GetArrayElementAtIndex(0), TowerType.Arrow, prefabs.ArrowTower);
-            SetTowerPrefabEntry(entries.GetArrayElementAtIndex(1), TowerType.Cannon, prefabs.CannonTower);
-            SetTowerPrefabEntry(entries.GetArrayElementAtIndex(2), TowerType.Frost, prefabs.FrostTower);
+
+            var prefabConfigs = new List<(TowerType Type, NetworkObject Prefab)>
+            {
+                (TowerType.Arrow, prefabs.ArrowTower),
+                (TowerType.Cannon, prefabs.CannonTower),
+                (TowerType.Frost, prefabs.FrostTower)
+            };
+            if (spikePrefab != null) prefabConfigs.Add((TowerType.SpikeTrap, spikePrefab));
+            if (laserPrefab != null) prefabConfigs.Add((TowerType.Laser, laserPrefab));
+
+            entries.arraySize = prefabConfigs.Count;
+            for (int i = 0; i < prefabConfigs.Count; i++)
+            {
+                SetTowerPrefabEntry(entries.GetArrayElementAtIndex(i), prefabConfigs[i].Type, prefabConfigs[i].Prefab);
+            }
+
             serialized.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(building);
         }

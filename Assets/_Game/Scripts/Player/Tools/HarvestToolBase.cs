@@ -92,7 +92,10 @@ namespace DungeonBuilder.Player.Tools
                 DBLog.Warning($"{ToolType}.click.too-far.{NetworkObjectId}", $"{ToolType} clicked harvest target too far from player. target={clickedTarget.name}, distance={clickedDistance:0.00}, max={_fallbackSearchRadius:0.00}. Searching nearest valid target instead.", 0.5f, clickedTarget);
             }
 
-            int fallbackCount = Physics2D.OverlapCircleNonAlloc(transform.position, _fallbackSearchRadius, _fallbackResults, _targetMask);
+            ContactFilter2D filter = new ContactFilter2D();
+            filter.SetLayerMask(_targetMask);
+            filter.useLayerMask = true;
+            int fallbackCount = Physics2D.OverlapCircle(transform.position, _fallbackSearchRadius, filter, _fallbackResults);
             NetworkObject nearestTarget = null;
             float nearestDistance = float.MaxValue;
 

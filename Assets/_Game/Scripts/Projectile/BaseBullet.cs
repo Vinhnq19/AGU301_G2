@@ -41,12 +41,12 @@ namespace DungeonBuilder.Projectile
             _lifetime = lifetime;
             _targetNetworkObjectId = targetNetworkObjectId;
             _lastKnownTargetPos = spawnPosition;
-            _isActive = false;
+            _isActive = true;
         }
 
         public override void OnNetworkSpawn()
         {
-            _isActive = true;
+            _isActive = IsServer;
             if (IsServer)
             {
                 _lifetimeTimer = _lifetime;

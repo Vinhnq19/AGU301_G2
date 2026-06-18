@@ -13,6 +13,7 @@ namespace Assets._Game.Scripts.Building
     public sealed class TowerModel
     {
         private readonly TowerDataSO _data;
+        private readonly Dictionary<ResourceType, int> _paid = new();
 
         public event Action OnChanged;
 
@@ -31,6 +32,11 @@ namespace Assets._Game.Scripts.Building
         public IReadOnlyList<ResourceCost> UpgradeCost =>
             (IReadOnlyList<ResourceCost>)(_data?.GetUpgradeCostForLevel(Level) ?? Array.Empty<ResourceCost>());
 
+        public int GetPaid(ResourceType type) => _paid.TryGetValue(type, out int v) ? v : 0;
+
+        public bool IsConstructed => BuildCost.Count == 0
+            || BuildCost.All(c => GetPaid(c.type) >= c.amount);
+
         public TowerModel(TowerDataSO data)
         {
             _data = data;
@@ -45,6 +51,16 @@ namespace Assets._Game.Scripts.Building
         public void SetHealth(float health)
         {
             CurrentHealth = health;
+            OnChanged?.Invoke();
+        }
+
+        /// <summary>
+        /// Cap nhat so tien da dong gop cho 1 loai resource.
+        /// Goi tu BaseTower khi NetworkVariable thay doi.
+        /// </summary>
+        public void SetPaid(ResourceType type, int amount)
+        {
+            _paid[type] = amount;
             OnChanged?.Invoke();
         }
     }

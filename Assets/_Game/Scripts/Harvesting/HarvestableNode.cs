@@ -131,12 +131,9 @@ namespace DungeonBuilder.Harvesting
                 return;
             }
 
-            // Spawn() TRƯỚC để NetworkVariable hợp lệ trước khi Configure() ghi vào
-            if (!dropObject.IsSpawned) dropObject.Spawn();
-
             ResourceDrop drop = dropObject.GetComponent<ResourceDrop>();
             drop?.Configure(_data.resourceType, _data.amountPerHit);
-
+            dropObject.Spawn();
             DBLog.Info($"node.drop.spawn.{NetworkObjectId}", $"Spawned resource drop. dropId={dropObject.NetworkObjectId}, type={_data.resourceType}, amount={_data.amountPerHit}.", 0.2f, dropObject);
         }
 

@@ -90,15 +90,13 @@ namespace DungeonBuilder.UI.TowerSelection
             if (_catalog == null) return;
             foreach (TowerDataSO data in _catalog.Towers)
             {
-                bool canAfford = _resources.CanAfford(data.buildCost);
-                Model.UpdateAffordability(data, canAfford);
+                Model.UpdateAffordability(data, true);
             }
         }
 
         private void HandleResourceChanged(ResourceChanged change)
         {
             if (!Model.IsOpen) return;
-            RefreshAffordability();
             Model.NotifyAffordabilityChanged();
         }
     }

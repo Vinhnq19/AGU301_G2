@@ -1,12 +1,11 @@
 using DungeonBuilder.Core.Debugging;
-using DungeonBuilder.Core.Interfaces;
 using Unity.Netcode;
 using UnityEngine;
 using VContainer;
 
 namespace DungeonBuilder.Core
 {
-    public sealed class CoreManager : NetworkBehaviour, IDamageable
+    public sealed class CoreManager : NetworkBehaviour
     {
         [SerializeField, Min(1)] private int _maxHealth = 100;
 
@@ -42,7 +41,7 @@ namespace DungeonBuilder.Core
             _currentHealth.OnValueChanged -= HandleHealthChanged;
         }
 
-        public void TakeDamage(float amount, ulong attackerClientId = 0)
+        public void TakeDamage(float amount)
         {
             if (!IsServer || amount <= 0f)
             {

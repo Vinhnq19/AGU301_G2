@@ -4,8 +4,6 @@ namespace DungeonBuilder.Core.Enums
     {
         Arrow,
         Cannon,
-        Frost,
-        SpikeTrap,
-        Laser
+        Frost
     }
 }

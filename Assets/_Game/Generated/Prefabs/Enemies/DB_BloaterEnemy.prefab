@@ -274,12 +274,11 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9f7255a186ddb1d4c9c358c43b48deae, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Enemy.Types.BloaterEnemy
+  m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Enemy.Types.MinerBugEnemy
   ShowTopMostFoldoutHeaderGroup: 1
-  _data: {fileID: 11400000, guid: b8c98ff13bcf7504a8e851105f946f22, type: 2}
+  _data: {fileID: 11400000, guid: b461a4b7f520b324ea69eb44f9e98cad, type: 2}
   _coreTarget: {fileID: 0}
   _visual: {fileID: 6975265989002531296}
   _attackRange: 1.25
   _attackDamage: 10
   _attackInterval: 1
-  _projectilePrefab: {fileID: 0}

@@ -28,6 +28,12 @@ namespace Assets._Game.Scripts.Building
         [SerializeField] private Button _removeButton;
         [SerializeField] private TMP_Text _upgradeCostText;
 
+        [Header("Construction Panel")]
+        [SerializeField] private GameObject _constructionPanel;
+        [SerializeField] private TMP_Text _constructionProgressText;
+        [SerializeField] private Button _contributeButton;
+        [SerializeField] private Button _constructionRemoveButton;
+
         private TowerPresenter _presenter;
         private bool _isProximityUiVisible = false;
         private CanvasGroup _actionPanelGroup;
@@ -81,6 +87,18 @@ namespace Assets._Game.Scripts.Building
                 _removeButton.onClick.RemoveAllListeners();
                 _removeButton.onClick.AddListener(() => _presenter?.RequestRemove());
             }
+
+            if (_contributeButton != null)
+            {
+                _contributeButton.onClick.RemoveAllListeners();
+                _contributeButton.onClick.AddListener(() => _presenter?.RequestContribute());
+            }
+
+            if (_constructionRemoveButton != null)
+            {
+                _constructionRemoveButton.onClick.RemoveAllListeners();
+                _constructionRemoveButton.onClick.AddListener(() => _presenter?.RequestRemove());
+            }
         }
 
         /// <summary>
@@ -118,7 +136,7 @@ namespace Assets._Game.Scripts.Building
 
             if (_upgradeButton != null)
             {
-                _upgradeButton.interactable = model.CanUpgrade;
+                _upgradeButton.interactable = model.CanUpgrade && model.IsConstructed;
             }
 
             if (_upgradeCostText != null)
@@ -137,6 +155,31 @@ namespace Assets._Game.Scripts.Building
             }
         }
 
+        /// <summary>
+        /// Cap nhat Construction Panel theo tien do dong gop tai nguyen.
+        /// Hien construction panel khi chua xay xong, an khi da active.
+        /// </summary>
+        public void RenderConstruction(TowerModel model)
+        {
+            if (model == null) return;
+
+            bool done = model.IsConstructed;
+            _constructionPanel?.SetActive(!done);
+
+            if (!done && _constructionProgressText != null)
+            {
+                string progress = model.BuildCost.Count > 0
+                    ? string.Join("  ", model.BuildCost.Select(c =>
+                        $"{model.GetPaid(c.type)}/{c.amount}{ResourceCost.Abbr(c.type)}"))
+                    : "";
+                _constructionProgressText.text = progress;
+            }
+        }
+
+        /// <summary>
+        /// Toggle panel Upgrade/Remove. Chi goi khi tower da IsConstructed.
+        /// Goi tu TowerPresenter.OnPointerClick() tren root.
+        /// </summary>
         public void TogglePanel()
         {
             if (_actionPanel == null) return;

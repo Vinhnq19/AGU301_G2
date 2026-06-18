@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.EnemyDataSO
   enemyType: 1
   maxHealth: 60
-  moveSpeed: 1.5
+  moveSpeed: 3
   rewardToken: 3

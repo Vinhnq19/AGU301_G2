@@ -25,7 +25,6 @@ namespace DungeonBuilder.Wave
         [SerializeField] private WaveCatalogSO _waveCatalog;
         [SerializeField] private EnemyPrefabMapping[] _enemyPrefabMappings;
         [SerializeField] private EnemyPath[] _enemyPaths;
-        public EnemyPath[] EnemyPaths => _enemyPaths;
         [SerializeField] private Transform _coreTarget;
         [SerializeField] private Transform[] _spawnPoints;
 

@@ -29,7 +29,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.4, y: 0.4, z: 0.4}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 7192280832303012503}
@@ -74,7 +74,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Projectile.BaseBullet
   ShowTopMostFoldoutHeaderGroup: 1
   _visual: {fileID: 7192280832303012503}
-  _autoRotate: 1
+  _hitRadius: 0.4
 --- !u!58 &7846262380657018043
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -136,13 +136,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7222273147276146945}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0.38268343, w: 0.92387956}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.5, y: 1.5, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4563095160786280877}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 45}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &4005682030045055447
 SpriteRenderer:
   serializedVersion: 2
@@ -188,12 +188,12 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: -1415411323
-  m_SortingLayer: 2
-  m_SortingOrder: 100
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -4346244404228752641, guid: 3b35eb0fd1958b14786b6d6dd860d0e2, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
+  m_Color: {r: 0.2, g: 1, b: 0.49803922, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

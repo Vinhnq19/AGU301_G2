@@ -68,7 +68,5 @@
         "*.slnx": "*.csproj"
     },
     "dotnet.defaultSolution": "AGU301_G2.slnx",
-    "dotrush.roslyn.projectOrSolutionFiles": [
-        "d:\\Unity\\AGU301_G2\\AGU301_G2.sln"
-    ]
+    "dotrush.roslyn.projectOrSolutionFiles": []
 }

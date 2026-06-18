@@ -44,6 +44,7 @@ namespace DungeonBuilder.Building
 
         public int CurrentLevel => _currentLevel.Value;
         public bool CanUpgrade  => _data != null && _currentLevel.Value < _data.maxLevel;
+        public virtual bool IsTargetable => true;
 
         protected virtual void Awake()
         {
@@ -107,7 +108,7 @@ namespace DungeonBuilder.Building
 
         public void TakeDamage(float amount, ulong attackerClientId = 0)
         {
-            if (!IsServer) return;
+            if (!IsServer || !IsTargetable) return;
             
             _health.Value -= amount;
             DBLog.Info($"tower.damage.{NetworkObjectId}", $"[BaseTower] Took {amount} damage. HP: {_health.Value}/{_model.MaxHealth}.", 0.2f, this);

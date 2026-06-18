@@ -11,6 +11,8 @@ namespace DungeonBuilder.Building
     {
         [SerializeField] private Vector3 _origin;
         [SerializeField, Min(0.1f)] private float _cellSize = 1f;
+        [Tooltip("Neo (Anchor) của ô lưới. Mặc định Tilemap Unity là (0.5, 0.5) ở giữa ô.")]
+        [SerializeField] private Vector2 _cellAnchor = new Vector2(0.5f, 0.5f);
         [SerializeField] private Vector2Int _minBounds = new(-50, -50);
         [SerializeField] private Vector2Int _maxBounds = new(50, 50);
 
@@ -109,12 +111,14 @@ namespace DungeonBuilder.Building
 
         public Vector3 GridToWorld(Vector2Int position)
         {
-            return _origin + new Vector3(position.x * _cellSize, position.y * _cellSize, 0f);
+            Vector3 anchorOffset = new Vector3(_cellAnchor.x * _cellSize, _cellAnchor.y * _cellSize, 0f);
+            return _origin + anchorOffset + new Vector3(position.x * _cellSize, position.y * _cellSize, 0f);
         }
 
         public Vector2Int WorldToGrid(Vector3 worldPosition)
         {
-            Vector3 local = worldPosition - _origin;
+            Vector3 anchorOffset = new Vector3(_cellAnchor.x * _cellSize, _cellAnchor.y * _cellSize, 0f);
+            Vector3 local = worldPosition - _origin - anchorOffset;
             return new Vector2Int(
                 Mathf.RoundToInt(local.x / _cellSize),
                 Mathf.RoundToInt(local.y / _cellSize));

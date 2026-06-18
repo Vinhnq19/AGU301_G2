@@ -24,6 +24,8 @@ namespace DungeonBuilder.Building
         private ContactFilter2D _aoeFilter;
         private Vector3 _initialScale;
 
+        public override bool IsTargetable => false;
+
         protected override void Awake()
         {
             base.Awake();

@@ -50,11 +50,10 @@ namespace DungeonBuilder.Editor
 
                 if (EditorGUI.EndChangeCheck())
                 {
-                    // Snap vị trí mới về giao điểm lưới gần nhất
-                    Vector3 local   = newPos - origin;
-                    int     gx      = Mathf.RoundToInt(local.x / cellSize);
-                    int     gy      = Mathf.RoundToInt(local.y / cellSize);
-                    Vector3 snapped = origin + new Vector3(gx * cellSize, gy * cellSize, oldPos.z);
+                    // Sử dụng hàm chuẩn từ GridManager để đảm bảo khớp Anchor offset
+                    Vector2Int gridPos = _gridManager.WorldToGrid(newPos);
+                    Vector3 snapped = _gridManager.GridToWorld(gridPos);
+                    snapped.z = oldPos.z;
 
                     Undo.RecordObject(spot, "Move Grid Spot");
                     spot.position = snapped;
@@ -111,10 +110,9 @@ namespace DungeonBuilder.Editor
                 SerializedProperty element = spotsProp.GetArrayElementAtIndex(i);
                 if (element.objectReferenceValue is not Transform spot) continue;
 
-                Vector3 local    = spot.position - origin;
-                int     gx       = Mathf.RoundToInt(local.x / cellSize);
-                int     gy       = Mathf.RoundToInt(local.y / cellSize);
-                Vector3 snappedP = origin + new Vector3(gx * cellSize, gy * cellSize, spot.position.z);
+                Vector2Int gridPos = _gridManager.WorldToGrid(spot.position);
+                Vector3 snappedP = _gridManager.GridToWorld(gridPos);
+                snappedP.z = spot.position.z;
 
                 if (Vector3.Distance(spot.position, snappedP) > 0.001f)
                 {

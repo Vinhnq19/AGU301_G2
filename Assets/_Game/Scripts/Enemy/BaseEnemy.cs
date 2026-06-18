@@ -40,6 +40,21 @@ namespace Assets._Game.Scripts.Enemy
         private int _currentWaypointIndex;
         protected DungeonBuilder.Building.BaseTower _currentBlocker;
 
+        private Tween _knockbackTween;
+        private Tween _stunTween;
+        private Tween _slowTween;
+        private Vector3 _initialScale = Vector3.one;
+        private bool _hasCachedScale;
+
+        private void CacheInitialScaleIfNeeded()
+        {
+            if (!_hasCachedScale && _visual != null)
+            {
+                _initialScale = _visual.localScale;
+                _hasCachedScale = true;
+            }
+        }
+
         public EnemyType EnemyType => _data != null ? _data.enemyType : EnemyType.Drone;
         public float MoveSpeed => (_data != null ? _data.moveSpeed : 2f) * _slowMultiplier;
         public Transform Visual => _visual;
@@ -126,11 +141,13 @@ namespace Assets._Game.Scripts.Enemy
             _currentWaypointIndex = 0;
             SetPhysicsActive(true);
 
+            CacheInitialScaleIfNeeded();
+
             if (_visual != null)
             {
                 _visual.DOKill();
                 _visual.localPosition = Vector3.zero;
-                _visual.localScale = Vector3.one;
+                _visual.localScale = _initialScale;
             }
         }
 
@@ -143,6 +160,8 @@ namespace Assets._Game.Scripts.Enemy
             _currentPathWaypoints = null;
             _currentWaypointIndex = 0;
 
+            CacheInitialScaleIfNeeded();
+
             if (_visual == null)
             {
                 return;
@@ -150,7 +169,7 @@ namespace Assets._Game.Scripts.Enemy
 
             _visual.DOKill();
             _visual.localPosition = Vector3.zero;
-            _visual.localScale = Vector3.one;
+            _visual.localScale = _initialScale;
         }
 
         public void ChangeState(IEnemyState nextState)
@@ -264,8 +283,9 @@ namespace Assets._Game.Scripts.Enemy
                 return;
             }
 
-            _visual.DOKill();
-            _visual.DOLocalMove(_visual.localPosition + localOffset, duration)
+            _knockbackTween?.Kill();
+            _visual.localPosition = Vector3.zero;
+            _knockbackTween = _visual.DOLocalMove(localOffset, duration)
                 .SetEase(Ease.OutQuad)
                 .OnComplete(() => _visual.localPosition = Vector3.zero);
         }
@@ -290,8 +310,9 @@ namespace Assets._Game.Scripts.Enemy
                 return;
             }
 
-            _visual.DOKill();
-            _visual.DOPunchPosition(Vector3.right * 0.08f, 0.25f, 8, 0.5f);
+            _stunTween?.Kill();
+            _visual.localPosition = Vector3.zero;
+            _stunTween = _visual.DOPunchPosition(Vector3.right * 0.08f, 0.25f, 8, 0.5f);
         }
 
         /// <summary>
@@ -321,8 +342,10 @@ namespace Assets._Game.Scripts.Enemy
         private void PlaySlowFeedbackClientRpc()
         {
             if (_visual == null) return;
-            _visual.DOKill();
-            _visual.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f);
+            CacheInitialScaleIfNeeded();
+            _slowTween?.Kill();
+            _visual.localScale = _initialScale;
+            _slowTween = _visual.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.5f);
         }
 
         private void ResetEnemy()

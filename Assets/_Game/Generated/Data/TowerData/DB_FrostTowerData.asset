@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DB_FrostTowerData
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.TowerDataSO
   towerType: 2
-  maxHealth: 150
+  maxHealth: 750
   damage: 30
   range: 12
   attackRate: 1.5

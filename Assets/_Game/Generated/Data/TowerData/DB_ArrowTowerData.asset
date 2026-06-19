@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DB_ArrowTowerData
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.TowerDataSO
   towerType: 0
-  maxHealth: 100
+  maxHealth: 500
   damage: 25
   range: 10
   attackRate: 1.5

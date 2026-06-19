@@ -39,8 +39,10 @@ namespace DungeonBuilder.Building
         protected TowerModel _model;
         private TowerPresenter _presenter;
         private TowerView _view;
+        private Vector2Int _gridPosition;
 
         [Inject] protected INetworkPool _pool;
+        [Inject] protected GridManager _grid;
 
         public int CurrentLevel => _currentLevel.Value;
         public bool CanUpgrade  => _data != null && _currentLevel.Value < _data.maxLevel;
@@ -93,6 +95,7 @@ namespace DungeonBuilder.Building
         /// <summary>Goi boi BuildingController sau tower.Spawn().</summary>
         public void OnPlaced(Vector2Int gridPosition)
         {
+            _gridPosition = gridPosition;
             DBLog.Info($"tower.placed.{NetworkObjectId}", $"[BaseTower] Tower placed at grid={gridPosition}.", 0f, this);
         }
 
@@ -123,6 +126,12 @@ namespace DungeonBuilder.Building
         {
             if (!IsServer) return;
             DBLog.Info($"tower.die.{NetworkObjectId}", $"[BaseTower] Destroyed.", 0f, this);
+
+            if (_grid != null)
+            {
+                _grid.ClearTower(_gridPosition);
+            }
+
             if (_pool != null)
             {
                 _pool.Return(NetworkObject);

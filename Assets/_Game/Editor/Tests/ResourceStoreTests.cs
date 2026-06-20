@@ -17,7 +17,7 @@ namespace DungeonBuilder.Tests
             Assert.That(store.GetSnapshot().Keys, Is.EquivalentTo(ResourceTypeUtility.All));
             Assert.That(store.GetSnapshot().ContainsKey(ResourceType.MAX), Is.False);
             Assert.That(store.GetSnapshot().ContainsKey(ResourceType.Coin), Is.True);
-            Assert.That(store.GetSnapshot().ContainsKey(ResourceType.Tokken), Is.True);
+            Assert.That(store.GetSnapshot().ContainsKey(ResourceType.Token), Is.True);
         }
 
         [Test]

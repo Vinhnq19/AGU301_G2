@@ -216,7 +216,7 @@ namespace DungeonBuilder.Editor
                 case ResourceType.Iron: return new Color(0.75f, 0.78f, 0.82f);
                 case ResourceType.BlueGems: return new Color(0.30f, 0.55f, 1.00f);
                 case ResourceType.PurpleGems: return new Color(0.65f, 0.30f, 0.90f);
-                case ResourceType.Tokken: return new Color(1.00f, 0.85f, 0.25f);
+                case ResourceType.Token: return new Color(1.00f, 0.85f, 0.25f);
                 case ResourceType.Coin: return new Color(1.00f, 0.78f, 0.10f);
                 default: return Color.white;
             }

@@ -1,0 +1,520 @@
+fileFormatVersion: 2
+guid: 095aa635f69e6e647865de98ec5f661d
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 8441131743317300083
+    second: Walls_And_Floors_0
+  - first:
+      213: 8382947517160015843
+    second: Walls_And_Floors_1
+  - first:
+      213: 1166750728909749061
+    second: Walls_And_Floors_2
+  - first:
+      213: -202482898247467979
+    second: Walls_And_Floors_3
+  - first:
+      213: -2054467094365286629
+    second: Walls_And_Floors_4
+  - first:
+      213: 1505658191790396871
+    second: Walls_And_Floors_5
+  - first:
+      213: -4711921356177891042
+    second: Walls_And_Floors_6
+  - first:
+      213: -1867375939982075326
+    second: Walls_And_Floors_7
+  - first:
+      213: -8224509138729684124
+    second: Walls_And_Floors_8
+  - first:
+      213: -4076850489090180944
+    second: Walls_And_Floors_9
+  - first:
+      213: 3681381474043614049
+    second: Walls_And_Floors_10
+  - first:
+      213: 8231597286320328723
+    second: Walls_And_Floors_11
+  - first:
+      213: -5038988800547792492
+    second: Walls_And_Floors_12
+  - first:
+      213: -9160744636123916482
+    second: Walls_And_Floors_13
+  - first:
+      213: 2003317284341327218
+    second: Walls_And_Floors_14
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Walls_And_Floors_0
+      rect:
+        serializedVersion: 2
+        x: 10
+        y: 220
+        width: 55
+        height: 136
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 37393b6f89ce42570800000000000000
+      internalID: 8441131743317300083
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Walls_And_Floors_1
+      rect:
+        serializedVersion: 2
+        x: 95
+        y: 220
+        width: 55
+        height: 136
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3e7c0132a56365470800000000000000
+      internalID: 8382947517160015843
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Walls_And_Floors_2
+      rect:
+        serializedVersion: 2
+        x: 170
+        y: 220
+        width: 55
+        height: 136
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 54bf7123b91213010800000000000000
+      internalID: 1166750728909749061
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Walls_And_Floors_3
+      rect:
+        serializedVersion: 2
+        x: 255
+        y: 220
+        width: 55
+        height: 136
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 53c3ed870e2a03df0800000000000000
+      internalID: -202482898247467979
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Walls_And_Floors_4
+      rect:
+        serializedVersion: 2
+        x: 330
+        y: 220
+        width: 55
+        height: 136
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b1fc0ad00111d73e0800000000000000
+      internalID: -2054467094365286629
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Walls_And_Floors_5
+      rect:
+        serializedVersion: 2
+        x: 415
+        y: 220
+        width: 55
+        height: 136
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7c5d2dae52c25e410800000000000000
+      internalID: 1505658191790396871
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Walls_And_Floors_6
+      rect:
+        serializedVersion: 2
+        x: 10
+        y: 108
+        width: 60
+        height: 88
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e11a07bcd74eb9eb0800000000000000
+      internalID: -4711921356177891042
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Walls_And_Floors_7
+      rect:
+        serializedVersion: 2
+        x: 90
+        y: 108
+        width: 60
+        height: 88
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24ad143f97fb516e0800000000000000
+      internalID: -1867375939982075326
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Walls_And_Floors_8
+      rect:
+        serializedVersion: 2
+        x: 170
+        y: 108
+        width: 60
+        height: 88
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 463301e738cacdd80800000000000000
+      internalID: -8224509138729684124
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Walls_And_Floors_9
+      rect:
+        serializedVersion: 2
+        x: 250
+        y: 108
+        width: 60
+        height: 88
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0b8f66b841e1c67c0800000000000000
+      internalID: -4076850489090180944
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Walls_And_Floors_10
+      rect:
+        serializedVersion: 2
+        x: 330
+        y: 108
+        width: 60
+        height: 88
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 163d21322f4e61330800000000000000
+      internalID: 3681381474043614049
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Walls_And_Floors_11
+      rect:
+        serializedVersion: 2
+        x: 410
+        y: 108
+        width: 60
+        height: 88
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 31051397e128c3270800000000000000
+      internalID: 8231597286320328723
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Walls_And_Floors_12
+      rect:
+        serializedVersion: 2
+        x: 31
+        y: 15
+        width: 98
+        height: 82
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4995d24326ae11ab0800000000000000
+      internalID: -5038988800547792492
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Walls_And_Floors_13
+      rect:
+        serializedVersion: 2
+        x: 191
+        y: 15
+        width: 98
+        height: 82
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e37d4c50a4f7ed080800000000000000
+      internalID: -9160744636123916482
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Walls_And_Floors_14
+      rect:
+        serializedVersion: 2
+        x: 351
+        y: 15
+        width: 98
+        height: 82
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 275a091c4763dcb10800000000000000
+      internalID: 2003317284341327218
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Walls_And_Floors_0: 8441131743317300083
+      Walls_And_Floors_1: 8382947517160015843
+      Walls_And_Floors_10: 3681381474043614049
+      Walls_And_Floors_11: 8231597286320328723
+      Walls_And_Floors_12: -5038988800547792492
+      Walls_And_Floors_13: -9160744636123916482
+      Walls_And_Floors_14: 2003317284341327218
+      Walls_And_Floors_2: 1166750728909749061
+      Walls_And_Floors_3: -202482898247467979
+      Walls_And_Floors_4: -2054467094365286629
+      Walls_And_Floors_5: 1505658191790396871
+      Walls_And_Floors_6: -4711921356177891042
+      Walls_And_Floors_7: -1867375939982075326
+      Walls_And_Floors_8: -8224509138729684124
+      Walls_And_Floors_9: -4076850489090180944
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

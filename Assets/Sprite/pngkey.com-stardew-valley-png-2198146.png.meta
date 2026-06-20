@@ -1,0 +1,2810 @@
+fileFormatVersion: 2
+guid: 016cfb6c7bcb8a5448a5abd37f6e8105
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -2222063343273938780
+    second: pngkey.com-stardew-valley-png-2198146_0
+  - first:
+      213: -946468906079375106
+    second: pngkey.com-stardew-valley-png-2198146_1
+  - first:
+      213: -4674090733877670263
+    second: pngkey.com-stardew-valley-png-2198146_2
+  - first:
+      213: 4206399235965869327
+    second: pngkey.com-stardew-valley-png-2198146_3
+  - first:
+      213: -2778219434723827530
+    second: pngkey.com-stardew-valley-png-2198146_4
+  - first:
+      213: 4517772241417075035
+    second: pngkey.com-stardew-valley-png-2198146_5
+  - first:
+      213: 4371122471485898046
+    second: pngkey.com-stardew-valley-png-2198146_6
+  - first:
+      213: 3087846247022026119
+    second: pngkey.com-stardew-valley-png-2198146_7
+  - first:
+      213: 5306260279870979506
+    second: pngkey.com-stardew-valley-png-2198146_8
+  - first:
+      213: 5282852284988494366
+    second: pngkey.com-stardew-valley-png-2198146_9
+  - first:
+      213: 5005777315723779842
+    second: pngkey.com-stardew-valley-png-2198146_10
+  - first:
+      213: -3155330637602796970
+    second: pngkey.com-stardew-valley-png-2198146_11
+  - first:
+      213: 8182528736764641569
+    second: pngkey.com-stardew-valley-png-2198146_12
+  - first:
+      213: -3803722204996484288
+    second: pngkey.com-stardew-valley-png-2198146_13
+  - first:
+      213: -7278127277622832579
+    second: pngkey.com-stardew-valley-png-2198146_14
+  - first:
+      213: 4644399666332101820
+    second: pngkey.com-stardew-valley-png-2198146_15
+  - first:
+      213: -9019985335407131101
+    second: pngkey.com-stardew-valley-png-2198146_16
+  - first:
+      213: 2496391300874410762
+    second: pngkey.com-stardew-valley-png-2198146_17
+  - first:
+      213: -6795185217016504169
+    second: pngkey.com-stardew-valley-png-2198146_18
+  - first:
+      213: -3998698479687797801
+    second: pngkey.com-stardew-valley-png-2198146_19
+  - first:
+      213: 8993689783024320994
+    second: pngkey.com-stardew-valley-png-2198146_20
+  - first:
+      213: 4803771309701461384
+    second: pngkey.com-stardew-valley-png-2198146_21
+  - first:
+      213: -5176068236406614413
+    second: pngkey.com-stardew-valley-png-2198146_22
+  - first:
+      213: -8552793620220425612
+    second: pngkey.com-stardew-valley-png-2198146_23
+  - first:
+      213: -2053241015609345188
+    second: pngkey.com-stardew-valley-png-2198146_24
+  - first:
+      213: -9017655523634967871
+    second: pngkey.com-stardew-valley-png-2198146_25
+  - first:
+      213: -5666796969638168597
+    second: pngkey.com-stardew-valley-png-2198146_26
+  - first:
+      213: 5203025292580527728
+    second: pngkey.com-stardew-valley-png-2198146_27
+  - first:
+      213: 9005651266758420016
+    second: pngkey.com-stardew-valley-png-2198146_28
+  - first:
+      213: 8156093371870606742
+    second: pngkey.com-stardew-valley-png-2198146_29
+  - first:
+      213: -7892788514255647861
+    second: pngkey.com-stardew-valley-png-2198146_30
+  - first:
+      213: -1703567448114584636
+    second: pngkey.com-stardew-valley-png-2198146_31
+  - first:
+      213: -5893387828066467174
+    second: pngkey.com-stardew-valley-png-2198146_32
+  - first:
+      213: 8767150503163447473
+    second: pngkey.com-stardew-valley-png-2198146_33
+  - first:
+      213: -7186890377559180675
+    second: pngkey.com-stardew-valley-png-2198146_34
+  - first:
+      213: 3711373030841522042
+    second: pngkey.com-stardew-valley-png-2198146_35
+  - first:
+      213: -4016470103283568288
+    second: pngkey.com-stardew-valley-png-2198146_36
+  - first:
+      213: -8483851277472384720
+    second: pngkey.com-stardew-valley-png-2198146_37
+  - first:
+      213: 7507476783014265356
+    second: pngkey.com-stardew-valley-png-2198146_38
+  - first:
+      213: 6034348803952015867
+    second: pngkey.com-stardew-valley-png-2198146_39
+  - first:
+      213: 4567297137341354104
+    second: pngkey.com-stardew-valley-png-2198146_40
+  - first:
+      213: -1294174685771840671
+    second: pngkey.com-stardew-valley-png-2198146_41
+  - first:
+      213: 3252535783823370826
+    second: pngkey.com-stardew-valley-png-2198146_42
+  - first:
+      213: 1499364640470119098
+    second: pngkey.com-stardew-valley-png-2198146_43
+  - first:
+      213: -4449519312714148361
+    second: pngkey.com-stardew-valley-png-2198146_44
+  - first:
+      213: -3803846444887695358
+    second: pngkey.com-stardew-valley-png-2198146_45
+  - first:
+      213: 6064259554354369770
+    second: pngkey.com-stardew-valley-png-2198146_46
+  - first:
+      213: -5125316616904724915
+    second: pngkey.com-stardew-valley-png-2198146_47
+  - first:
+      213: 5755831517163741686
+    second: pngkey.com-stardew-valley-png-2198146_48
+  - first:
+      213: -6260184622043835420
+    second: pngkey.com-stardew-valley-png-2198146_49
+  - first:
+      213: 5617811845392734341
+    second: pngkey.com-stardew-valley-png-2198146_50
+  - first:
+      213: 6931369661683303207
+    second: pngkey.com-stardew-valley-png-2198146_51
+  - first:
+      213: 1093607647303351734
+    second: pngkey.com-stardew-valley-png-2198146_52
+  - first:
+      213: 8430313089432925221
+    second: pngkey.com-stardew-valley-png-2198146_53
+  - first:
+      213: 8439391234754796796
+    second: pngkey.com-stardew-valley-png-2198146_54
+  - first:
+      213: 5438387806530946074
+    second: pngkey.com-stardew-valley-png-2198146_55
+  - first:
+      213: -7960514110219602011
+    second: pngkey.com-stardew-valley-png-2198146_56
+  - first:
+      213: -7752053138928779100
+    second: pngkey.com-stardew-valley-png-2198146_57
+  - first:
+      213: -6027821672574473546
+    second: pngkey.com-stardew-valley-png-2198146_58
+  - first:
+      213: -5040679656600396605
+    second: pngkey.com-stardew-valley-png-2198146_59
+  - first:
+      213: -7363156933072619308
+    second: pngkey.com-stardew-valley-png-2198146_60
+  - first:
+      213: -1815947100909067598
+    second: pngkey.com-stardew-valley-png-2198146_61
+  - first:
+      213: -5100164001787477536
+    second: pngkey.com-stardew-valley-png-2198146_62
+  - first:
+      213: 997027301362933972
+    second: pngkey.com-stardew-valley-png-2198146_63
+  - first:
+      213: 338783299826381568
+    second: pngkey.com-stardew-valley-png-2198146_64
+  - first:
+      213: -1972165314051335203
+    second: pngkey.com-stardew-valley-png-2198146_65
+  - first:
+      213: 111004610377158628
+    second: pngkey.com-stardew-valley-png-2198146_66
+  - first:
+      213: 9195916022135458157
+    second: pngkey.com-stardew-valley-png-2198146_67
+  - first:
+      213: 5458010924999124448
+    second: pngkey.com-stardew-valley-png-2198146_68
+  - first:
+      213: 1487439387641624470
+    second: pngkey.com-stardew-valley-png-2198146_69
+  - first:
+      213: -327832998617207512
+    second: pngkey.com-stardew-valley-png-2198146_70
+  - first:
+      213: -5715489680445744018
+    second: pngkey.com-stardew-valley-png-2198146_71
+  - first:
+      213: -4354870981695392350
+    second: pngkey.com-stardew-valley-png-2198146_72
+  - first:
+      213: -8218485068492541037
+    second: pngkey.com-stardew-valley-png-2198146_73
+  - first:
+      213: 320012172604608265
+    second: pngkey.com-stardew-valley-png-2198146_74
+  - first:
+      213: 7246880326533323893
+    second: pngkey.com-stardew-valley-png-2198146_75
+  - first:
+      213: -2565690285654694306
+    second: pngkey.com-stardew-valley-png-2198146_76
+  - first:
+      213: -4615699003385971947
+    second: pngkey.com-stardew-valley-png-2198146_77
+  - first:
+      213: -7439911695888264892
+    second: pngkey.com-stardew-valley-png-2198146_78
+  - first:
+      213: -2342362927492828865
+    second: pngkey.com-stardew-valley-png-2198146_79
+  - first:
+      213: -5725163111356231568
+    second: pngkey.com-stardew-valley-png-2198146_80
+  - first:
+      213: 7431283891790010523
+    second: pngkey.com-stardew-valley-png-2198146_81
+  - first:
+      213: -847191183514274570
+    second: pngkey.com-stardew-valley-png-2198146_82
+  - first:
+      213: -1691543837052519712
+    second: pngkey.com-stardew-valley-png-2198146_83
+  - first:
+      213: -2654019049767023579
+    second: pngkey.com-stardew-valley-png-2198146_84
+  - first:
+      213: -5206486855073170738
+    second: pngkey.com-stardew-valley-png-2198146_85
+  - first:
+      213: -1453789585653757917
+    second: pngkey.com-stardew-valley-png-2198146_86
+  - first:
+      213: -6105004442700535265
+    second: pngkey.com-stardew-valley-png-2198146_87
+  - first:
+      213: 22572818439711682
+    second: pngkey.com-stardew-valley-png-2198146_88
+  - first:
+      213: -2744311024919711217
+    second: pngkey.com-stardew-valley-png-2198146_89
+  - first:
+      213: -300462095184794829
+    second: pngkey.com-stardew-valley-png-2198146_90
+  - first:
+      213: -8312396443386527613
+    second: pngkey.com-stardew-valley-png-2198146_91
+  - first:
+      213: -4825349017470245054
+    second: pngkey.com-stardew-valley-png-2198146_92
+  - first:
+      213: 1520566445582064410
+    second: pngkey.com-stardew-valley-png-2198146_93
+  - first:
+      213: 2581488670872328836
+    second: pngkey.com-stardew-valley-png-2198146_94
+  - first:
+      213: -4550934065272668713
+    second: pngkey.com-stardew-valley-png-2198146_95
+  - first:
+      213: -1564994567870372149
+    second: pngkey.com-stardew-valley-png-2198146_96
+  - first:
+      213: -6405393651290626475
+    second: pngkey.com-stardew-valley-png-2198146_97
+  - first:
+      213: 139679692538243021
+    second: pngkey.com-stardew-valley-png-2198146_98
+  - first:
+      213: 1465782720742948861
+    second: pngkey.com-stardew-valley-png-2198146_99
+  - first:
+      213: -6818516170178734469
+    second: pngkey.com-stardew-valley-png-2198146_100
+  - first:
+      213: -4933221264390416172
+    second: pngkey.com-stardew-valley-png-2198146_101
+  - first:
+      213: 5897746709906046576
+    second: pngkey.com-stardew-valley-png-2198146_102
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_0
+      rect:
+        serializedVersion: 2
+        x: 177
+        y: 320
+        width: 144
+        height: 240
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4a07dbb8925a921e0800000000000000
+      internalID: -2222063343273938780
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_1
+      rect:
+        serializedVersion: 2
+        x: 323
+        y: 481
+        width: 46
+        height: 77
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ef0bf266b877dd2f0800000000000000
+      internalID: -946468906079375106
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_2
+      rect:
+        serializedVersion: 2
+        x: 370
+        y: 553
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 98ec64fed3b422fb0800000000000000
+      internalID: -4674090733877670263
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_3
+      rect:
+        serializedVersion: 2
+        x: 378
+        y: 553
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f0d583391d1206a30800000000000000
+      internalID: 4206399235965869327
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_4
+      rect:
+        serializedVersion: 2
+        x: 386
+        y: 553
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6b0233dc428c179d0800000000000000
+      internalID: -2778219434723827530
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_5
+      rect:
+        serializedVersion: 2
+        x: 394
+        y: 553
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b59f8c9dae952be30800000000000000
+      internalID: 4517772241417075035
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_6
+      rect:
+        serializedVersion: 2
+        x: 402
+        y: 553
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e3df4a68ab859ac30800000000000000
+      internalID: 4371122471485898046
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_7
+      rect:
+        serializedVersion: 2
+        x: 410
+        y: 553
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 78d55c23dcb3ada20800000000000000
+      internalID: 3087846247022026119
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_8
+      rect:
+        serializedVersion: 2
+        x: 370
+        y: 545
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2bd797b5c9f93a940800000000000000
+      internalID: 5306260279870979506
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_9
+      rect:
+        serializedVersion: 2
+        x: 378
+        y: 545
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e129997d926705940800000000000000
+      internalID: 5282852284988494366
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_10
+      rect:
+        serializedVersion: 2
+        x: 386
+        y: 545
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 20f9c6862f7187540800000000000000
+      internalID: 5005777315723779842
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_11
+      rect:
+        serializedVersion: 2
+        x: 394
+        y: 545
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 65a47c4b0830634d0800000000000000
+      internalID: -3155330637602796970
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_12
+      rect:
+        serializedVersion: 2
+        x: 402
+        y: 545
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 121484f788e2e8170800000000000000
+      internalID: 8182528736764641569
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_13
+      rect:
+        serializedVersion: 2
+        x: 410
+        y: 545
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0434beabec6763bc0800000000000000
+      internalID: -3803722204996484288
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_14
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 483
+        width: 15
+        height: 17
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d32d53b5dc5eefa90800000000000000
+      internalID: -7278127277622832579
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_15
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 480
+        width: 19
+        height: 28
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cbceaa2b3e8347040800000000000000
+      internalID: 4644399666332101820
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_16
+      rect:
+        serializedVersion: 2
+        x: 93
+        y: 480
+        width: 21
+        height: 37
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 32643db902392d280800000000000000
+      internalID: -9019985335407131101
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_17
+      rect:
+        serializedVersion: 2
+        x: 131
+        y: 480
+        width: 42
+        height: 52
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a0b9ef469a6f4a220800000000000000
+      internalID: 2496391300874410762
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_18
+      rect:
+        serializedVersion: 2
+        x: 385
+        y: 473
+        width: 16
+        height: 31
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 790eebc2c07a2b1a0800000000000000
+      internalID: -6795185217016504169
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_19
+      rect:
+        serializedVersion: 2
+        x: 323
+        y: 401
+        width: 46
+        height: 78
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7d370523be4c188c0800000000000000
+      internalID: -3998698479687797801
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_20
+      rect:
+        serializedVersion: 2
+        x: 370
+        y: 473
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2e18931053100dc70800000000000000
+      internalID: 8993689783024320994
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_21
+      rect:
+        serializedVersion: 2
+        x: 378
+        y: 473
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 885f7f00e8c6aa240800000000000000
+      internalID: 4803771309701461384
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_22
+      rect:
+        serializedVersion: 2
+        x: 402
+        y: 473
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3761dcbec59ea28b0800000000000000
+      internalID: -5176068236406614413
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_23
+      rect:
+        serializedVersion: 2
+        x: 410
+        y: 473
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 47ac88d548f5e4980800000000000000
+      internalID: -8552793620220425612
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_24
+      rect:
+        serializedVersion: 2
+        x: 370
+        y: 465
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5bb752cc2c6183e0800000000000000
+      internalID: -2053241015609345188
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_25
+      rect:
+        serializedVersion: 2
+        x: 378
+        y: 465
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1ca06ee241adad280800000000000000
+      internalID: -9017655523634967871
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_26
+      rect:
+        serializedVersion: 2
+        x: 386
+        y: 465
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be7f47a1e2e7b51b0800000000000000
+      internalID: -5666796969638168597
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_27
+      rect:
+        serializedVersion: 2
+        x: 394
+        y: 465
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 07e92a1dfebd43840800000000000000
+      internalID: 5203025292580527728
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_28
+      rect:
+        serializedVersion: 2
+        x: 402
+        y: 465
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 036ae26fc108afc70800000000000000
+      internalID: 9005651266758420016
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_29
+      rect:
+        serializedVersion: 2
+        x: 410
+        y: 465
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 695f34975b3403170800000000000000
+      internalID: 8156093371870606742
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_30
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 403
+        width: 14
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b8b42800aae277290800000000000000
+      internalID: -7892788514255647861
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_31
+      rect:
+        serializedVersion: 2
+        x: 49
+        y: 400
+        width: 16
+        height: 27
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4c3263c8e66bb58e0800000000000000
+      internalID: -1703567448114584636
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_32
+      rect:
+        serializedVersion: 2
+        x: 93
+        y: 400
+        width: 20
+        height: 40
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a92cc70befa763ea0800000000000000
+      internalID: -5893387828066467174
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_33
+      rect:
+        serializedVersion: 2
+        x: 134
+        y: 400
+        width: 40
+        height: 54
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1b8c179aeec2ba970800000000000000
+      internalID: 8767150503163447473
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_34
+      rect:
+        serializedVersion: 2
+        x: 389
+        y: 400
+        width: 10
+        height: 23
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d7a79e58749034c90800000000000000
+      internalID: -7186890377559180675
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_35
+      rect:
+        serializedVersion: 2
+        x: 323
+        y: 321
+        width: 46
+        height: 77
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a77164c9b12718330800000000000000
+      internalID: 3711373030841522042
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_36
+      rect:
+        serializedVersion: 2
+        x: 370
+        y: 393
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0617ec2a8b1a248c0800000000000000
+      internalID: -4016470103283568288
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_37
+      rect:
+        serializedVersion: 2
+        x: 378
+        y: 393
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 039b307663e434a80800000000000000
+      internalID: -8483851277472384720
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_38
+      rect:
+        serializedVersion: 2
+        x: 386
+        y: 393
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c02ce0b9b5aef2860800000000000000
+      internalID: 7507476783014265356
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_39
+      rect:
+        serializedVersion: 2
+        x: 402
+        y: 393
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bf9fc5e04405eb350800000000000000
+      internalID: 6034348803952015867
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_40
+      rect:
+        serializedVersion: 2
+        x: 410
+        y: 393
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 870d3ee3c8c426f30800000000000000
+      internalID: 4567297137341354104
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_41
+      rect:
+        serializedVersion: 2
+        x: 370
+        y: 385
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1634449eafa2a0ee0800000000000000
+      internalID: -1294174685771840671
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_42
+      rect:
+        serializedVersion: 2
+        x: 378
+        y: 385
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a4ae90e0014532d20800000000000000
+      internalID: 3252535783823370826
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_43
+      rect:
+        serializedVersion: 2
+        x: 386
+        y: 385
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab2b0005230dec410800000000000000
+      internalID: 1499364640470119098
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_44
+      rect:
+        serializedVersion: 2
+        x: 394
+        y: 385
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f5de6872c12042c0800000000000000
+      internalID: -4449519312714148361
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_45
+      rect:
+        serializedVersion: 2
+        x: 402
+        y: 385
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2002650efc5063bc0800000000000000
+      internalID: -3803846444887695358
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_46
+      rect:
+        serializedVersion: 2
+        x: 410
+        y: 385
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ae49f035fe3982450800000000000000
+      internalID: 6064259554354369770
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_47
+      rect:
+        serializedVersion: 2
+        x: 3
+        y: 323
+        width: 13
+        height: 19
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d4eacf721b73fd8b0800000000000000
+      internalID: -5125316616904724915
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_48
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 320
+        width: 20
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6f1ea87e442d0ef40800000000000000
+      internalID: 5755831517163741686
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_49
+      rect:
+        serializedVersion: 2
+        x: 92
+        y: 320
+        width: 24
+        height: 38
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4e3d6be014b5f19a0800000000000000
+      internalID: -6260184622043835420
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_50
+      rect:
+        serializedVersion: 2
+        x: 135
+        y: 320
+        width: 35
+        height: 64
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5889d93eb1a76fd40800000000000000
+      internalID: 5617811845392734341
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_51
+      rect:
+        serializedVersion: 2
+        x: 386
+        y: 320
+        width: 15
+        height: 22
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7238d8bbbfb213060800000000000000
+      internalID: 6931369661683303207
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_52
+      rect:
+        serializedVersion: 2
+        x: 177
+        y: 80
+        width: 144
+        height: 237
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6bdba2d6c564d2f00800000000000000
+      internalID: 1093607647303351734
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_53
+      rect:
+        serializedVersion: 2
+        x: 323
+        y: 240
+        width: 46
+        height: 78
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 524b9f0d61d7ef470800000000000000
+      internalID: 8430313089432925221
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_54
+      rect:
+        serializedVersion: 2
+        x: 370
+        y: 313
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cfcda1c3d9dbe1570800000000000000
+      internalID: 8439391234754796796
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_55
+      rect:
+        serializedVersion: 2
+        x: 378
+        y: 313
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a14c71f65e8097b40800000000000000
+      internalID: 5438387806530946074
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_56
+      rect:
+        serializedVersion: 2
+        x: 402
+        y: 313
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5a730e6e792968190800000000000000
+      internalID: -7960514110219602011
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_57
+      rect:
+        serializedVersion: 2
+        x: 410
+        y: 313
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4a0c2360ebc2b6490800000000000000
+      internalID: -7752053138928779100
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_58
+      rect:
+        serializedVersion: 2
+        x: 370
+        y: 305
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ba2cc42020e85ca0800000000000000
+      internalID: -6027821672574473546
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_59
+      rect:
+        serializedVersion: 2
+        x: 378
+        y: 305
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3cc9bc91f88eb0ab0800000000000000
+      internalID: -5040679656600396605
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_60
+      rect:
+        serializedVersion: 2
+        x: 386
+        y: 305
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4d870c2f7cfc0d990800000000000000
+      internalID: -7363156933072619308
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_61
+      rect:
+        serializedVersion: 2
+        x: 394
+        y: 305
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2b22a67abb57cc6e0800000000000000
+      internalID: -1815947100909067598
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_62
+      rect:
+        serializedVersion: 2
+        x: 402
+        y: 305
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0e10939bcd39839b0800000000000000
+      internalID: -5100164001787477536
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_63
+      rect:
+        serializedVersion: 2
+        x: 410
+        y: 305
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4d0aa115c0726dd00800000000000000
+      internalID: 997027301362933972
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_64
+      rect:
+        serializedVersion: 2
+        x: 4
+        y: 243
+        width: 10
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0037cf1cd9993b400800000000000000
+      internalID: 338783299826381568
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_65
+      rect:
+        serializedVersion: 2
+        x: 49
+        y: 240
+        width: 16
+        height: 29
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ddb9f99881671a4e0800000000000000
+      internalID: -1972165314051335203
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_66
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 240
+        width: 18
+        height: 47
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4ef06f1ea1e5a8100800000000000000
+      internalID: 111004610377158628
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_67
+      rect:
+        serializedVersion: 2
+        x: 134
+        y: 240
+        width: 40
+        height: 58
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d6905bb66e47e9f70800000000000000
+      internalID: 9195916022135458157
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_68
+      rect:
+        serializedVersion: 2
+        x: 383
+        y: 240
+        width: 24
+        height: 24
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0e526ccb400cebb40800000000000000
+      internalID: 5458010924999124448
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_69
+      rect:
+        serializedVersion: 2
+        x: 323
+        y: 161
+        width: 46
+        height: 77
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 697bd450e3274a410800000000000000
+      internalID: 1487439387641624470
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_70
+      rect:
+        serializedVersion: 2
+        x: 370
+        y: 233
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 82d25cbef9d437bf0800000000000000
+      internalID: -327832998617207512
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_71
+      rect:
+        serializedVersion: 2
+        x: 378
+        y: 233
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e6cde97ea608ea0b0800000000000000
+      internalID: -5715489680445744018
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_72
+      rect:
+        serializedVersion: 2
+        x: 410
+        y: 233
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2a5b36d4ae36093c0800000000000000
+      internalID: -4354870981695392350
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_73
+      rect:
+        serializedVersion: 2
+        x: 370
+        y: 225
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 39376a4af5312fd80800000000000000
+      internalID: -8218485068492541037
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_74
+      rect:
+        serializedVersion: 2
+        x: 378
+        y: 225
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 90f06ef1069e07400800000000000000
+      internalID: 320012172604608265
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_75
+      rect:
+        serializedVersion: 2
+        x: 386
+        y: 225
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 57c19c8e247129460800000000000000
+      internalID: 7246880326533323893
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_76
+      rect:
+        serializedVersion: 2
+        x: 394
+        y: 225
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e56a1ef5746d46cd0800000000000000
+      internalID: -2565690285654694306
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_77
+      rect:
+        serializedVersion: 2
+        x: 402
+        y: 225
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 51bfd01263eb1ffb0800000000000000
+      internalID: -4615699003385971947
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_78
+      rect:
+        serializedVersion: 2
+        x: 410
+        y: 225
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4415e4e1bbf10c890800000000000000
+      internalID: -7439911695888264892
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_79
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 163
+        width: 16
+        height: 15
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f31febbe3514e7fd0800000000000000
+      internalID: -2342362927492828865
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_80
+      rect:
+        serializedVersion: 2
+        x: 49
+        y: 160
+        width: 17
+        height: 30
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0701172cb722c80b0800000000000000
+      internalID: -5725163111356231568
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_81
+      rect:
+        serializedVersion: 2
+        x: 95
+        y: 160
+        width: 19
+        height: 41
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b98d933b359312760800000000000000
+      internalID: 7431283891790010523
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_82
+      rect:
+        serializedVersion: 2
+        x: 131
+        y: 160
+        width: 41
+        height: 60
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6f4f9c17b1c2e34f0800000000000000
+      internalID: -847191183514274570
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_83
+      rect:
+        serializedVersion: 2
+        x: 382
+        y: 161
+        width: 25
+        height: 21
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0eabb76a7dd6688e0800000000000000
+      internalID: -1691543837052519712
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_84
+      rect:
+        serializedVersion: 2
+        x: 323
+        y: 80
+        width: 46
+        height: 78
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 52c448f5cb70b2bd0800000000000000
+      internalID: -2654019049767023579
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_85
+      rect:
+        serializedVersion: 2
+        x: 370
+        y: 153
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eca7f9b5ac7deb7b0800000000000000
+      internalID: -5206486855073170738
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_86
+      rect:
+        serializedVersion: 2
+        x: 378
+        y: 153
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 32802f8031a13dbe0800000000000000
+      internalID: -1453789585653757917
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_87
+      rect:
+        serializedVersion: 2
+        x: 410
+        y: 153
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f1a27a81ecaa64ba0800000000000000
+      internalID: -6105004442700535265
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_88
+      rect:
+        serializedVersion: 2
+        x: 370
+        y: 145
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2cbada8dbd1305000800000000000000
+      internalID: 22572818439711682
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_89
+      rect:
+        serializedVersion: 2
+        x: 378
+        y: 145
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f02f87ea9af3ae9d0800000000000000
+      internalID: -2744311024919711217
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_90
+      rect:
+        serializedVersion: 2
+        x: 386
+        y: 145
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 33b6a0cf05b84dbf0800000000000000
+      internalID: -300462095184794829
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_91
+      rect:
+        serializedVersion: 2
+        x: 394
+        y: 145
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 380c9b7c97f64ac80800000000000000
+      internalID: -8312396443386527613
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_92
+      rect:
+        serializedVersion: 2
+        x: 402
+        y: 145
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 247e76862aae80db0800000000000000
+      internalID: -4825349017470245054
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_93
+      rect:
+        serializedVersion: 2
+        x: 410
+        y: 145
+        width: 5
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a1b1c4e30232a1510800000000000000
+      internalID: 1520566445582064410
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_94
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 83
+        width: 16
+        height: 19
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 48a5a03d44a43d320800000000000000
+      internalID: 2581488670872328836
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_95
+      rect:
+        serializedVersion: 2
+        x: 49
+        y: 80
+        width: 18
+        height: 28
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7ddb23b5495d7d0c0800000000000000
+      internalID: -4550934065272668713
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_96
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 80
+        width: 18
+        height: 38
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bc6aba27bb5084ae0800000000000000
+      internalID: -1564994567870372149
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_97
+      rect:
+        serializedVersion: 2
+        x: 129
+        y: 80
+        width: 43
+        height: 52
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 556a74059687b17a0800000000000000
+      internalID: -6405393651290626475
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_98
+      rect:
+        serializedVersion: 2
+        x: 381
+        y: 80
+        width: 24
+        height: 22
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dc7e318b0fd30f100800000000000000
+      internalID: 139679692538243021
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_99
+      rect:
+        serializedVersion: 2
+        x: 5
+        y: 3
+        width: 10
+        height: 14
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dfff9c35e91875410800000000000000
+      internalID: 1465782720742948861
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_100
+      rect:
+        serializedVersion: 2
+        x: 49
+        y: 0
+        width: 16
+        height: 27
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b765d355ba3cf51a0800000000000000
+      internalID: -6818516170178734469
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_101
+      rect:
+        serializedVersion: 2
+        x: 97
+        y: 0
+        width: 17
+        height: 36
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4d81b99b56da98bb0800000000000000
+      internalID: -4933221264390416172
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pngkey.com-stardew-valley-png-2198146_102
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 0
+        width: 39
+        height: 51
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 07ebd23926109d150800000000000000
+      internalID: 5897746709906046576
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5375e85af75eb6b4b8238455d996209a
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
+    nameFileIdTable:
+      pngkey.com-stardew-valley-png-2198146_0: -2222063343273938780
+      pngkey.com-stardew-valley-png-2198146_1: -946468906079375106
+      pngkey.com-stardew-valley-png-2198146_10: 5005777315723779842
+      pngkey.com-stardew-valley-png-2198146_100: -6818516170178734469
+      pngkey.com-stardew-valley-png-2198146_101: -4933221264390416172
+      pngkey.com-stardew-valley-png-2198146_102: 5897746709906046576
+      pngkey.com-stardew-valley-png-2198146_11: -3155330637602796970
+      pngkey.com-stardew-valley-png-2198146_12: 8182528736764641569
+      pngkey.com-stardew-valley-png-2198146_13: -3803722204996484288
+      pngkey.com-stardew-valley-png-2198146_14: -7278127277622832579
+      pngkey.com-stardew-valley-png-2198146_15: 4644399666332101820
+      pngkey.com-stardew-valley-png-2198146_16: -9019985335407131101
+      pngkey.com-stardew-valley-png-2198146_17: 2496391300874410762
+      pngkey.com-stardew-valley-png-2198146_18: -6795185217016504169
+      pngkey.com-stardew-valley-png-2198146_19: -3998698479687797801
+      pngkey.com-stardew-valley-png-2198146_2: -4674090733877670263
+      pngkey.com-stardew-valley-png-2198146_20: 8993689783024320994
+      pngkey.com-stardew-valley-png-2198146_21: 4803771309701461384
+      pngkey.com-stardew-valley-png-2198146_22: -5176068236406614413
+      pngkey.com-stardew-valley-png-2198146_23: -8552793620220425612
+      pngkey.com-stardew-valley-png-2198146_24: -2053241015609345188
+      pngkey.com-stardew-valley-png-2198146_25: -9017655523634967871
+      pngkey.com-stardew-valley-png-2198146_26: -5666796969638168597
+      pngkey.com-stardew-valley-png-2198146_27: 5203025292580527728
+      pngkey.com-stardew-valley-png-2198146_28: 9005651266758420016
+      pngkey.com-stardew-valley-png-2198146_29: 8156093371870606742
+      pngkey.com-stardew-valley-png-2198146_3: 4206399235965869327
+      pngkey.com-stardew-valley-png-2198146_30: -7892788514255647861
+      pngkey.com-stardew-valley-png-2198146_31: -1703567448114584636
+      pngkey.com-stardew-valley-png-2198146_32: -5893387828066467174
+      pngkey.com-stardew-valley-png-2198146_33: 8767150503163447473
+      pngkey.com-stardew-valley-png-2198146_34: -7186890377559180675
+      pngkey.com-stardew-valley-png-2198146_35: 3711373030841522042
+      pngkey.com-stardew-valley-png-2198146_36: -4016470103283568288
+      pngkey.com-stardew-valley-png-2198146_37: -8483851277472384720
+      pngkey.com-stardew-valley-png-2198146_38: 7507476783014265356
+      pngkey.com-stardew-valley-png-2198146_39: 6034348803952015867
+      pngkey.com-stardew-valley-png-2198146_4: -2778219434723827530
+      pngkey.com-stardew-valley-png-2198146_40: 4567297137341354104
+      pngkey.com-stardew-valley-png-2198146_41: -1294174685771840671
+      pngkey.com-stardew-valley-png-2198146_42: 3252535783823370826
+      pngkey.com-stardew-valley-png-2198146_43: 1499364640470119098
+      pngkey.com-stardew-valley-png-2198146_44: -4449519312714148361
+      pngkey.com-stardew-valley-png-2198146_45: -3803846444887695358
+      pngkey.com-stardew-valley-png-2198146_46: 6064259554354369770
+      pngkey.com-stardew-valley-png-2198146_47: -5125316616904724915
+      pngkey.com-stardew-valley-png-2198146_48: 5755831517163741686
+      pngkey.com-stardew-valley-png-2198146_49: -6260184622043835420
+      pngkey.com-stardew-valley-png-2198146_5: 4517772241417075035
+      pngkey.com-stardew-valley-png-2198146_50: 5617811845392734341
+      pngkey.com-stardew-valley-png-2198146_51: 6931369661683303207
+      pngkey.com-stardew-valley-png-2198146_52: 1093607647303351734
+      pngkey.com-stardew-valley-png-2198146_53: 8430313089432925221
+      pngkey.com-stardew-valley-png-2198146_54: 8439391234754796796
+      pngkey.com-stardew-valley-png-2198146_55: 5438387806530946074
+      pngkey.com-stardew-valley-png-2198146_56: -7960514110219602011
+      pngkey.com-stardew-valley-png-2198146_57: -7752053138928779100
+      pngkey.com-stardew-valley-png-2198146_58: -6027821672574473546
+      pngkey.com-stardew-valley-png-2198146_59: -5040679656600396605
+      pngkey.com-stardew-valley-png-2198146_6: 4371122471485898046
+      pngkey.com-stardew-valley-png-2198146_60: -7363156933072619308
+      pngkey.com-stardew-valley-png-2198146_61: -1815947100909067598
+      pngkey.com-stardew-valley-png-2198146_62: -5100164001787477536
+      pngkey.com-stardew-valley-png-2198146_63: 997027301362933972
+      pngkey.com-stardew-valley-png-2198146_64: 338783299826381568
+      pngkey.com-stardew-valley-png-2198146_65: -1972165314051335203
+      pngkey.com-stardew-valley-png-2198146_66: 111004610377158628
+      pngkey.com-stardew-valley-png-2198146_67: 9195916022135458157
+      pngkey.com-stardew-valley-png-2198146_68: 5458010924999124448
+      pngkey.com-stardew-valley-png-2198146_69: 1487439387641624470
+      pngkey.com-stardew-valley-png-2198146_7: 3087846247022026119
+      pngkey.com-stardew-valley-png-2198146_70: -327832998617207512
+      pngkey.com-stardew-valley-png-2198146_71: -5715489680445744018
+      pngkey.com-stardew-valley-png-2198146_72: -4354870981695392350
+      pngkey.com-stardew-valley-png-2198146_73: -8218485068492541037
+      pngkey.com-stardew-valley-png-2198146_74: 320012172604608265
+      pngkey.com-stardew-valley-png-2198146_75: 7246880326533323893
+      pngkey.com-stardew-valley-png-2198146_76: -2565690285654694306
+      pngkey.com-stardew-valley-png-2198146_77: -4615699003385971947
+      pngkey.com-stardew-valley-png-2198146_78: -7439911695888264892
+      pngkey.com-stardew-valley-png-2198146_79: -2342362927492828865
+      pngkey.com-stardew-valley-png-2198146_8: 5306260279870979506
+      pngkey.com-stardew-valley-png-2198146_80: -5725163111356231568
+      pngkey.com-stardew-valley-png-2198146_81: 7431283891790010523
+      pngkey.com-stardew-valley-png-2198146_82: -847191183514274570
+      pngkey.com-stardew-valley-png-2198146_83: -1691543837052519712
+      pngkey.com-stardew-valley-png-2198146_84: -2654019049767023579
+      pngkey.com-stardew-valley-png-2198146_85: -5206486855073170738
+      pngkey.com-stardew-valley-png-2198146_86: -1453789585653757917
+      pngkey.com-stardew-valley-png-2198146_87: -6105004442700535265
+      pngkey.com-stardew-valley-png-2198146_88: 22572818439711682
+      pngkey.com-stardew-valley-png-2198146_89: -2744311024919711217
+      pngkey.com-stardew-valley-png-2198146_9: 5282852284988494366
+      pngkey.com-stardew-valley-png-2198146_90: -300462095184794829
+      pngkey.com-stardew-valley-png-2198146_91: -8312396443386527613
+      pngkey.com-stardew-valley-png-2198146_92: -4825349017470245054
+      pngkey.com-stardew-valley-png-2198146_93: 1520566445582064410
+      pngkey.com-stardew-valley-png-2198146_94: 2581488670872328836
+      pngkey.com-stardew-valley-png-2198146_95: -4550934065272668713
+      pngkey.com-stardew-valley-png-2198146_96: -1564994567870372149
+      pngkey.com-stardew-valley-png-2198146_97: -6405393651290626475
+      pngkey.com-stardew-valley-png-2198146_98: 139679692538243021
+      pngkey.com-stardew-valley-png-2198146_99: 1465782720742948861
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

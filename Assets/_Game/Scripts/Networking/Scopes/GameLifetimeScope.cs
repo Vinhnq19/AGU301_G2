@@ -22,6 +22,7 @@ namespace DungeonBuilder.Networking.Scopes
         [SerializeField] private GridManager _gridManager;
         [SerializeField] private BuildingController _buildingController;
         [SerializeField] private WaveManager _waveManager;
+        [SerializeField] private ResourceSpawner _resourceSpawner;
 
         [Header("UI")]
         [SerializeField] private HUDView _hudView;
@@ -64,6 +65,11 @@ namespace DungeonBuilder.Networking.Scopes
             if (_waveManager != null)
             {
                 builder.RegisterComponent(_waveManager);
+            }
+
+            if (_resourceSpawner != null)
+            {
+                builder.RegisterComponent(_resourceSpawner);
             }
 
             if (_hudView != null)

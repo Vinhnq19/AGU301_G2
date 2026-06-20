@@ -47,7 +47,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 2656218421
+  GlobalObjectIdHash: 984114802
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -120,11 +120,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Harvesting.HarvestableNode
   ShowTopMostFoldoutHeaderGroup: 1
   _data: {fileID: 11400000, guid: 8bfde4780b29082418dba712b5448564, type: 2}
-  _resourceDropPrefab: {fileID: 19318099078005837, guid: 288bc9033dfbad04fb134d0194db8675, type: 3}
+  _resourceDropPrefab: {fileID: 19318099078005837, guid: e265256e9cef97642b7140fe35c35adc, type: 3}
   _serverInteractionRange: 2
   _visual: {fileID: 8664900862425172146}
+  _visualRenderer: {fileID: 1594571695457144791}
   _colliders:
   - {fileID: 4906788619519296601}
+  _flashDuration: 0.15
+  _deathDuration: 0.3
 --- !u!1 &4303880962434039180
 GameObject:
   m_ObjectHideFlags: 0
@@ -152,8 +155,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 6046916233621681246}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -183,7 +186,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 2100000, guid: 25b80c0269028364ca535bd8dcac7251, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -206,8 +209,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 1
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: ba506cb6ee91d2a4a951a273cf5d746b, type: 3}
-  m_Color: {r: 0.35, g: 0.45, b: 0.75, a: 1}
+  m_Sprite: {fileID: -2203604961604142478, guid: 958c1849b0e3c2c42a7a2ea85d18fa54, type: 3}
+  m_Color: {r: 0.42790312, g: 0.51238656, b: 0.7584905, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

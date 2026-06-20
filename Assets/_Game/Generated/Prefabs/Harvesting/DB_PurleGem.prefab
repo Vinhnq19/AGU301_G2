@@ -211,8 +211,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Harvesting.HarvestableNode
   ShowTopMostFoldoutHeaderGroup: 1
   _data: {fileID: 11400000, guid: a12d9a7e9ed2eaf46a7c87253c399572, type: 2}
-  _resourceDropPrefab: {fileID: 19318099078005837, guid: 288bc9033dfbad04fb134d0194db8675, type: 3}
+  _resourceDropPrefab: {fileID: 19318099078005837, guid: d1134011cc0cc6743ab26ca6b308bab6, type: 3}
   _serverInteractionRange: 2
   _visual: {fileID: 5598776829431598761}
+  _visualRenderer: {fileID: 0}
   _colliders:
   - {fileID: 5177290483445336090}
+  _flashDuration: 0.15
+  _deathDuration: 0.3

@@ -17,3 +17,4 @@ MonoBehaviour:
   amountPerHit: 10
   maxAmount: 70
   respawnTime: 12
+  minWaveToAppear: 2

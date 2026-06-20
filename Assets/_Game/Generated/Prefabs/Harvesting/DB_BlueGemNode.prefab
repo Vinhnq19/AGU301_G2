@@ -120,11 +120,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Harvesting.HarvestableNode
   ShowTopMostFoldoutHeaderGroup: 1
   _data: {fileID: 11400000, guid: 5a536f8d70136aa42960bd173ed3aad5, type: 2}
-  _resourceDropPrefab: {fileID: 19318099078005837, guid: 288bc9033dfbad04fb134d0194db8675, type: 3}
+  _resourceDropPrefab: {fileID: 19318099078005837, guid: 5c9a2eb61103115499fc66ac7a66ddf8, type: 3}
   _serverInteractionRange: 2
   _visual: {fileID: 4765546310202527334}
+  _visualRenderer: {fileID: 8415826872345455290}
   _colliders:
   - {fileID: 7298797259476166572}
+  _flashDuration: 0.15
+  _deathDuration: 0.3
 --- !u!1 &6551993910266581449
 GameObject:
   m_ObjectHideFlags: 0
@@ -152,8 +155,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 2587873961143747678}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -183,7 +186,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 2100000, guid: 3f48d3dac0e8629409335fd9ac04a90f, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -206,8 +209,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 1
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: ba506cb6ee91d2a4a951a273cf5d746b, type: 3}
-  m_Color: {r: 0.7, g: 0.3, b: 1, a: 1}
+  m_Sprite: {fileID: -2383031484441755576, guid: 958c1849b0e3c2c42a7a2ea85d18fa54, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

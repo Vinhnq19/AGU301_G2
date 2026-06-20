@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5624a780c250bd044964a44a31345322, type: 3}
+  m_Name: DB_ResourceSpawnConfig
+  m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.ResourceSpawnConfigSO
+  entries:
+  - resourceType: 0
+    nodePrefab: {fileID: 7103796545349103722, guid: dc2f5d61d5f7787458cba3517eaf5c70, type: 3}
+    nodeData: {fileID: 11400000, guid: c9eacc7ad9cbe784cad3821343ba3d2f, type: 2}
+    minWaveToAppear: 1
+    baseWeight: 10
+    weightGainPerWave: 0
+    maxWeight: 10
+  - resourceType: 1
+    nodePrefab: {fileID: 4912576831634312186, guid: 0644406637524b14b833be00326cea82, type: 3}
+    nodeData: {fileID: 11400000, guid: 3cae2e5a2c5a52748a1faac3f8ceb954, type: 2}
+    minWaveToAppear: 1
+    baseWeight: 8
+    weightGainPerWave: 0
+    maxWeight: 8
+  - resourceType: 2
+    nodePrefab: {fileID: 5324271297793162456, guid: 354323fe59b0fff40a60d5d0cc2e0390, type: 3}
+    nodeData: {fileID: 11400000, guid: 8bfde4780b29082418dba712b5448564, type: 2}
+    minWaveToAppear: 2
+    baseWeight: 4
+    weightGainPerWave: 0.3
+    maxWeight: 8
+  - resourceType: 3
+    nodePrefab: {fileID: 7771601021486431538, guid: ecd421d4132d861409a1a18f6c0d3329, type: 3}
+    nodeData: {fileID: 11400000, guid: 70d4bd88c471a0b47abd2354b8ebcb0c, type: 2}
+    minWaveToAppear: 3
+    baseWeight: 2
+    weightGainPerWave: 0.4
+    maxWeight: 7
+  - resourceType: 6
+    nodePrefab: {fileID: 8474278793681442142, guid: b7c3d9aaadce2904a90a1c11b7343266, type: 3}
+    nodeData: {fileID: 11400000, guid: 8c5aadd5c672683409d6ea7380df96e1, type: 2}
+    minWaveToAppear: 5
+    baseWeight: 1
+    weightGainPerWave: 0.6
+    maxWeight: 6
+  baseNodesPerWave: 2
+  nodesPerWaveGain: 1
+  maxNodesPerWave: 12

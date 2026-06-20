@@ -10,13 +10,10 @@ namespace DungeonBuilder.Networking
     /// </summary>
     public sealed class NetworkDebugUI : MonoBehaviour
     {
-        [Tooltip("Bat de hien debug OnGUI Host/Client/Server. Tat khi dung UI Lobby de tranh xung dot.")]
-        [SerializeField] private bool _enabled = false;
         [SerializeField] private string _hostAddress = "127.0.0.1";
 
         private void OnGUI()
         {
-            if (!_enabled) return;
             if (NetworkManager.Singleton == null) return;
             if (NetworkManager.Singleton.IsListening)
             {

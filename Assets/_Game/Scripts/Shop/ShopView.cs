@@ -17,6 +17,8 @@ public class ShopView
     [SerializeField] private ShopItemPanel itemPanelPrefab;
     [SerializeField] private Transform itemPanelContainer;
 
+    [SerializeField] private ShopQuantityPopup quantityPopup;
+
     public event Action<CurrencyType> OnTabChanged;
 
     // THÊM: List dùng để lưu trữ và tái sử dụng các Item Panel (Object Pooling)
@@ -34,6 +36,13 @@ public class ShopView
 
         tokenTabButton.onClick.AddListener(() =>
             OnTabChanged?.Invoke(CurrencyType.Token));
+
+        // Popup nhập số lượng: wire 1 lần + ẩn mặc định
+        if (quantityPopup != null)
+        {
+            quantityPopup.Initialize();
+            quantityPopup.Hide();
+        }
     }
 
     public void SetTab(CurrencyType active)
@@ -50,10 +59,33 @@ public class ShopView
     }
 
     public void OpenShop() => shopPanel.SetActive(true);
-    public void CloseShop() => shopPanel.SetActive(false);
+
+    public void CloseShop()
+    {
+        // Đóng shop cũng phải ẩn popup nhập số lượng (nếu đang mở)
+        HideQuantityPopup();
+        shopPanel.SetActive(false);
+    }
+
+    /// <summary>Mở popup nhập số lượng cho 1 item + thao tác (Buy/Sell).</summary>
+    /// <param name="unitPrice">Đơn giá để hiện tổng trên nút (Price cho Buy, Sell cho Sell).</param>
+    public void ShowQuantityPopup(string itemName, ShopAction action, int maxQty, int unitPrice, Action<int> onConfirm)
+    {
+        if (quantityPopup == null)
+        {
+            Debug.LogWarning(
+                "[ShopView] quantityPopup chưa được gán trong Inspector — không thể mở popup nhập số lượng. " +
+                "Kéo GameObject popup (có script ShopQuantityPopup) vào field quantityPopup của ShopView để fix.");
+            return;
+        }
+
+        quantityPopup.Show(itemName, action, maxQty, unitPrice, onConfirm);
+    }
+
+    public void HideQuantityPopup() => quantityPopup?.Hide();
 
     // CẬP NHẬT: Xử lý hiển thị bằng cách tái sử dụng (Pooling)
-    public void CreateItemPanels(List<ShopItem> items, System.Action<string> onBuyCallback = null)
+    public void CreateItemPanels(List<ShopItem> items, System.Action<string> onBuyCallback = null, System.Action<string> onSellCallback = null)
     {
         // 1. Tạm ẩn tất cả các panel đang có trong Pool
         foreach (var panel in panelPool)
@@ -68,7 +100,7 @@ public class ShopView
             {
                 // Nếu trong Pool đã có sẵn Panel -> Bật nó lên và gán data mới
                 panelPool[i].gameObject.SetActive(true);
-                panelPool[i].Setup(items[i], onBuyCallback);
+                panelPool[i].Setup(items[i], onBuyCallback, onSellCallback);
             }
             else
             {
@@ -76,7 +108,7 @@ public class ShopView
                 var panelObj = GameObject.Instantiate(itemPanelPrefab.gameObject, itemPanelContainer);
                 var shopItemPanel = panelObj.GetComponent<ShopItemPanel>();
 
-                shopItemPanel.Setup(items[i], onBuyCallback);
+                shopItemPanel.Setup(items[i], onBuyCallback, onSellCallback);
                 panelPool.Add(shopItemPanel);
             }
         }

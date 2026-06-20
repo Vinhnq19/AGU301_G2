@@ -12,7 +12,9 @@ namespace DungeonBuilder.UI.HUD
             [ResourceType.Wood] = 0,
             [ResourceType.Stone] = 0,
             [ResourceType.Ore] = 0,
-            [ResourceType.Crystal] = 0
+            [ResourceType.Crystal] = 0,
+            [ResourceType.Token] = 0,
+            [ResourceType.Coin] = 0
         };
 
         public event Action OnChanged;

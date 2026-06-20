@@ -10,7 +10,7 @@ namespace DungeonBuilder.Core.Enums
         Iron      = 5,
         BlueGems  = 6,
         PurpleGems = 7,
-        Tokken = 8,
+        Token = 8,
         Coin = 9,
 
 

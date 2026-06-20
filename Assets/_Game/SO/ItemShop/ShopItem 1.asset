@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ShopItem
   Id: 2
   Name: Stone
-  Price: 1
+  Price: 5
+  Sell: 1
   isUnlimited: 1
+  isSellable: 1
   CurrencyType: 0
   RemainingQuantity: 0
   ResourceType: 1

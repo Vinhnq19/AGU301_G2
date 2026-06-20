@@ -12,7 +12,10 @@ public class ShopItem : ScriptableObject
     public string Name;
     public int Price;
 
+    public int Sell;
     public bool isUnlimited;
+
+    public bool isSellable;
 
     public CurrencyType CurrencyType;
 

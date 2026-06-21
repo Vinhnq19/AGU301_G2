@@ -910,7 +910,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: -1415411323
-  m_SortingLayer: 3
+  m_SortingLayer: 2
   m_SortingOrder: 99
   m_MaskInteraction: 0
   m_Sprite: {fileID: -6581316934696511771, guid: 8f2e9efe8b1c03a479633722cd7a5259, type: 3}
@@ -1087,7 +1087,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 856793085
+  GlobalObjectIdHash: 3483575275
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -1298,7 +1298,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: -1415411323
-  m_SortingLayer: 3
+  m_SortingLayer: 2
   m_SortingOrder: -10
   m_MaskInteraction: 0
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
@@ -1360,7 +1360,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Building.TowerView
   _levelText: {fileID: 236127073635329518}
-  _rangeCircle: {fileID: 1538953227259973285}
+  _rangeLine: {fileID: 0}
+  _circleSegments: 40
   _actionPanel: {fileID: 5591501782133351252}
   _upgradeButton: {fileID: 8896710414983471445}
   _removeButton: {fileID: 6327873883936838462}

@@ -27,12 +27,8 @@ MonoBehaviour:
   maxLevel: 3
   upgradeLevels:
   - costs:
-    - type: 6
-      amount: 25
-    - type: 5
-      amount: 25
+    - type: 9
+      amount: 350
   - costs:
-    - type: 1
-      amount: 30
-    - type: 1
-      amount: 30
+    - type: 9
+      amount: 500

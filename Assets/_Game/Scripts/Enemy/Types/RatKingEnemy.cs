@@ -186,7 +186,7 @@ namespace DungeonBuilder.Enemy.Types
                     endPositions[i] = hit.point;
 
                     IDamageable damageable = hit.collider.GetComponentInParent<IDamageable>();
-                    if (damageable != null && hit.collider.GetComponentInParent<BaseEnemy>() == null)
+                    if (IsValidTarget(damageable))
                     {
                         if (damagedTargets.Add(damageable))
                         {

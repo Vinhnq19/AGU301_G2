@@ -128,6 +128,9 @@ namespace DungeonBuilder.Projectile
 
                     if (damageable != null && results[i].GetComponentInParent<BaseEnemy>() == null)
                     {
+                        // Bỏ qua người chơi
+                        if (damageable is DungeonBuilder.Player.PlayerStats) continue;
+
                         // Bỏ qua các tháp không thể target (vd: bẫy gai)
                         var tower = damageable as DungeonBuilder.Building.BaseTower;
                         if (tower != null && !tower.IsTargetable) continue;

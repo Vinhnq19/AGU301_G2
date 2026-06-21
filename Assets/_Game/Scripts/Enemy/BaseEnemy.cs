@@ -24,6 +24,7 @@ namespace Assets._Game.Scripts.Enemy
         [SerializeField, Min(0f)] protected float _attackDamage = 10f;
         [SerializeField, Min(0.1f)] protected float _attackInterval = 1f;
         [SerializeField] protected NetworkObject _projectilePrefab;
+        [SerializeField] private NetworkObject _tokenDropPrefab;
 
         private readonly NetworkVariable<float> _currentHP = new(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
@@ -417,6 +418,11 @@ namespace Assets._Game.Scripts.Enemy
             _eventBus?.RaiseEnemyKilled(EnemyType);
             PlayDeathEffectClientRpc();
 
+            if (IsServer && _tokenDropPrefab != null && _data != null && _data.rewardToken > 0)
+            {
+                SpawnTokenDrops(_data.rewardToken);
+            }
+
             try
             {
                 await UniTask.Delay(TimeSpan.FromMilliseconds(500), cancellationToken: destroyCancellationToken);
@@ -424,6 +430,52 @@ namespace Assets._Game.Scripts.Enemy
             }
             catch (OperationCanceledException)
             {
+            }
+        }
+
+        private void SpawnTokenDrops(int totalTokens)
+        {
+            if (_pool == null || _tokenDropPrefab == null)
+            {
+                return;
+            }
+
+            int maxDrops = 5;
+            int dropCount = Mathf.Min(totalTokens, maxDrops);
+            if (dropCount <= 0)
+            {
+                return;
+            }
+
+            int baseAmount = totalTokens / dropCount;
+            int remainder = totalTokens % dropCount;
+
+            for (int i = 0; i < dropCount; i++)
+            {
+                int amount = baseAmount + (i == dropCount - 1 ? remainder : 0);
+                if (amount <= 0)
+                {
+                    continue;
+                }
+
+                float angle = UnityEngine.Random.Range(0f, 360f) * Mathf.Deg2Rad;
+                float distance = UnityEngine.Random.Range(0.5f, 1.2f);
+                Vector3 offset = new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f) * distance;
+
+                NetworkObject dropObj = _pool.Get(_tokenDropPrefab, transform.position, Quaternion.identity);
+                if (dropObj != null)
+                {
+                    var drop = dropObj.GetComponent<DungeonBuilder.Harvesting.ResourceDrop>();
+                    if (drop != null)
+                    {
+                        drop.ConfigureWithOffset(ResourceType.Token, amount, offset);
+                    }
+
+                    if (!dropObj.IsSpawned)
+                    {
+                        dropObj.Spawn();
+                    }
+                }
             }
         }
 

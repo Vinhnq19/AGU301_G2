@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 13252ffdbbc360d44b2eda0f2e423fe9, type: 3}
-  m_Name: ShopItem_BombTower
+  m_Name: ShopItem_FrostTower
   m_EditorClassIdentifier: Assembly-CSharp::ShopItem
-  Icon: {fileID: -7240515471977461613, guid: 220d184522419f14c9c24d4b67eccc97, type: 3}
-  Id: 3
-  Name: Bomb Tower
+  Icon: {fileID: -7640645784331865333, guid: 20bd1d87459f6b047a61e095911a7a27, type: 3}
+  Id: 5
+  Name: Frost Tower
   Price: 150
   Sell: 0
   isUnlimited: 0
   isSellable: 0
   CurrencyType: 1
   RemainingQuantity: 1
-  ResourceType: 11
+  ResourceType: 12

@@ -6,6 +6,7 @@ using Assets._Game.Scripts.Data;
 using DungeonBuilder.Core;
 using DungeonBuilder.Core.Interfaces;
 using DungeonBuilder.Core.Enums;
+using DungeonBuilder.Data;
 using DungeonBuilder.Networking.Pool;
 
 public class Shop : NetworkBehaviour
@@ -13,6 +14,8 @@ public class Shop : NetworkBehaviour
     [SerializeField] private ShopPresenter presenter;
     [SerializeField] private ShopView view;
     [SerializeField] private ShopModel model;
+    [SerializeField] private TowerCatalogSO _towerCatalog;
+    [SerializeField] private TowerUnlockConfigSO _unlockConfig;
 
     private IResourceService _sharedResources;
     private INetworkPool _pool;
@@ -51,6 +54,7 @@ public class Shop : NetworkBehaviour
         // Server: Initialize network data từ model
         if (IsServer)
         {
+            ApplyDefaultUnlocks();
             InitializeNetworkData();
         }
 
@@ -90,6 +94,43 @@ public class Shop : NetworkBehaviour
             itemDataIndexMap[item.ResourceType] = networkItemData.Count;
             networkItemData.Add(itemData);
         }
+    }
+
+    /// <summary>Unlock mac dinh cac tower trong config (vd: Arrow) luc bat dau match.</summary>
+    private void ApplyDefaultUnlocks()
+    {
+        if (_sharedResources == null || _unlockConfig == null || _towerCatalog == null)
+        {
+            return;
+        }
+
+        foreach (TowerType type in _unlockConfig.DefaultUnlocked)
+        {
+            TowerDataSO data = FindTower(type);
+            if (data != null)
+            {
+                _sharedResources.TrySet(data.unlockResourceType, 1);
+            }
+        }
+    }
+
+    /// <summary>Map TowerType -> TowerDataSO tu catalog (dung cho ApplyDefaultUnlocks).</summary>
+    private TowerDataSO FindTower(TowerType type)
+    {
+        if (_towerCatalog == null)
+        {
+            return null;
+        }
+
+        foreach (TowerDataSO data in _towerCatalog.Towers)
+        {
+            if (data.towerType == type)
+            {
+                return data;
+            }
+        }
+
+        return null;
     }
 
     private void OnShopDataChanged(NetworkListEvent<ShopItemData> changeEvent)

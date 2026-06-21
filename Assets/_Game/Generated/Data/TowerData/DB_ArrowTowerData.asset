@@ -22,6 +22,8 @@ MonoBehaviour:
   buildCost:
   - type: 0
     amount: 60
+  unlockTokenCost: 10
+  unlockResourceType: 10
   maxLevel: 3
   upgradeLevels:
   - costs:

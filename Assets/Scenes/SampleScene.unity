@@ -87900,6 +87900,42 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 668536239355149413, guid: a67b43fe3b2ef0a47b929beb099dd9b7, type: 3}
+      propertyPath: _towerCatalog
+      value: 
+      objectReference: {fileID: 11400000, guid: c538ae4d5c52d88429b26f23d85d7da7, type: 2}
+    - target: {fileID: 668536239355149413, guid: a67b43fe3b2ef0a47b929beb099dd9b7, type: 3}
+      propertyPath: _unlockConfig
+      value: 
+      objectReference: {fileID: 11400000, guid: ebcc487646ce0ff48950e915185034dd, type: 2}
+    - target: {fileID: 668536239355149413, guid: a67b43fe3b2ef0a47b929beb099dd9b7, type: 3}
+      propertyPath: model.items.Array.size
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 668536239355149413, guid: a67b43fe3b2ef0a47b929beb099dd9b7, type: 3}
+      propertyPath: 'model.items.Array.data[0]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 741c94407a3187d4fa8c5681aaca52e9, type: 2}
+    - target: {fileID: 668536239355149413, guid: a67b43fe3b2ef0a47b929beb099dd9b7, type: 3}
+      propertyPath: 'model.items.Array.data[1]'
+      value: 
+      objectReference: {fileID: 11400000, guid: b2d8e3f59f0c4b5a9d6e7f8c2b3c4d5e, type: 2}
+    - target: {fileID: 668536239355149413, guid: a67b43fe3b2ef0a47b929beb099dd9b7, type: 3}
+      propertyPath: 'model.items.Array.data[2]'
+      value: 
+      objectReference: {fileID: 11400000, guid: c3e9f4f60a1d5c6bae7f8a9d3c4d5e6f, type: 2}
+    - target: {fileID: 668536239355149413, guid: a67b43fe3b2ef0a47b929beb099dd9b7, type: 3}
+      propertyPath: 'model.items.Array.data[3]'
+      value: 
+      objectReference: {fileID: 11400000, guid: d4f0a5f71b2e6d7cbf8a9bad4d5e6f70, type: 2}
+    - target: {fileID: 668536239355149413, guid: a67b43fe3b2ef0a47b929beb099dd9b7, type: 3}
+      propertyPath: 'model.items.Array.data[4]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 321f745e3a15284449f367d83535e005, type: 2}
+    - target: {fileID: 668536239355149413, guid: a67b43fe3b2ef0a47b929beb099dd9b7, type: 3}
+      propertyPath: 'model.items.Array.data[5]'
+      value: 
+      objectReference: {fileID: 11400000, guid: a05782818a9660b41804bdcfe4ea2c22, type: 2}
     - target: {fileID: 1912059041924409463, guid: a67b43fe3b2ef0a47b929beb099dd9b7, type: 3}
       propertyPath: GlobalObjectIdHash
       value: 3572531470

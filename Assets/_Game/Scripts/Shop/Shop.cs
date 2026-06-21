@@ -50,6 +50,11 @@ public class Shop : NetworkBehaviour
 
     public override void OnNetworkDespawn()
     {
+        if (_sharedResources != null)
+        {
+            _sharedResources.ResourceChanged -= HandleSharedResourceChanged;
+        }
+
         if (networkItemData != null)
         {
             networkItemData.OnListChanged -= OnShopDataChanged;
@@ -106,42 +111,45 @@ public class Shop : NetworkBehaviour
 
         if (!IsServer)
         {
-            // Client gọi RPC tới Server
+            // Client omits RpcParams; NGO auto-populates SenderClientId on the server.
+            // If the compiler requires the argument, pass `default`.
             BuyItemServerRpc(resourceType, quantity);
         }
         else
         {
-            // Server xử lý trực tiếp
-            ProcessBuyItem(resourceType, quantity);
+            ProcessBuyItem(resourceType, quantity, NetworkManager.ServerClientId);
         }
     }
 
     [Rpc(SendTo.Server)]
-    private void BuyItemServerRpc(ResourceType resourceType, int quantity)
+    private void BuyItemServerRpc(ResourceType resourceType, int quantity, RpcParams rpcParams)
     {
-        ProcessBuyItem(resourceType, quantity);
+        ProcessBuyItem(resourceType, quantity, rpcParams.Receive.SenderClientId);
     }
 
-    private void ProcessBuyItem(ResourceType resourceType, int quantity)
+    private void ProcessBuyItem(ResourceType resourceType, int quantity, ulong requesterClientId)
     {
-        if (!itemDataIndexMap.TryGetValue(resourceType, out int index))
+        if (_sharedResources == null)
             return;
 
-        if (index < 0 || index >= networkItemData.Count)
-            return;
-
-        var itemData = networkItemData[index];
-
-        // Tìm ShopItem tương ứng
         var shopItem = model.items.Find(x => x.ResourceType == resourceType);
         if (shopItem == null)
             return;
 
-        // Kiểm tra điều kiện mua
-        if (shopItem.IsSoldOut)
+        if (!itemDataIndexMap.TryGetValue(resourceType, out int index) || index < 0 || index >= networkItemData.Count)
             return;
 
-        // Server-side clamp theo stock còn lại (authoritative)
+        var itemData = networkItemData[index];
+
+        ResourceType currencyRT = shopItem.CurrencyType.ToResourceType();
+
+        // Sold out?
+        if (shopItem.IsSoldOut)
+        {
+            SendFeedback(ShopTxResult.FailedStock, resourceType, 0, currencyRT, 0, requesterClientId);
+            return;
+        }
+
         int qty = quantity;
         if (!shopItem.isUnlimited)
         {
@@ -149,14 +157,32 @@ public class Shop : NetworkBehaviour
                 qty = itemData.RemainingQuantity;
 
             if (qty <= 0)
+            {
+                SendFeedback(ShopTxResult.FailedStock, resourceType, 0, currencyRT, 0, requesterClientId);
                 return;
+            }
+        }
 
+        // Affordability: atomic check + spend of Price*qty in the item's currency.
+        int totalCost = SafeMultiply(shopItem.Price, qty);
+        var cost = new ResourceCost[] { new ResourceCost(currencyRT, totalCost) };
+        if (!_sharedResources.CanAfford(cost) || !_sharedResources.TrySpend(cost))
+        {
+            SendFeedback(ShopTxResult.FailedAfford, resourceType, 0, currencyRT, 0, requesterClientId);
+            return;
+        }
+
+        // Deduct stock.
+        if (!shopItem.isUnlimited)
+        {
             itemData.RemainingQuantity -= qty;
             networkItemData[index] = itemData;
         }
 
-        // Broadcast event tới tất cả clients (cấp `qty` resource)
-        OnItemPurchasedClientRpc(resourceType, qty);
+        // Grant the resource server-side; NetworkList replicates → ResourceChanged → HUD updates.
+        _sharedResources.TryAdd(resourceType, qty);
+
+        SendFeedback(ShopTxResult.Success, resourceType, qty, currencyRT, totalCost, requesterClientId);
     }
 
     [Inject]
@@ -164,16 +190,19 @@ public class Shop : NetworkBehaviour
     {
         _sharedResources = sharedResources;
         _pool = pool;
-    }
 
-    [Rpc(SendTo.ClientsAndHost)]
-    private void OnItemPurchasedClientRpc(ResourceType resourceType, int quantity)
-    {
-        Debug.Log($"[Network] Item purchased: {quantity}x {resourceType}");
-        // Cập nhật tài nguyên người chơi (cấp `quantity` resource)
         if (_sharedResources != null)
         {
-            _sharedResources.TryAdd(resourceType, quantity);
+            _sharedResources.ResourceChanged += HandleSharedResourceChanged;
+        }
+    }
+
+    private void HandleSharedResourceChanged(ResourceChanged change)
+    {
+        // Re-clamp/disable buy buttons only when a gating currency changes (cheap; ignores harvest spam).
+        if (change.Type == ResourceType.Coin || change.Type == ResourceType.Token)
+        {
+            presenter?.RefreshShop();
         }
     }
 
@@ -193,65 +222,92 @@ public class Shop : NetworkBehaviour
         }
         else
         {
-            ProcessSellItem(resourceType, quantity);
+            ProcessSellItem(resourceType, quantity, NetworkManager.ServerClientId);
         }
     }
 
     [Rpc(SendTo.Server)]
-    private void SellItemServerRpc(ResourceType resourceType, int quantity)
+    private void SellItemServerRpc(ResourceType resourceType, int quantity, RpcParams rpcParams)
     {
-        ProcessSellItem(resourceType, quantity);
+        ProcessSellItem(resourceType, quantity, rpcParams.Receive.SenderClientId);
     }
 
-    private void ProcessSellItem(ResourceType resourceType, int quantity)
+    private void ProcessSellItem(ResourceType resourceType, int quantity, ulong requesterClientId)
     {
         if (_sharedResources == null)
             return;
 
-        // Tìm ShopItem tương ứng (chỉ để check isSellable — flag tĩnh từ ScriptableObject)
         var shopItem = model.items.Find(x => x.ResourceType == resourceType);
         if (shopItem == null)
             return;
 
-        // Guard 1: chỉ xử lý nếu item được đánh dấu sellable
         if (!shopItem.isSellable)
+        {
+            SendFeedback(ShopTxResult.FailedNotSellable, shopItem.CurrencyType.ToResourceType(), 0, resourceType, 0, requesterClientId);
             return;
+        }
 
-        // Lookup network data để lấy Sell price server-authoritative
-        if (!itemDataIndexMap.TryGetValue(resourceType, out int index))
-            return;
-        if (index < 0 || index >= networkItemData.Count)
+        if (!itemDataIndexMap.TryGetValue(resourceType, out int index) || index < 0 || index >= networkItemData.Count)
             return;
 
         var itemData = networkItemData[index];
         int qty = quantity;
 
-        // Guard 2: server validate atomic — trừ `qty` resource khỏi player.
-        // TrySpend tự check đủ resource và trừ trong cùng transaction; fail nguyên lô nếu thiếu.
-        var costs = new ResourceCost[] { new ResourceCost(resourceType, qty) };
-        if (!_sharedResources.TrySpend(costs))
+        // Spend the resource atomically; fail the whole batch if the player lacks enough.
+        var spend = new ResourceCost[] { new ResourceCost(resourceType, qty) };
+        if (!_sharedResources.TrySpend(spend))
         {
-            Debug.LogWarning($"[Shop] Sell failed — player không đủ {qty} {resourceType}");
+            SendFeedback(ShopTxResult.FailedNoResource, shopItem.CurrencyType.ToResourceType(), 0, resourceType, 0, requesterClientId);
             return;
         }
 
-        // Cộng coin cho player dùng Sell price từ itemData (network-replicated, server-authoritative)
-        int coinReceived = itemData.Sell * qty;
-        if (coinReceived > 0)
+        // Award the item's currency (not hardcoded Coin).
+        ResourceType currencyRT = shopItem.CurrencyType.ToResourceType();
+        int received = SafeMultiply(itemData.Sell, qty);
+        if (received > 0)
         {
-            _sharedResources.TryAdd(ResourceType.Coin, coinReceived);
+            _sharedResources.TryAdd(currencyRT, received);
         }
 
-        // Broadcast cho clients (chỉ để log/UI feedback; data đã sync qua NetworkList resource)
-        OnItemSoldClientRpc(resourceType, coinReceived);
+        SendFeedback(ShopTxResult.Success, currencyRT, received, resourceType, qty, requesterClientId);
+    }
+
+    private void SendFeedback(
+        ShopTxResult result,
+        ResourceType gainedType, int gainedAmt,
+        ResourceType spentType, int spentAmt,
+        ulong requesterClientId)
+    {
+        OnTransactionFeedbackClientRpc(
+            (int)result,
+            (int)gainedType, gainedAmt,
+            (int)spentType, spentAmt,
+            requesterClientId);
     }
 
     [Rpc(SendTo.ClientsAndHost)]
-    private void OnItemSoldClientRpc(ResourceType resourceType, int coinReceived)
+    private void OnTransactionFeedbackClientRpc(
+        int result,
+        int gainedType, int gainedAmt,
+        int spentType, int spentAmt,
+        ulong requesterClientId)
     {
-        Debug.Log($"[Network] Item sold: {resourceType} for {coinReceived} coin(s)");
-        // Resources đã được SharedResourceManager tự đồng bộ qua NetworkList
-        // → HUD sẽ tự update nhờ ResourceChanged event
+        // Approach B: broadcast to all, but only the requester shows the toast.
+        if (NetworkManager == null || NetworkManager.LocalClientId != requesterClientId)
+            return;
+
+        presenter?.ShowFeedback(
+            (ShopTxResult)result,
+            (ResourceType)gainedType, gainedAmt,
+            (ResourceType)spentType, spentAmt);
+    }
+
+    /// <summary>Overflow-safe multiply; non-positive inputs yield 0 (free / no-op).</summary>
+    private static int SafeMultiply(int a, int b)
+    {
+        if (a <= 0 || b <= 0) return 0;
+        if (a > int.MaxValue / b) return int.MaxValue;
+        return a * b;
     }
 
     public NetworkList<ShopItemData> GetNetworkItemData()

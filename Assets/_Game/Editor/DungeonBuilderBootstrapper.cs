@@ -320,7 +320,6 @@ namespace DungeonBuilder.Editor
             SetObject(inputReader, "_inputActions", AssetDatabase.LoadAssetAtPath<InputActionAsset>(InputActionsPath));
             SetObject(playerController, "_data", playerData);
             SetObject(playerStats, "_data", playerData);
-            SetObjectArray(toolController, "_toolBehaviours", new Object[] { axeTool, pickaxeTool, weaponTool, builderTool });
 
             SetObject(lifetimeScope, "_inputReader", inputReader);
             SetObject(lifetimeScope, "_playerController", playerController);

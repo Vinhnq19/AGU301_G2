@@ -1,6 +1,5 @@
-using System.Collections.Generic;
+using DungeonBuilder.Building;
 using DungeonBuilder.Core.Debugging;
-using DungeonBuilder.Core.Enums;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -8,20 +7,19 @@ using VContainer;
 
 namespace DungeonBuilder.Player.Tools
 {
+    /// <summary>
+    /// Routes the attack input to the right action by click context — no manual
+    /// tool swapping. Click on a buildable grid cell -> BuilderTool (open the tower
+    /// panel); anything else -> HarvestToolBase (harvest a node / free foraging).
+    /// </summary>
     public sealed class ToolController : NetworkBehaviour
     {
         [SerializeField] private Camera _camera;
-        [SerializeField] private MonoBehaviour[] _toolBehaviours;
 
-        private readonly List<ITool> _tools = new();
         private InputReader _inputReader;
-        private int _currentIndex;
-
-        /// <summary>
-        /// Tool dang duoc local owner su dung. Static de TowerPresenter co the doc
-        /// ma khong can injection (tower o GameLifetimeScope, ToolController o PlayerLifetimeScope).
-        /// </summary>
-        public static ToolType LocalActiveTool { get; private set; } = ToolType.None;
+        private BuilderTool _builderTool;
+        private HarvestToolBase _harvestTool;
+        private GridManager _grid;
 
         [Inject]
         public void Construct(InputReader inputReader)
@@ -31,12 +29,13 @@ namespace DungeonBuilder.Player.Tools
 
         private void Awake()
         {
-            BuildToolList();
+            _builderTool = GetComponent<BuilderTool>();
+            _harvestTool = GetComponent<HarvestToolBase>();
         }
 
         public override void OnNetworkSpawn()
         {
-            DBLog.Info($"tool.spawn.{NetworkObjectId}", $"ToolController spawned. owner={OwnerClientId}, isOwner={IsOwner}, tools={_tools.Count}.", 0f, this);
+            DBLog.Info($"tool.spawn.{NetworkObjectId}", $"ToolController spawned. owner={OwnerClientId}, isOwner={IsOwner}.", 0f, this);
 
             if (!IsOwner || _inputReader == null)
             {
@@ -44,17 +43,8 @@ namespace DungeonBuilder.Player.Tools
                 return;
             }
 
-            _inputReader.OnAttackPressed += UseCurrentTool;
-            _inputReader.OnAttackCanceled += CancelCurrentTool;
-            _inputReader.OnNextToolPressed += SelectNextTool;
-            _inputReader.OnPrevToolPressed += SelectPreviousTool;
-            _inputReader.OnHotbarPressed += SelectTool;
-
-            // Ghi nhan tool dau tien khi spawn
-            if (_tools.Count > 0)
-            {
-                LocalActiveTool = _tools[_currentIndex].ToolType;
-            }
+            _inputReader.OnAttackPressed += UseAt;
+            _inputReader.OnAttackCanceled += CancelUse;
         }
 
         public override void OnNetworkDespawn()
@@ -64,101 +54,43 @@ namespace DungeonBuilder.Player.Tools
                 return;
             }
 
-            _inputReader.OnAttackPressed -= UseCurrentTool;
-            _inputReader.OnAttackCanceled -= CancelCurrentTool;
-            _inputReader.OnNextToolPressed -= SelectNextTool;
-            _inputReader.OnPrevToolPressed -= SelectPreviousTool;
-            _inputReader.OnHotbarPressed -= SelectTool;
-
-            LocalActiveTool = ToolType.None;
+            _inputReader.OnAttackPressed -= UseAt;
+            _inputReader.OnAttackCanceled -= CancelUse;
         }
 
-        public void SelectTool(int index)
+        private void UseAt()
         {
-            if (_tools.Count == 0 || index < 0 || index >= _tools.Count)
-            {
-                DBLog.Warning($"tool.select.invalid.{NetworkObjectId}", $"SelectTool ignored. index={index}, tools={_tools.Count}.", 1f, this);
-                return;
-            }
-
-            _tools[_currentIndex].CancelAction();
-            _currentIndex = index;
-            LocalActiveTool = _tools[_currentIndex].ToolType;
-            DBLog.Info($"tool.select.{NetworkObjectId}", $"Selected tool index={_currentIndex}, type={_tools[_currentIndex].ToolType}.", 0.25f, this);
-        }
-
-        private void BuildToolList()
-        {
-            _tools.Clear();
-
-            if (_toolBehaviours != null)
-            {
-                foreach (MonoBehaviour behaviour in _toolBehaviours)
-                {
-                    if (behaviour is ITool tool && tool.ToolType != ToolType.None)
-                    {
-                        _tools.Add(tool);
-                    }
-                }
-            }
-
-            if (_tools.Count > 0)
-            {
-                return;
-            }
-
-            foreach (MonoBehaviour behaviour in GetComponentsInChildren<MonoBehaviour>(true))
-            {
-                if (behaviour is ITool tool && tool.ToolType != ToolType.None)
-                {
-                    _tools.Add(tool);
-                }
-            }
-
-            DBLog.Info($"tool.build-list.{GetInstanceID()}", $"Tool list built: count={_tools.Count}.", 1f, this);
-        }
-
-        private void UseCurrentTool()
-        {
-            if (_tools.Count == 0)
-            {
-                DBLog.Warning($"tool.use.none.{NetworkObjectId}", "Attack pressed but no tools are registered.", 1f, this);
-                return;
-            }
-
             Vector3 targetWorldPosition = GetTargetWorldPosition();
-            DBLog.Info($"tool.use.{NetworkObjectId}", $"Attack pressed. tool={_tools[_currentIndex].ToolType}, target={targetWorldPosition}.", 0.2f, this);
-            _tools[_currentIndex].UseAction(targetWorldPosition);
-        }
 
-        private void CancelCurrentTool()
-        {
-            if (_tools.Count == 0)
+            if (_grid == null)
             {
-                return;
+                _grid = FindFirstObjectByType<GridManager>();
             }
 
-            _tools[_currentIndex].CancelAction();
+            // Build wins when the click lands on a valid, empty buildable cell;
+            // otherwise harvest/forage (cell occupied by a tower is not valid placement,
+            // and tower clicks are handled separately by TowerPresenter).
+            bool build = _grid != null
+                && _builderTool != null
+                && _grid.IsValidPlacement(_grid.WorldToGrid(targetWorldPosition));
+
+            DBLog.Info($"tool.use.{NetworkObjectId}", $"Attack routed to {(build ? "build" : "harvest")}. target={targetWorldPosition}.", 0.2f, this);
+
+            if (build)
+            {
+                _builderTool.UseAction(targetWorldPosition);
+            }
+            else
+            {
+                _harvestTool?.UseAction(targetWorldPosition);
+            }
         }
 
-        private void SelectNextTool()
+        private void CancelUse()
         {
-            if (_tools.Count == 0)
-            {
-                return;
-            }
-
-            SelectTool((_currentIndex + 1) % _tools.Count);
-        }
-
-        private void SelectPreviousTool()
-        {
-            if (_tools.Count == 0)
-            {
-                return;
-            }
-
-            SelectTool((_currentIndex - 1 + _tools.Count) % _tools.Count);
+            // BuilderTool.CancelAction opens/closes the tower panel on mouse-up;
+            // HarvestToolBase.CancelAction is a no-op.
+            _builderTool?.CancelAction();
         }
 
         private Vector3 GetTargetWorldPosition()

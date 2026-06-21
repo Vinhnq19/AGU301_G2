@@ -1,7 +1,5 @@
 using DungeonBuilder.Building;
 using DungeonBuilder.Core.Debugging;
-using DungeonBuilder.Core.Enums;
-using DungeonBuilder.Player.Tools;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -13,7 +11,7 @@ namespace Assets._Game.Scripts.Building
     /// Presenter cua tower (MonoBehaviour tren root prefab). Bridges TowerModel voi TowerView.
     /// Xu ly request Upgrade / Remove / Contribute gui len server qua BuildingController.
     /// IPointerClickHandler tren root (cung BoxCollider2D): nhan Physics2D Raycaster click.
-    /// Chi mo ActionPanel khi Builder tool active va tower da IsConstructed.
+    /// Mo ActionPanel khi click tower da IsConstructed (build luon available, khong can swap tool).
     /// </summary>
     public sealed class TowerPresenter : MonoBehaviour, IPointerClickHandler
     {
@@ -73,12 +71,11 @@ namespace Assets._Game.Scripts.Building
         }
 
         /// <summary>
-        /// Physics2D Raycaster hit BoxCollider2D tren root.
-        /// Chi mo ActionPanel khi Builder tool active.
+        /// Physics2D Raycaster hit BoxCollider2D tren root. Tool swap was removed,
+        /// so clicking a constructed tower always toggles its action panel.
         /// </summary>
         public void OnPointerClick(PointerEventData eventData)
         {
-            if (ToolController.LocalActiveTool != ToolType.Builder) return;
             _view?.TogglePanel();
         }
 

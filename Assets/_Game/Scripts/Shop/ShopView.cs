@@ -19,6 +19,8 @@ public class ShopView
 
     [SerializeField] private ShopQuantityPopup quantityPopup;
 
+    [SerializeField] private TransactionToast toast;
+
     public event Action<CurrencyType> OnTabChanged;
 
     // THÊM: List dùng để lưu trữ và tái sử dụng các Item Panel (Object Pooling)
@@ -84,8 +86,20 @@ public class ShopView
 
     public void HideQuantityPopup() => quantityPopup?.Hide();
 
+    public void ShowToast(string message, bool success)
+    {
+        if (toast == null)
+        {
+            Debug.LogWarning(
+                "[ShopView] toast chưa được gán trong Inspector — không thể hiển thị feedback. " +
+                "Kéo GameObject toast (có script TransactionToast) vào field toast của ShopView để fix.");
+            return;
+        }
+        toast.Show(message, success);
+    }
+
     // CẬP NHẬT: Xử lý hiển thị bằng cách tái sử dụng (Pooling)
-    public void CreateItemPanels(List<ShopItem> items, System.Action<string> onBuyCallback = null, System.Action<string> onSellCallback = null)
+    public void CreateItemPanels(List<ShopItem> items, int ownedCurrency, System.Action<string> onBuyCallback = null, System.Action<string> onSellCallback = null)
     {
         // 1. Tạm ẩn tất cả các panel đang có trong Pool
         foreach (var panel in panelPool)
@@ -100,7 +114,7 @@ public class ShopView
             {
                 // Nếu trong Pool đã có sẵn Panel -> Bật nó lên và gán data mới
                 panelPool[i].gameObject.SetActive(true);
-                panelPool[i].Setup(items[i], onBuyCallback, onSellCallback);
+                panelPool[i].Setup(items[i], ownedCurrency, onBuyCallback, onSellCallback);
             }
             else
             {
@@ -108,7 +122,7 @@ public class ShopView
                 var panelObj = GameObject.Instantiate(itemPanelPrefab.gameObject, itemPanelContainer);
                 var shopItemPanel = panelObj.GetComponent<ShopItemPanel>();
 
-                shopItemPanel.Setup(items[i], onBuyCallback, onSellCallback);
+                shopItemPanel.Setup(items[i], ownedCurrency, onBuyCallback, onSellCallback);
                 panelPool.Add(shopItemPanel);
             }
         }

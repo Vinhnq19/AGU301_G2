@@ -30,6 +30,11 @@ namespace DungeonBuilder.Projectile
         private Vector3 _direction;
         [SerializeField] private float _collisionRadius = 0.2f;
 
+        private readonly NetworkVariable<float> _netSpeed = new(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        private readonly NetworkVariable<Vector3> _netDirection = new(Vector3.right, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        private readonly NetworkVariable<Color> _netColor = new(Color.white, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        private readonly NetworkVariable<Vector3> _netScale = new(Vector3.one, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
         [Inject] private INetworkPool _pool;
 
         public void Initialize(float damage, float speed, float lifetime, ulong targetNetworkObjectId, Vector3 targetInitialPosition, Color color, Vector3 localScale)
@@ -57,11 +62,25 @@ namespace DungeonBuilder.Projectile
             {
                 _visual.localScale = localScale;
             }
+
+            _netSpeed.Value = speed;
+            _netDirection.Value = _direction;
+            _netColor.Value = color;
+            _netScale.Value = localScale;
         }
 
         public override void OnNetworkSpawn()
         {
-            _isActive = IsServer;
+            if (!IsServer)
+            {
+                _speed = _netSpeed.Value;
+                _direction = _netDirection.Value;
+                if (_spriteRenderer != null) _spriteRenderer.color = _netColor.Value;
+                if (_visual != null) _visual.localScale = _netScale.Value;
+                transform.rotation = Quaternion.FromToRotation(Vector3.up, _direction);
+            }
+
+            _isActive = true;
             if (IsServer)
             {
                 _lifetimeTimer = _lifetime;

@@ -150,7 +150,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 942224123
+  GlobalObjectIdHash: 2412152181
   InScenePlacedSourceGlobalObjectIdHash: 942224123
   DeferredDespawnTick: 0
   Ownership: 1
@@ -189,7 +189,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!114 &6954549493562366144
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -250,8 +250,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   _targetRadius: 0.35
-  _fallbackSearchRadius: 1.2
-  _serverInteractionRange: 1.2
+  _fallbackSearchRadius: 2
+  _serverInteractionRange: 2
+  _swingDuration: 0.5
 --- !u!114 &4199280064977222803
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -269,8 +270,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   _targetRadius: 0.35
-  _fallbackSearchRadius: 1.2
-  _serverInteractionRange: 1.2
+  _fallbackSearchRadius: 2
+  _serverInteractionRange: 2
+  _swingDuration: 0.5
 --- !u!114 &5523730212316939046
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -517,7 +519,6 @@ MonoBehaviour:
   _renderer: {fileID: 4751057477609977098}
   _frameRate: 10
   _moveThreshold: 0.05
-  _foragingDuration: 0.5
 --- !u!61 &3203991521671980804
 BoxCollider2D:
   m_ObjectHideFlags: 0

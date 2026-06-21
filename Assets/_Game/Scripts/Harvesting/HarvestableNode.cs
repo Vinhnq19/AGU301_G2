@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using DungeonBuilder.Core;
 using DungeonBuilder.Core.Debugging;
+using DungeonBuilder.Core.Enums;
 using DungeonBuilder.Core.Interfaces;
 using DungeonBuilder.Data;
 using DungeonBuilder.Networking.Pool;
@@ -36,6 +37,7 @@ namespace DungeonBuilder.Harvesting
 
         private INetworkPool _pool;
         private EventBus _eventBus;
+        private IResourceService _sharedResources;
         private ResourceSpawner _owner;
         private int _slotIndex = -1;
         private int _currentWave;
@@ -47,10 +49,11 @@ namespace DungeonBuilder.Harvesting
         public bool IsDepletable => true;
 
         [Inject]
-        public void Construct(INetworkPool pool, EventBus eventBus)
+        public void Construct(INetworkPool pool, EventBus eventBus, IResourceService sharedResources)
         {
             _pool = pool;
             _eventBus = eventBus;
+            _sharedResources = sharedResources;
         }
 
         private void Awake()
@@ -184,7 +187,7 @@ namespace DungeonBuilder.Harvesting
         {
             if (IsServer && interactor != null && IsPlayerInRange(interactor.NetworkObject))
             {
-                HarvestOnce();
+                HarvestOnce(null);
             }
         }
 
@@ -195,7 +198,7 @@ namespace DungeonBuilder.Harvesting
                 return;
             }
 
-            HarvestOnce();
+            HarvestOnce(tool);
         }
 
         public void TakeDamage(float amount, ulong attackerClientId = 0)
@@ -205,7 +208,7 @@ namespace DungeonBuilder.Harvesting
                 return;
             }
 
-            HarvestOnce();
+            HarvestOnce(null);
         }
 
         [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
@@ -221,10 +224,10 @@ namespace DungeonBuilder.Harvesting
                 return;
             }
 
-            HarvestOnce();
+            HarvestOnce(null);
         }
 
-        private void HarvestOnce()
+        private void HarvestOnce(ITool sourceTool)
         {
             ResolvePool();
 
@@ -239,17 +242,33 @@ namespace DungeonBuilder.Harvesting
                 _hitsRemaining.Value = Mathf.Max(1, _data.hitsToBreak);
             }
 
-            _hitsRemaining.Value = Mathf.Max(0, _hitsRemaining.Value - 1);
-            DBLog.Info($"node.harvest.{NetworkObjectId}", $"Harvested node. type={_data.resourceType}, hitsRemaining={_hitsRemaining.Value}, amount={_data.amountPerHit}.", 0.2f, this);
+            ToolType toolType = sourceTool != null ? sourceTool.ToolType : ToolType.None;
+            int skill = ResolveSkillForTool(toolType);
+            int damage = SkillDamageCalculator.Calculate(skill);
+            int hitsBefore = _hitsRemaining.Value;
+            _hitsRemaining.Value = Mathf.Max(0, _hitsRemaining.Value - damage);
+            DBLog.Info($"node.harvest.{NetworkObjectId}", $"Harvested node. type={_data.resourceType}, tool={toolType}, skill={skill}, damage={damage}, hitsRemaining={_hitsRemaining.Value}, amount={_data.amountPerHit}.", 0.2f, this);
             PlayDamageFlashClientRpc();
             SpawnResourceDrop();
 
             if (_hitsRemaining.Value <= 0)
             {
                 _isDepleted.Value = true;
-                DBLog.Info($"node.depleted.{NetworkObjectId}", $"Node depleted. type={_data.resourceType}, slot={_slotIndex}.", 0f, this);
+                DBLog.Info($"node.depleted.{NetworkObjectId}", $"Node depleted. type={_data.resourceType}, slot={_slotIndex}, hitsBefore={hitsBefore}, damage={damage}.", 0f, this);
                 DepleteAsync().Forget();
             }
+        }
+
+        private int ResolveSkillForTool(ToolType toolType)
+        {
+            if (_sharedResources == null)
+            {
+                return SkillDamageCalculator.BaseSkill;
+            }
+
+            ResourceType skillType = SkillDamageCalculator.SkillForTool(toolType);
+            int skill = _sharedResources.GetAmount(skillType);
+            return skill < SkillDamageCalculator.BaseSkill ? SkillDamageCalculator.BaseSkill : skill;
         }
 
         private void SpawnResourceDrop()

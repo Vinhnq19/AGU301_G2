@@ -23,15 +23,17 @@ namespace Assets._Game.Scripts.Data
         /// <summary>Viet tat hien thi UI: Wood→W, Stone→St, Ore→O, ...</summary>
         public static string Abbr(ResourceType type) => type switch
         {
-            ResourceType.Wood       => "W",
-            ResourceType.Stone      => "St",
-            ResourceType.Ore        => "O",
-            ResourceType.Crystal    => "C",
-            ResourceType.Copper     => "Cu",
-            ResourceType.Iron       => "Fe",
-            ResourceType.BlueGems   => "BG",
-            ResourceType.PurpleGems => "PG",
-            _                       => type.ToString()
+            ResourceType.Wood        => "W",
+            ResourceType.Stone       => "St",
+            ResourceType.Ore         => "O",
+            ResourceType.Crystal     => "C",
+            ResourceType.Copper      => "Cu",
+            ResourceType.Iron        => "Fe",
+            ResourceType.BlueGems    => "BG",
+            ResourceType.PurpleGems  => "PG",
+            ResourceType.MiningSkill  => "Mining",
+            ResourceType.ForgingSkill => "Forging",
+            _                        => type.ToString()
         };
 
         public override string ToString() => $"{amount}{Abbr(type)}";

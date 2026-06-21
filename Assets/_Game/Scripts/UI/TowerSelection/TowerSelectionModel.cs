@@ -50,7 +50,9 @@ namespace DungeonBuilder.UI.TowerSelection
 
         public bool CanAfford(TowerType type)
         {
-            if (!_affordability.TryGetValue(type, out bool can)) return true;
+            // Default to NOT affordable when a tower hasn't been evaluated (e.g. locked/unknown),
+            // so locked towers can never appear enabled.
+            if (!_affordability.TryGetValue(type, out bool can)) return false;
             return can;
         }
     }

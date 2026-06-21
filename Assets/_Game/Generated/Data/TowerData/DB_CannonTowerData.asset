@@ -24,7 +24,6 @@ MonoBehaviour:
     amount: 45
   - type: 4
     amount: 25
-  unlockTokenCost: 10
   unlockResourceType: 11
   maxLevel: 3
   upgradeLevels:

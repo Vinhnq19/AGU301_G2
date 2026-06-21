@@ -16,6 +16,10 @@ namespace DungeonBuilder.UI.HUD
         [SerializeField] private TMP_Text _coinText;
         [SerializeField] private TMP_Text _tokenText;
 
+        [Header("Skills")]
+        [SerializeField] private TMP_Text _miningSkillText;
+        [SerializeField] private TMP_Text _forgingSkillText;
+
         [Header("Wave")]
         [SerializeField] private TMP_Text _waveText;
         [SerializeField] private TMP_Text _countdownText;
@@ -40,6 +44,8 @@ namespace DungeonBuilder.UI.HUD
             SetText(_copperText, Presenter.GetResource(ResourceType.Copper).ToString());
             SetText(_coinText, Presenter.GetResource(ResourceType.Coin).ToString());
             SetText(_tokenText, Presenter.GetResource(ResourceType.Token).ToString());
+            SetText(_miningSkillText, Presenter.GetResource(ResourceType.MiningSkill).ToString());
+            SetText(_forgingSkillText, Presenter.GetResource(ResourceType.ForgingSkill).ToString());
             SetText(_waveText, Presenter.GetWave().ToString());
             SetText(_countdownText, Mathf.CeilToInt(Presenter.GetCountdown()).ToString());
             SetText(_coreHealthText, Presenter.GetCoreHealth().ToString());

@@ -19,18 +19,21 @@ namespace DungeonBuilder.UI.TowerSelection
         private readonly BuildingController _buildingController;
         private readonly IResourceService _resources;
         private readonly TowerCatalogSO _catalog;
+        private readonly TowerUnlockConfigSO _unlockConfig;
 
         public TowerSelectionPresenter(
             TowerSelectionView view,
             TowerSelectionModel model,
             BuildingController buildingController,
             IResourceService resources,
-            TowerCatalogSO catalog)
+            TowerCatalogSO catalog,
+            TowerUnlockConfigSO unlockConfig)
             : base(view, model)
         {
             _buildingController = buildingController;
             _resources = resources;
             _catalog = catalog;
+            _unlockConfig = unlockConfig;
 
             _resources.ResourceChanged += HandleResourceChanged;
         }
@@ -66,8 +69,37 @@ namespace DungeonBuilder.UI.TowerSelection
         public void OnTowerSelected(TowerType towerType)
         {
             if (!Model.IsOpen) return;
+
+            // Defense: don't request placement if the tower is locked (not default-unlocked AND not purchased).
+            TowerDataSO data = FindTowerData(towerType);
+            if (data != null && !IsDefaultUnlocked(towerType) && _resources.GetAmount(data.unlockResourceType) <= 0)
+            {
+                return;
+            }
+
             _buildingController?.RequestPlaceTower(Model.SelectedGridPosition, towerType);
             Hide();
+        }
+
+        private TowerDataSO FindTowerData(TowerType towerType)
+        {
+            if (_catalog == null) return null;
+            foreach (TowerDataSO data in _catalog.Towers)
+            {
+                if (data.towerType == towerType) return data;
+            }
+            return null;
+        }
+
+        /// <summary>True if the tower is unlocked from the start per TowerUnlockConfigSO.</summary>
+        private bool IsDefaultUnlocked(TowerType towerType)
+        {
+            if (_unlockConfig == null) return false;
+            foreach (TowerType t in _unlockConfig.DefaultUnlocked)
+            {
+                if (t == towerType) return true;
+            }
+            return false;
         }
 
         protected override void OnModelChanged()
@@ -90,7 +122,7 @@ namespace DungeonBuilder.UI.TowerSelection
             if (_catalog == null) return;
             foreach (TowerDataSO data in _catalog.Towers)
             {
-                bool isUnlocked = data.unlockTokenCost <= 0 || _resources.GetAmount(data.unlockResourceType) > 0;
+                bool isUnlocked = IsDefaultUnlocked(data.towerType) || _resources.GetAmount(data.unlockResourceType) > 0;
                 bool canAfford = isUnlocked && _resources.CanAfford(data.buildCost);
                 Model.UpdateAffordability(data, canAfford);
             }

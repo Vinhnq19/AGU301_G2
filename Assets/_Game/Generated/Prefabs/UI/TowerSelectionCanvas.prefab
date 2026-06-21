@@ -3099,6 +3099,7 @@ MonoBehaviour:
   - {fileID: 6963267667246134577}
   - {fileID: 404694638306053800}
   - {fileID: 151235154292672510}
+  towerUnlockConfigSO: {fileID: 11400000, guid: ebcc487646ce0ff48950e915185034dd, type: 2}
 --- !u!1 &9054889397491315678
 GameObject:
   m_ObjectHideFlags: 0

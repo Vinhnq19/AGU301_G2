@@ -1,4 +1,5 @@
 using DungeonBuilder.Core.Enums;
+using DungeonBuilder.Data;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,6 +13,8 @@ namespace DungeonBuilder.UI.TowerSelection
 
         [Header("Tower Buttons")]
         [SerializeField] private TowerOptionButton[] _towerButtons;
+
+        [SerializeField] private TowerUnlockConfigSO towerUnlockConfigSO;
 
         private TowerSelectionPresenter _presenter;
         private bool _ignoreNextClick;

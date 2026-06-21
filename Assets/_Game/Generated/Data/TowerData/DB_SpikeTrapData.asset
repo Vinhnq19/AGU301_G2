@@ -24,6 +24,7 @@ MonoBehaviour:
     amount: 30
   - type: 1
     amount: 25
+  unlockResourceType: 13
   maxLevel: 3
   upgradeLevels:
   - costs:

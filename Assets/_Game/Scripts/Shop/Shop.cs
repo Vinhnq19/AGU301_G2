@@ -96,20 +96,31 @@ public class Shop : NetworkBehaviour
         }
     }
 
-    /// <summary>Unlock mac dinh cac tower trong config (vd: Arrow) luc bat dau match.</summary>
+    /// <summary>Reset unlock state moi match: lock tat ca tower truoc, roi unlock mac dinh (vd Arrow).
+    /// Chong stale unlock tu match/session truoc (nguyen nhan tower chua mua ma van xay duoc).</summary>
     private void ApplyDefaultUnlocks()
     {
-        if (_sharedResources == null || _unlockConfig == null || _towerCatalog == null)
+        if (_sharedResources == null || _towerCatalog == null)
         {
             return;
         }
 
-        foreach (TowerType type in _unlockConfig.DefaultUnlocked)
+        // Reset: lock tat ca tower truoc.
+        foreach (TowerDataSO data in _towerCatalog.Towers)
         {
-            TowerDataSO data = FindTower(type);
-            if (data != null)
+            _sharedResources.TrySet(data.unlockResourceType, 0);
+        }
+
+        // Unlock mac dinh theo config.
+        if (_unlockConfig != null)
+        {
+            foreach (TowerType type in _unlockConfig.DefaultUnlocked)
             {
-                _sharedResources.TrySet(data.unlockResourceType, 1);
+                TowerDataSO data = FindTower(type);
+                if (data != null)
+                {
+                    _sharedResources.TrySet(data.unlockResourceType, 1);
+                }
             }
         }
     }

@@ -17,6 +17,7 @@ namespace DungeonBuilder.Player.Tools
 
         private readonly Collider2D[] _fallbackResults = new Collider2D[16];
         private bool _isSwinging;
+        private bool _hasPendingTarget;
         private float _swingEnd;
         private ulong _pendingTargetId;
         private PlayerAnimation _animation;
@@ -35,20 +36,18 @@ namespace DungeonBuilder.Player.Tools
                 return;
             }
 
-            NetworkObject target = FindTarget(targetPosition);
-            if (target == null)
-            {
-                DBLog.Warning($"{ToolType}.send.no-target.{NetworkObjectId}", $"{ToolType} found no harvest target. click={targetPosition}, player={transform.position}.", 0.5f, this);
-                return;
-            }
-
+            // Swing always plays (free foraging, faces the mouse cursor); a resource
+            // node is captured opportunistically so damage can apply at the swing end.
             _isSwinging = true;
             _swingEnd = Time.time + _swingDuration;
-            _pendingTargetId = target.NetworkObjectId;
             if (_animation != null)
             {
-                _animation.BeginForaging(target.transform.position);
+                _animation.BeginForaging(targetPosition);
             }
+
+            NetworkObject target = FindTarget(targetPosition);
+            _hasPendingTarget = target != null;
+            _pendingTargetId = target != null ? target.NetworkObjectId : 0;
         }
 
         private void Update()
@@ -68,7 +67,11 @@ namespace DungeonBuilder.Player.Tools
             {
                 _animation.EndForaging();
             }
-            InteractWithNodeServerRpc(_pendingTargetId);
+
+            if (_hasPendingTarget)
+            {
+                InteractWithNodeServerRpc(_pendingTargetId);
+            }
         }
 
         public virtual void CancelAction()

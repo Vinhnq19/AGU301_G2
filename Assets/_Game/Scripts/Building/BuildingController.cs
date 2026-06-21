@@ -58,7 +58,7 @@ namespace DungeonBuilder.Building
             }
 
             // Check if tower is unlocked
-            if (_sharedResources.GetAmount(data.unlockResourceType) <= 0)
+            if (data.unlockTokenCost > 0 && _sharedResources.GetAmount(data.unlockResourceType) <= 0)
             {
                 DBLog.Warning($"build.reject.locked.{towerType}", $"[BuildingController] Place rejected: {towerType} is not unlocked.", 0.5f, this);
                 return;

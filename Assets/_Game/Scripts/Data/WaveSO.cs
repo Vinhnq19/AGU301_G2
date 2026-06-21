@@ -18,6 +18,7 @@ namespace DungeonBuilder.Data
     public sealed class WaveSO : ScriptableObject
     {
         public float buildPhaseDuration = 30f;
+        public float combatPhaseDuration = 120f;
         public List<SpawnGroup> spawnGroups = new();
     }
 }

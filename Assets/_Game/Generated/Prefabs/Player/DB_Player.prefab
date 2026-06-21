@@ -82,7 +82,7 @@ SpriteRenderer:
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 6635da6bcb4bfdc43ba102cd3dc0f000, type: 3}
-  m_Color: {r: 0.25, g: 0.75, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -150,7 +150,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 2412152181
+  GlobalObjectIdHash: 942224123
   InScenePlacedSourceGlobalObjectIdHash: 942224123
   DeferredDespawnTick: 0
   Ownership: 1
@@ -322,11 +322,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Player.Tools.ToolController
   ShowTopMostFoldoutHeaderGroup: 1
   _camera: {fileID: 0}
-  _toolBehaviours:
-  - {fileID: 5002381239887548320}
-  - {fileID: 4199280064977222803}
-  - {fileID: 5523730212316939046}
-  - {fileID: 4054209775680089584}
 --- !u!114 &8807089381628071931
 MonoBehaviour:
   m_ObjectHideFlags: 0

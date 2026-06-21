@@ -27,6 +27,7 @@ namespace DungeonBuilder.Harvesting
 
         private readonly NetworkVariable<ResourceType> _resourceType = new(ResourceType.Wood, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         private readonly NetworkVariable<int> _amount = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        private readonly NetworkVariable<Vector3> _jumpOffset = new(Vector3.zero, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
         private IResourceService _sharedResources;
         private INetworkPool _pool;
@@ -54,9 +55,45 @@ namespace DungeonBuilder.Harvesting
             float jitter = _jumpVerticalJitter > 0f
                 ? UnityEngine.Random.Range(-_jumpVerticalJitter, _jumpVerticalJitter)
                 : 0f;
-            transform.position += new Vector3(_jumpRightDistance, jitter, 0f);
+            Vector3 offset = new Vector3(_jumpRightDistance, jitter, 0f);
+            _jumpOffset.Value = offset;
+            transform.position += offset;
 
             DBLog.Info($"drop.configure.{NetworkObjectId}", $"ResourceDrop configured. id={NetworkObjectId}, type={type}, amount={amount}, rightOffset={_jumpRightDistance}.", 0.2f, this);
+        }
+
+        public void ConfigureWithOffset(ResourceType type, int amount, Vector3 offset)
+        {
+            if (NetworkManager.Singleton != null && !NetworkManager.Singleton.IsServer)
+            {
+                return;
+            }
+
+            _resourceType.Value = type;
+            _amount.Value = amount;
+            _jumpOffset.Value = offset;
+            transform.position += offset;
+
+            DBLog.Info($"drop.configure.offset.{NetworkObjectId}", $"ResourceDrop configured with custom offset. id={NetworkObjectId}, type={type}, amount={amount}, offset={offset}.", 0.2f, this);
+        }
+
+        public override void OnNetworkSpawn()
+        {
+            base.OnNetworkSpawn();
+
+            if (_visual == null)
+            {
+                return;
+            }
+
+            _visual.DOKill();
+            // Vị trí ngang/ngẫu nhiên do server dịch trên root + NetworkTransform sync.
+            // Visual chỉ làm cung nhảy từ vị trí ban đầu (-_jumpOffset) về vị trí mới của root (Vector3.zero).
+            _visual.localPosition = -_jumpOffset.Value;
+            _visual.DOLocalJump(Vector3.zero, _jumpPower, 1, _jumpDuration)
+                .SetEase(Ease.OutQuad)
+                .OnComplete(() => _visual.localPosition = Vector3.zero);
+            _visual.DOPunchScale(Vector3.one * 0.25f, 0.3f, 6, 0.6f);
         }
 
         public void OnGetFromPool()
@@ -70,15 +107,7 @@ namespace DungeonBuilder.Harvesting
             }
 
             _visual.DOKill();
-         //   _visual.localScale = Vector3.one;
-
-            // Vị trí ngang (ra bên phải) do server dịch trên root + NetworkTransform sync.
-            // Visual chỉ làm cung nhảy lên rồi đáp về 0 cho cảm giác "bật ra".
-            _visual.localPosition = new Vector3(-_jumpRightDistance, 0f, 0f);
-            _visual.DOLocalJump(Vector3.zero, _jumpPower, 1, _jumpDuration)
-                .SetEase(Ease.OutQuad)
-                .OnComplete(() => _visual.localPosition = Vector3.zero);
-            _visual.DOPunchScale(Vector3.one * 0.25f, 0.3f, 6, 0.6f);
+            _visual.localPosition = Vector3.zero;
         }
 
         public void OnReturnToPool()

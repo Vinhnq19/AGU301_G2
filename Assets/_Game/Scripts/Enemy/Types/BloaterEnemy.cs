@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using Assets._Game.Scripts.Enemy;
 using DG.Tweening;
+using DungeonBuilder.Core.Interfaces;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -17,15 +19,18 @@ namespace DungeonBuilder.Enemy.Types
         [SerializeField, Min(0.1f)] private float _gasDuration = 3f;
         [SerializeField, Min(0.1f)] private float _gasCooldown = 5f;
         [SerializeField, Min(0.1f)] private float _gasTickInterval = 1f;
+        [SerializeField] private SpriteRenderer _gasFillVisual;
 
         private float _gasActiveTimer;
         private float _gasCooldownTimer;
         private bool _isGasActive;
         private float _damageTickTimer;
+        private readonly Collider2D[] _gasScanResults = new Collider2D[32];
 
         private LineRenderer _gasIndicator;
         private Tween _pulseTween;
         private Tween _fadeTween;
+        private Tween _gasFillTween;
 
         protected override void Update()
         {
@@ -65,15 +70,26 @@ namespace DungeonBuilder.Enemy.Types
 
         private void ApplyGasDamage()
         {
-            // Tìm tất cả Player trong phạm vi _gasRadius và gây sát thương
-            Collider2D[] hitPlayers = Physics2D.OverlapCircleAll(transform.position, _gasRadius, LayerMask.GetMask("Player"));
-            foreach (var col in hitPlayers)
+            int layerMask = ~LayerMask.GetMask("Enemy");
+            ContactFilter2D filter = new ContactFilter2D();
+            filter.SetLayerMask(layerMask);
+            filter.useLayerMask = true;
+            filter.useTriggers = true;
+
+            int count = Physics2D.OverlapCircle(transform.position, _gasRadius, filter, _gasScanResults);
+            HashSet<IDamageable> damagedTargets = new HashSet<IDamageable>();
+
+            for (int i = 0; i < count; i++)
             {
-                if (col == null) continue;
-                var playerStats = col.GetComponentInParent<DungeonBuilder.Player.PlayerStats>();
-                if (playerStats != null)
+                if (_gasScanResults[i] == null) continue;
+
+                IDamageable damageable = _gasScanResults[i].GetComponentInParent<IDamageable>();
+                if (IsValidTarget(damageable))
                 {
-                    playerStats.TakeDamage(_gasDamage, 0);
+                    if (damagedTargets.Add(damageable))
+                    {
+                        damageable.TakeDamage(_gasDamage, 0);
+                    }
                 }
             }
         }
@@ -83,17 +99,14 @@ namespace DungeonBuilder.Enemy.Types
             base.OnReturnToPool();
             _pulseTween?.Kill();
             _fadeTween?.Kill();
+            _gasFillTween?.Kill();
             if (_gasIndicator != null)
             {
                 _gasIndicator.enabled = false;
             }
-            if (_visual != null)
+            if (_gasFillVisual != null)
             {
-                var sr = _visual.GetComponent<SpriteRenderer>();
-                if (sr != null)
-                {
-                    sr.color = new Color(0.95f, 0.65f, 0.2f, 1f);
-                }
+                _gasFillVisual.enabled = false;
             }
         }
 
@@ -153,13 +166,16 @@ namespace DungeonBuilder.Enemy.Types
                 _gasIndicator.endWidth = w;
             }, 0.14f, 0.5f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);
 
-            if (_visual != null)
+            if (_gasFillVisual != null)
             {
-                var sr = _visual.GetComponent<SpriteRenderer>();
-                if (sr != null)
-                {
-                    sr.color = new Color(0.4f, 0.9f, 0.4f, 1f);
-                }
+                _gasFillVisual.transform.localPosition = Vector3.zero;
+                _gasFillVisual.transform.localScale = new Vector3(_gasRadius * 2f, _gasRadius * 2f, 1f);
+                _gasFillVisual.enabled = true;
+                _gasFillVisual.color = new Color(0.2f, 0.8f, 0.2f, 0.05f);
+                _gasFillTween?.Kill();
+                _gasFillTween = _gasFillVisual.DOFade(0.15f, 0.5f)
+                    .SetLoops(-1, LoopType.Yoyo)
+                    .SetEase(Ease.InOutSine);
             }
         }
 
@@ -180,13 +196,12 @@ namespace DungeonBuilder.Enemy.Types
                 });
             }
 
-            if (_visual != null)
+            _gasFillTween?.Kill();
+            if (_gasFillVisual != null)
             {
-                var sr = _visual.GetComponent<SpriteRenderer>();
-                if (sr != null)
-                {
-                    sr.color = new Color(0.95f, 0.65f, 0.2f, 1f);
-                }
+                _gasFillVisual.DOFade(0f, 0.4f).OnComplete(() => {
+                    if (_gasFillVisual != null) _gasFillVisual.enabled = false;
+                });
             }
         }
     }

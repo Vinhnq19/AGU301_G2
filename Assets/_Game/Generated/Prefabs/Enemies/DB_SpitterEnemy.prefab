@@ -163,7 +163,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 2166838347
+  GlobalObjectIdHash: 824350359
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -304,5 +304,5 @@ MonoBehaviour:
   _visual: {fileID: 7794510355619725346}
   _attackRange: 5
   _attackDamage: 10
-  _attackInterval: 1
+  _attackInterval: 3
   _projectilePrefab: {fileID: 392532428047427896, guid: a5b78ca9b244ca18a36c13e5519abcdf, type: 3}

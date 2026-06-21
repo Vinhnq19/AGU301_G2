@@ -16,3 +16,4 @@ MonoBehaviour:
   speed: 5
   maxMana: 100
   dashCooldown: 1
+  dashForce: 8

@@ -10,7 +10,6 @@ namespace DungeonBuilder.Player
     public sealed class PlayerController : NetworkBehaviour
     {
         [SerializeField] private PlayerDataSO _data;
-        [SerializeField, Min(0f)] private float _dashForce = 8f;
 
         private InputReader _inputReader;
         private Rigidbody2D _rigidbody;
@@ -20,6 +19,7 @@ namespace DungeonBuilder.Player
 
         private float Speed => _data != null ? _data.speed : 5f;
         private float DashCooldown => _data != null ? _data.dashCooldown : 1f;
+        private float DashForce => _data != null ? _data.dashForce : 8f;
 
         [Inject]
         public void Construct(InputReader inputReader)
@@ -105,8 +105,8 @@ namespace DungeonBuilder.Player
             }
 
             _lastDashTime = Time.time;
-            _rigidbody.AddForce(dashDirection * _dashForce, ForceMode2D.Impulse);
-            DBLog.Info($"player.dash.{NetworkObjectId}", $"Dash applied. direction={dashDirection}, force={_dashForce}.", 0.25f, this);
+            _rigidbody.AddForce(dashDirection * DashForce, ForceMode2D.Impulse);
+            DBLog.Info($"player.dash.{NetworkObjectId}", $"Dash applied. direction={dashDirection}, force={DashForce}.", 0.25f, this);
         }
     }
 }

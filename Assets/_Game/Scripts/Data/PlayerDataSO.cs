@@ -9,5 +9,6 @@ namespace DungeonBuilder.Data
         public float speed = 5f;
         public float maxMana = 100f;
         public float dashCooldown = 1f;
+        public float dashForce = 8f;
     }
 }

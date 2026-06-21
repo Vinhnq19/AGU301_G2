@@ -68,12 +68,18 @@ namespace DungeonBuilder.Building
             if (_presenter != null)
                 _presenter.Initialize(_model, _view);
 
-            _model.SetLevel(_currentLevel.Value);
-            
-            if (IsServer && _health.Value == 100f && _currentLevel.Value == 1) // Just initialized
+            if (IsServer)
             {
+                // Reset trạng thái khi lấy từ Pool ra xây lại
+                _currentLevel.Value = 1;
+                _model.SetLevel(1);
                 _health.Value = _model.MaxHealth;
             }
+            else
+            {
+                _model.SetLevel(_currentLevel.Value);
+            }
+            
             _model.SetHealth(_health.Value);
 
             DBLog.Info(

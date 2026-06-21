@@ -12,6 +12,11 @@ namespace DungeonBuilder.Core.Enums
         PurpleGems = 7,
         Token = 8,
         Coin = 9,
+        ArrowTowerUnlock = 10,
+        CannonTowerUnlock = 11,
+        FrostTowerUnlock = 12,
+        SpikeTrapTowerUnlock = 13,
+        LaserTowerUnlock = 14,
         MAX
     }
 }

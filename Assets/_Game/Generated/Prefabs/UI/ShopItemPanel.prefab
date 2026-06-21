@@ -604,6 +604,8 @@ MonoBehaviour:
   buyButton: {fileID: 4785112514654741815}
   sellButton: {fileID: 2485001180887656215}
   soldOutLabel: {fileID: 0}
+  iconImage: {fileID: 6468560507300605133}
+  maxSize: 170
 --- !u!1 &8670092625826608913
 GameObject:
   m_ObjectHideFlags: 0

@@ -27,6 +27,10 @@ namespace DungeonBuilder.Projectile
         protected bool _isActive;
         private float _lifetimeTimer;
 
+        private readonly NetworkVariable<float> _netSpeed = new(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        private readonly NetworkVariable<ulong> _netTargetId = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        private readonly NetworkVariable<Vector3> _netSpawnPos = new(Vector3.zero, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
         protected float Damage { get; private set; }
 
         [Inject] private INetworkPool _pool;
@@ -42,11 +46,22 @@ namespace DungeonBuilder.Projectile
             _targetNetworkObjectId = targetNetworkObjectId;
             _lastKnownTargetPos = spawnPosition;
             _isActive = true;
+
+            _netSpeed.Value = speed;
+            _netTargetId.Value = targetNetworkObjectId;
+            _netSpawnPos.Value = spawnPosition;
         }
 
         public override void OnNetworkSpawn()
         {
-            _isActive = IsServer;
+            if (!IsServer)
+            {
+                _speed = _netSpeed.Value;
+                _targetNetworkObjectId = _netTargetId.Value;
+                _lastKnownTargetPos = _netSpawnPos.Value;
+            }
+
+            _isActive = true;
             if (IsServer)
             {
                 _lifetimeTimer = _lifetime;

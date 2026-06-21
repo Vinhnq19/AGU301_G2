@@ -67,6 +67,15 @@ namespace DungeonBuilder.Player
             IsForaging = false;
         }
 
+        /// <summary>Current facing as a unit vector (for dash direction, etc.).</summary>
+        public Vector2 GetFacingVector() => _netFacing.Value switch
+        {
+            FacingDir.Up => Vector2.up,
+            FacingDir.Down => Vector2.down,
+            FacingDir.Left => Vector2.left,
+            _ => Vector2.right,
+        };
+
         private void Update()
         {
             if (IsOwner)

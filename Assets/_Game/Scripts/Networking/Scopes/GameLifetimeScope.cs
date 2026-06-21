@@ -4,6 +4,7 @@ using DungeonBuilder.Core.Interfaces;
 using DungeonBuilder.Data;
 using DungeonBuilder.Harvesting;
 using DungeonBuilder.Networking.Pool;
+using DungeonBuilder.UI.GameResult;
 using DungeonBuilder.UI.HUD;
 using DungeonBuilder.UI.TowerSelection;
 using DungeonBuilder.Wave;
@@ -27,6 +28,7 @@ namespace DungeonBuilder.Networking.Scopes
         [Header("UI")]
         [SerializeField] private HUDView _hudView;
         [SerializeField] private TowerSelectionView _towerSelectionView;
+        [SerializeField] private GameResultView _gameResultView;
 
         [Header("Data")]
         [SerializeField] private TowerCatalogSO _towerCatalog;
@@ -90,6 +92,11 @@ namespace DungeonBuilder.Networking.Scopes
             {
                 builder.RegisterInstance(_towerCatalog);
             }
+
+            builder.Register<GameResultModel>(Lifetime.Singleton);
+            builder.RegisterEntryPoint<GameResultPresenter>(Lifetime.Singleton);
+            if (_gameResultView != null)
+                builder.RegisterComponent(_gameResultView);
 
             builder.RegisterBuildCallback(resolver =>
             {

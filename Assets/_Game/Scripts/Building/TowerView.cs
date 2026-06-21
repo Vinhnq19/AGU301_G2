@@ -20,7 +20,8 @@ namespace Assets._Game.Scripts.Building
         [SerializeField] private TMP_Text _levelText;
 
         [Header("Range")]
-        [SerializeField] private SpriteRenderer _rangeCircle;
+        [SerializeField] private LineRenderer _rangeLine;
+        [SerializeField] private int _circleSegments = 40;
 
         [Header("Action Panel")]
         [SerializeField] private GameObject _actionPanel;
@@ -40,11 +41,14 @@ namespace Assets._Game.Scripts.Building
 
         private void Awake()
         {
-            if (_rangeCircle != null)
+            if (_rangeLine != null)
             {
-                Color c = _rangeCircle.color;
+                Color c = _rangeLine.startColor;
                 c.a = 0f;
-                _rangeCircle.color = c;
+                _rangeLine.startColor = c;
+                _rangeLine.endColor = c;
+                _rangeLine.useWorldSpace = false;
+                _rangeLine.loop = true;
             }
 
             if (_levelText != null)
@@ -98,26 +102,17 @@ namespace Assets._Game.Scripts.Building
 
             SetText(_levelText, $"Lv{model.Level}");
 
-            if (_rangeCircle != null && _rangeCircle.sprite != null)
+            if (_rangeLine != null && model.Range > 0)
             {
-                float diameter = model.Range * 2f;
-                float spriteSize = _rangeCircle.sprite.bounds.size.x;
-                float targetScale = spriteSize > 0f ? diameter / spriteSize : diameter;
+                DrawCircle(_rangeLine, model.Range, _circleSegments);
 
-                // Bù trừ scale của parent để vòng tròn không bị méo (hình bầu dục)
-                Vector3 parentScale = _rangeCircle.transform.parent != null ? _rangeCircle.transform.parent.lossyScale : Vector3.one;
-                _baseRangeScale = new Vector3(
-                    targetScale / (parentScale.x != 0 ? Mathf.Abs(parentScale.x) : 1f),
-                    targetScale / (parentScale.y != 0 ? Mathf.Abs(parentScale.y) : 1f),
-                    1f
-                );
-
-                _rangeCircle.transform.DOKill();
-                _rangeCircle.transform.localScale = _baseRangeScale;
+                _baseRangeScale = Vector3.one;
+                _rangeLine.transform.DOKill();
+                _rangeLine.transform.localScale = _baseRangeScale;
 
                 if (_isProximityUiVisible)
                 {
-                    _rangeCircle.transform.DOScale(_baseRangeScale * 1.05f, 1f)
+                    _rangeLine.transform.DOScale(_baseRangeScale * 1.05f, 1f)
                         .SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);
                 }
             }
@@ -202,13 +197,20 @@ namespace Assets._Game.Scripts.Building
             if (_isProximityUiVisible) return;
             _isProximityUiVisible = true;
 
-            if (_rangeCircle != null)
+            if (_rangeLine != null)
             {
-                _rangeCircle.DOKill();
-                _rangeCircle.DOFade(0.15f, 0.3f);
-                _rangeCircle.transform.DOKill();
-                _rangeCircle.transform.localScale = _baseRangeScale; // Reset về scale chuẩn trước khi anim
-                _rangeCircle.transform.DOScale(_baseRangeScale * 1.05f, 1f)
+                DOTween.Kill(_rangeLine);
+                float startA = _rangeLine.startColor.a;
+                DOVirtual.Float(startA, 0.5f, 0.3f, (a) => {
+                    if (_rangeLine == null) return;
+                    Color c = _rangeLine.startColor; c.a = a;
+                    _rangeLine.startColor = c;
+                    _rangeLine.endColor = c;
+                }).SetId(_rangeLine);
+
+                _rangeLine.transform.DOKill();
+                _rangeLine.transform.localScale = _baseRangeScale; // Reset về scale chuẩn trước khi anim
+                _rangeLine.transform.DOScale(_baseRangeScale * 1.05f, 1f)
                     .SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);
             }
 
@@ -224,11 +226,18 @@ namespace Assets._Game.Scripts.Building
             if (!_isProximityUiVisible) return;
             _isProximityUiVisible = false;
 
-            if (_rangeCircle != null)
+            if (_rangeLine != null)
             {
-                _rangeCircle.DOKill();
-                _rangeCircle.DOFade(0f, 0.3f);
-                _rangeCircle.transform.DOKill();
+                DOTween.Kill(_rangeLine);
+                float startA = _rangeLine.startColor.a;
+                DOVirtual.Float(startA, 0f, 0.3f, (a) => {
+                    if (_rangeLine == null) return;
+                    Color c = _rangeLine.startColor; c.a = a;
+                    _rangeLine.startColor = c;
+                    _rangeLine.endColor = c;
+                }).SetId(_rangeLine);
+
+                _rangeLine.transform.DOKill();
             }
 
             if (_levelText != null)
@@ -241,6 +250,19 @@ namespace Assets._Game.Scripts.Building
         private static void SetText(TMP_Text text, string value)
         {
             if (text != null) text.text = value;
+        }
+
+        private void DrawCircle(LineRenderer line, float radius, int segments)
+        {
+            line.positionCount = segments;
+            float angle = 0f;
+            for (int i = 0; i < segments; i++)
+            {
+                float x = Mathf.Cos(Mathf.Deg2Rad * angle) * radius;
+                float y = Mathf.Sin(Mathf.Deg2Rad * angle) * radius;
+                line.SetPosition(i, new Vector3(x, y, 0f));
+                angle += (360f / segments);
+            }
         }
     }
 }

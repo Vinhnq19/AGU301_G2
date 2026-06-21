@@ -54,8 +54,11 @@ namespace DungeonBuilder.Enemy.Types
             filter.useTriggers = true;
             int count = Physics2D.OverlapCircle(transform.position, _attackRange, filter, _targetScanResults);
 
-            Transform bestTarget = null;
-            float closestDist = float.MaxValue;
+            Transform bestTower = null;
+            float closestTowerDist = float.MaxValue;
+
+            Transform bestHeroOrCore = null;
+            float closestHeroOrCoreDist = float.MaxValue;
 
             for (int i = 0; i < count; i++)
             {
@@ -68,29 +71,51 @@ namespace DungeonBuilder.Enemy.Types
                 // Không bắn quái khác
                 if (_targetScanResults[i].GetComponentInParent<BaseEnemy>() != null) continue;
 
-                // Bỏ qua các tháp không thể target (vd: bẫy gai)
-                var tower = damageable as DungeonBuilder.Building.BaseTower;
-                if (tower != null && !tower.IsTargetable) continue;
-
                 float dist = Vector3.Distance(transform.position, _targetScanResults[i].transform.position);
-                if (dist < closestDist)
+
+                // Phân loại: Tháp canh (Tower) vs Anh hùng/Lõi (Hero/Core)
+                var tower = damageable as DungeonBuilder.Building.BaseTower;
+                if (tower != null)
                 {
-                    closestDist = dist;
-                    bestTarget = _targetScanResults[i].transform;
+                    if (!tower.IsTargetable) continue; // Bỏ qua bẫy gai
+
+                    if (dist < closestTowerDist)
+                    {
+                        closestTowerDist = dist;
+                        bestTower = _targetScanResults[i].transform;
+                    }
+                }
+                else
+                {
+                    // Anh hùng hoặc lõi hoặc các đối tượng damageable khác
+                    if (dist < closestHeroOrCoreDist)
+                    {
+                        closestHeroOrCoreDist = dist;
+                        bestHeroOrCore = _targetScanResults[i].transform;
+                    }
                 }
             }
 
-            // Nếu không tìm thấy player/tower nào, kiểm tra core target
-            if (bestTarget == null && _coreTarget != null)
+            // Kiểm tra Core Target
+            if (_coreTarget != null)
             {
                 float coreDist = Vector3.Distance(transform.position, _coreTarget.position);
                 if (coreDist <= _attackRange)
                 {
-                    bestTarget = _coreTarget;
+                    if (coreDist < closestHeroOrCoreDist)
+                    {
+                        closestHeroOrCoreDist = coreDist;
+                        bestHeroOrCore = _coreTarget;
+                    }
                 }
             }
 
-            return bestTarget;
+            // Thứ tự ưu tiên: Tower > Core = Hero
+            if (bestTower != null)
+            {
+                return bestTower;
+            }
+            return bestHeroOrCore;
         }
     }
 }

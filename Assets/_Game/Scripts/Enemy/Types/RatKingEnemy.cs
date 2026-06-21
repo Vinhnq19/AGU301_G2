@@ -255,8 +255,11 @@ namespace DungeonBuilder.Enemy.Types
 
             int count = Physics2D.OverlapCircle(transform.position, _magicRange, filter, _magicScanResults);
 
-            Transform bestTarget = null;
-            float closestDist = float.MaxValue;
+            Transform bestTower = null;
+            float closestTowerDist = float.MaxValue;
+
+            Transform bestHeroOrCore = null;
+            float closestHeroOrCoreDist = float.MaxValue;
 
             for (int i = 0; i < count; i++)
             {
@@ -267,24 +270,49 @@ namespace DungeonBuilder.Enemy.Types
                 if (_magicScanResults[i].GetComponentInParent<BaseEnemy>() != null) continue;
 
                 float dist = Vector3.Distance(transform.position, _magicScanResults[i].transform.position);
-                if (dist < closestDist)
+
+                // Phân loại: Tháp canh (Tower) vs Anh hùng/Lõi (Hero/Core)
+                var tower = damageable as DungeonBuilder.Building.BaseTower;
+                if (tower != null)
                 {
-                    closestDist = dist;
-                    bestTarget = _magicScanResults[i].transform;
+                    if (!tower.IsTargetable) continue; // Bỏ qua bẫy gai
+
+                    if (dist < closestTowerDist)
+                    {
+                        closestTowerDist = dist;
+                        bestTower = _magicScanResults[i].transform;
+                    }
+                }
+                else
+                {
+                    if (dist < closestHeroOrCoreDist)
+                    {
+                        closestHeroOrCoreDist = dist;
+                        bestHeroOrCore = _magicScanResults[i].transform;
+                    }
                 }
             }
 
             // Fallback về CoreTarget
-            if (bestTarget == null && _coreTarget != null)
+            if (_coreTarget != null)
             {
                 float coreDist = Vector3.Distance(transform.position, _coreTarget.position);
                 if (coreDist <= _magicRange)
                 {
-                    bestTarget = _coreTarget;
+                    if (coreDist < closestHeroOrCoreDist)
+                    {
+                        closestHeroOrCoreDist = coreDist;
+                        bestHeroOrCore = _coreTarget;
+                    }
                 }
             }
 
-            return bestTarget;
+            // Thứ tự ưu tiên: Tower > Core = Hero
+            if (bestTower != null)
+            {
+                return bestTower;
+            }
+            return bestHeroOrCore;
         }
 
         private Vector2 RotateVector(Vector2 v, float degrees)

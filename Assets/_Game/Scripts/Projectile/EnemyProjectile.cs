@@ -6,6 +6,7 @@ using DungeonBuilder.Networking.Pool;
 using Unity.Netcode;
 using UnityEngine;
 using VContainer;
+using Assets._Game.Scripts.Enemy;
 
 namespace DungeonBuilder.Projectile
 {
@@ -26,16 +27,27 @@ namespace DungeonBuilder.Projectile
         private float _lifetimeTimer;
         private float _damage;
 
+        private Vector3 _direction;
+        [SerializeField] private float _collisionRadius = 0.2f;
+
         [Inject] private INetworkPool _pool;
 
-        public void Initialize(float damage, float speed, float lifetime, ulong targetNetworkObjectId, Vector3 spawnPosition, Color color, Vector3 localScale)
+        public void Initialize(float damage, float speed, float lifetime, ulong targetNetworkObjectId, Vector3 targetInitialPosition, Color color, Vector3 localScale)
         {
             _damage = damage;
             _speed = speed;
             _lifetime = lifetime;
             _targetNetworkObjectId = targetNetworkObjectId;
-            _lastKnownTargetPos = spawnPosition;
+            _lastKnownTargetPos = targetInitialPosition;
             _isActive = true;
+
+            _direction = (targetInitialPosition - transform.position).normalized;
+            if (_direction == Vector3.zero)
+            {
+                _direction = Vector3.right;
+            }
+
+            transform.rotation = Quaternion.FromToRotation(Vector3.up, _direction);
 
             if (_spriteRenderer != null)
             {
@@ -70,45 +82,42 @@ namespace DungeonBuilder.Projectile
                 }
             }
 
-            // Tìm và cập nhật vị trí target
-            if (NetworkManager.Singleton?.SpawnManager?.SpawnedObjects != null
-                && NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(_targetNetworkObjectId, out NetworkObject targetObj)
-                && targetObj != null)
-            {
-                if (targetObj.TryGetComponent<DungeonBuilder.Core.CoreManager>(out _))
-                {
-                    GameObject visualCore = GameObject.Find("DB_Core");
-                    _lastKnownTargetPos = visualCore != null ? visualCore.transform.position : targetObj.transform.position;
-                }
-                else
-                {
-                    _lastKnownTargetPos = targetObj.transform.position;
-                }
-            }
-
-            float distanceToTarget = Vector3.Distance(transform.position, _lastKnownTargetPos);
             float step = _speed * Time.deltaTime;
+            transform.position += _direction * step;
 
-            if (distanceToTarget <= step)
+            if (IsServer)
             {
-                transform.position = _lastKnownTargetPos;
-
-                if (IsServer)
+                int layerMask = ~LayerMask.GetMask("Enemy");
+                ContactFilter2D filter = new ContactFilter2D();
+                filter.SetLayerMask(layerMask);
+                filter.useLayerMask = true;
+                filter.useTriggers = true;
+                Collider2D[] results = new Collider2D[4];
+                int count = Physics2D.OverlapCircle(transform.position, _collisionRadius, filter, results);
+                for (int i = 0; i < count; i++)
                 {
-                    IDamageable damageable = null;
-                    if (NetworkManager.Singleton?.SpawnManager?.SpawnedObjects != null
-                        && NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(_targetNetworkObjectId, out NetworkObject obj)
-                        && obj != null)
+                    if (results[i] == null) continue;
+                    IDamageable damageable = results[i].GetComponentInParent<IDamageable>();
+                    if (damageable == null)
                     {
-                        damageable = obj.GetComponent<IDamageable>();
+                        // DB_Core holds BoxCollider2D but CoreManager is on GameRoot, so we find it dynamically
+                        if (results[i].gameObject.name == "DB_Core" || results[i].gameObject.name.Contains("Core"))
+                        {
+                            damageable = FindAnyObjectByType<DungeonBuilder.Core.CoreManager>();
+                        }
                     }
 
-                    OnHit(damageable);
-                }
-                return;
-            }
+                    if (damageable != null && results[i].GetComponentInParent<BaseEnemy>() == null)
+                    {
+                        // Bỏ qua các tháp không thể target (vd: bẫy gai)
+                        var tower = damageable as DungeonBuilder.Building.BaseTower;
+                        if (tower != null && !tower.IsTargetable) continue;
 
-            transform.position = Vector3.MoveTowards(transform.position, _lastKnownTargetPos, step);
+                        OnHit(damageable);
+                        return;
+                    }
+                }
+            }
         }
 
         protected virtual void OnHit(IDamageable target)
@@ -141,6 +150,7 @@ namespace DungeonBuilder.Projectile
         public void OnGetFromPool()
         {
             _isActive = false;
+            transform.rotation = Quaternion.identity;
             if (_visual == null) return;
             _visual.DOKill();
             _visual.localPosition = Vector3.zero;
@@ -150,6 +160,7 @@ namespace DungeonBuilder.Projectile
         public void OnReturnToPool()
         {
             _isActive = false;
+            transform.rotation = Quaternion.identity;
             if (_visual == null) return;
             _visual.DOKill();
             _visual.localPosition = Vector3.zero;

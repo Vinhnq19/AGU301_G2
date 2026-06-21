@@ -112,9 +112,9 @@ public class Shop : NetworkBehaviour
 
         if (!IsServer)
         {
-            // Client omits RpcParams; NGO auto-populates SenderClientId on the server.
-            // If the compiler requires the argument, pass `default`.
-            BuyItemServerRpc(resourceType, quantity);
+            // Pass `default` for RpcParams on the send side; NGO populates
+            // rpcParams.Receive.SenderClientId from the real sender on the server.
+            BuyItemServerRpc(resourceType, quantity, default);
         }
         else
         {
@@ -219,7 +219,7 @@ public class Shop : NetworkBehaviour
 
         if (!IsServer)
         {
-            SellItemServerRpc(resourceType, quantity);
+            SellItemServerRpc(resourceType, quantity, default);
         }
         else
         {

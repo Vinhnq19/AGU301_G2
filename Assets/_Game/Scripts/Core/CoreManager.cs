@@ -57,6 +57,8 @@ namespace DungeonBuilder.Core
         private void HandleHealthChanged(int previousValue, int newValue)
         {
             _eventBus?.RaiseCoreHealthChanged(newValue);
+            if (newValue <= 0)
+                _eventBus?.RaiseGameEnded(false);
         }
     }
 }

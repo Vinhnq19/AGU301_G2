@@ -32,6 +32,7 @@ namespace DungeonBuilder.Wave
         private readonly NetworkVariable<int> _currentWave = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         private readonly NetworkVariable<float> _phaseCountdown = new(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         private readonly NetworkVariable<GamePhase> _gamePhase = new(GamePhase.Build, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        private readonly NetworkVariable<bool> _allWavesCompleted = new(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
         private EventBus _eventBus;
         private INetworkPool _pool;
@@ -48,6 +49,7 @@ namespace DungeonBuilder.Wave
         public override void OnNetworkSpawn()
         {
             _phaseCountdown.OnValueChanged += HandlePhaseCountdownChanged;
+            _allWavesCompleted.OnValueChanged += HandleWavesCompleted;
 
             if (IsServer)
             {
@@ -59,6 +61,7 @@ namespace DungeonBuilder.Wave
         public override void OnNetworkDespawn()
         {
             _phaseCountdown.OnValueChanged -= HandlePhaseCountdownChanged;
+            _allWavesCompleted.OnValueChanged -= HandleWavesCompleted;
         }
 
         private void InitializePrefabLookup()
@@ -118,6 +121,13 @@ namespace DungeonBuilder.Wave
                     }
 
                     await UniTask.WaitUntil(AllEnemiesDead, cancellationToken: destroyCancellationToken);
+
+                    if (_waveCatalog != null && _waveCatalog.waves != null
+                        && _currentWave.Value >= _waveCatalog.waves.Count)
+                    {
+                        _allWavesCompleted.Value = true;
+                        break;
+                    }
                 }
             }
             catch (OperationCanceledException)
@@ -263,6 +273,12 @@ namespace DungeonBuilder.Wave
         private void HandlePhaseCountdownChanged(float previousValue, float newValue)
         {
             _eventBus?.RaisePhaseCountdownChanged(newValue);
+        }
+
+        private void HandleWavesCompleted(bool _, bool isCompleted)
+        {
+            if (isCompleted)
+                _eventBus?.RaiseGameEnded(true);
         }
 
         private bool IsNetworkReady()

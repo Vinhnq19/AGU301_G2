@@ -1296,6 +1296,8 @@ MonoBehaviour:
     prefab: {fileID: 1860617485065313912, guid: 39a5f7e9b5755bd478ebe7d2ea518059, type: 3}
   - enemyType: 2
     prefab: {fileID: 3611466090651016692, guid: 26a2134d735ca374893c9f44c4549367, type: 3}
+  - enemyType: 3
+    prefab: {fileID: 1860617485065313912, guid: 6c3887cf0bd4da24aa5812e012144715, type: 3}
   _enemyPaths:
   - {fileID: 1871110555}
   - {fileID: 1292254064}
@@ -1471,6 +1473,9 @@ MonoBehaviour:
     _parent: {fileID: 1082793120}
   - _prefab: {fileID: 19318099078005837, guid: 3063481165fde184787bc6ea69998a48, type: 3}
     _prewarmCount: 8
+    _parent: {fileID: 1082793120}
+  - _prefab: {fileID: 1860617485065313912, guid: 6c3887cf0bd4da24aa5812e012144715, type: 3}
+    _prewarmCount: 2
     _parent: {fileID: 1082793120}
 --- !u!114 &211244837
 MonoBehaviour:

@@ -35,11 +35,13 @@ namespace DungeonBuilder.Networking.Lobby
             spawner._net = net;
             spawner._gameSceneName = gameSceneName;
 
-            if (!spawner._armed)
-            {
-                net.SceneManager.OnLoadComplete += spawner.HandleLoadComplete;
-                spawner._armed = true;
-            }
+            // Unsubscribe trước để tránh duplicate nếu Arm() được gọi lại (ví dụ: sau Shutdown → StartHost lại).
+            // SceneManager bị reset sau Shutdown nên unsubscribe cũ là no-op, sau đó subscribe mới là bắt buộc.
+            if (spawner._armed)
+                net.SceneManager.OnLoadComplete -= spawner.HandleLoadComplete;
+
+            net.SceneManager.OnLoadComplete += spawner.HandleLoadComplete;
+            spawner._armed = true;
         }
 
         private void OnDestroy()

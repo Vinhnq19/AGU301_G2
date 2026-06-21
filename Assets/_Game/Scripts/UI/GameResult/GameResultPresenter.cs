@@ -31,21 +31,10 @@ namespace DungeonBuilder.UI.GameResult
         public void ReturnToLobby()
         {
             var net = NetworkManager.Singleton;
-            if (net == null)
-            {
-                SceneManager.LoadScene("LobbyScene");
-                return;
-            }
-
-            if (net.IsHost)
-            {
-                net.SceneManager.LoadScene("LobbyScene", LoadSceneMode.Single);
-            }
-            else
-            {
+            if (net != null && net.IsListening)
                 net.Shutdown();
-                SceneManager.LoadScene("LobbyScene");
-            }
+
+            SceneManager.LoadScene("LobbyScene");
         }
 
         public bool IsVisible => Model.IsVisible;

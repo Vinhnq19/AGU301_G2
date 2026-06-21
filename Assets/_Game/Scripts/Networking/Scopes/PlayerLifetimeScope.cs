@@ -12,6 +12,7 @@ namespace DungeonBuilder.Networking.Scopes
         [SerializeField] private PlayerController _playerController;
         [SerializeField] private PlayerStats _playerStats;
         [SerializeField] private ToolController _toolController;
+        [SerializeField] private PlayerAnimation _playerAnimation;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -33,6 +34,11 @@ namespace DungeonBuilder.Networking.Scopes
             if (_toolController != null)
             {
                 builder.RegisterComponent(_toolController);
+            }
+
+            if (_playerAnimation != null)
+            {
+                builder.RegisterComponent(_playerAnimation);
             }
         }
     }

@@ -10,6 +10,8 @@ public class ShopItemPanel : MonoBehaviour
     [SerializeField] private Button sellButton;
     [SerializeField] private GameObject soldOutLabel;
 
+    [SerializeField] private Image iconImage;
+
     private string itemId;
     private Action<string> onBuy;
     private Action<string> onSell;
@@ -19,6 +21,9 @@ public class ShopItemPanel : MonoBehaviour
         itemId = item.Id;
         onBuy = onBuyCallback;
         onSell = onSellCallback;
+
+        iconImage.sprite = item.Icon;
+        iconImage.SetNativeSize();
 
         nameText.text = item.Name;
 

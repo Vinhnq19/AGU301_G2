@@ -90,7 +90,7 @@ namespace DungeonBuilder.UI.TowerSelection
             if (_catalog == null) return;
             foreach (TowerDataSO data in _catalog.Towers)
             {
-                bool isUnlocked = _resources.GetAmount(data.unlockResourceType) > 0;
+                bool isUnlocked = data.unlockTokenCost <= 0 || _resources.GetAmount(data.unlockResourceType) > 0;
                 bool canAfford = isUnlocked && _resources.CanAfford(data.buildCost);
                 Model.UpdateAffordability(data, canAfford);
             }

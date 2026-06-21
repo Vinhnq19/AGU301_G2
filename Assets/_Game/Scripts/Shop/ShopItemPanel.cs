@@ -14,7 +14,7 @@ public class ShopItemPanel : MonoBehaviour
     private Action<string> onBuy;
     private Action<string> onSell;
 
-    public void Setup(ShopItem item, Action<string> onBuyCallback, Action<string> onSellCallback = null)
+    public void Setup(ShopItem item, int ownedCurrency, Action<string> onBuyCallback, Action<string> onSellCallback = null)
     {
         itemId = item.Id;
         onBuy = onBuyCallback;
@@ -22,8 +22,8 @@ public class ShopItemPanel : MonoBehaviour
 
         nameText.text = item.Name;
 
-        // soldOutLabel.SetActive(item.IsSoldOut);
-        buyButton.interactable = !item.IsSoldOut;
+        // Buy enabled only if in stock AND the player can afford at least one.
+        buyButton.interactable = !item.IsSoldOut && ownedCurrency >= item.Price;
 
         // Sell button: disable + auto-dim (Unity ColorBlock.disabledColor) khi item không sellable
         if (sellButton != null)

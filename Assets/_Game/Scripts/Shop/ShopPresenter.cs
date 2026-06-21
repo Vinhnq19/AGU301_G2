@@ -21,14 +21,16 @@ public class ShopPresenter
 
         view.OnTabChanged += HandleTabChanged;
 
-        var items = model.GetItemsByType(currentCurrency);
-        view.CreateItemPanels(items, HandleBuyItem, HandleSellItem);
+        RefreshShop();
     }
 
     public void RefreshShop()
     {
         var items = model.GetItemsByType(currentCurrency);
-        view.CreateItemPanels(items, HandleBuyItem, HandleSellItem);
+        int ownedCurrency = shopNetwork != null
+            ? shopNetwork.GetResourceAmount(currentCurrency.ToResourceType())
+            : 0;
+        view.CreateItemPanels(items, ownedCurrency, HandleBuyItem, HandleSellItem);
     }
 
     private void HandleTabChanged(CurrencyType type)
@@ -58,10 +60,20 @@ public class ShopPresenter
         }
 
         // Max = stock còn lại; item unlimited → giới hạn bằng cap an toàn
-        int maxQty = item.isUnlimited ? UnlimitedBuyMax : item.RemainingQuantity;
-        if (maxQty <= 0)
+        int stockMax = item.isUnlimited ? UnlimitedBuyMax : item.RemainingQuantity;
+        if (stockMax <= 0)
         {
             Debug.LogWarning($"Cannot buy — no stock: {itemId}");
+            return;
+        }
+
+        int owned = shopNetwork != null
+            ? shopNetwork.GetResourceAmount(item.CurrencyType.ToResourceType())
+            : 0;
+        int maxQty = ShopMath.MaxBuyQty(stockMax, owned, item.Price);
+        if (maxQty <= 0)
+        {
+            // Can't afford even one. Buy button should already be disabled; this guards races.
             return;
         }
 
@@ -126,6 +138,18 @@ public class ShopPresenter
             Debug.Log($"Selling {qty}x {item.Id}");
             shopNetwork.SellItem(item.ResourceType, qty);
         }
+    }
+
+    /// <summary>Called (via Shop feedback RPC) on the requester's client to show a toast.</summary>
+    public void ShowFeedback(ShopTxResult result, ResourceType gainedType, int gainedAmt, ResourceType spentType, int spentAmt)
+    {
+        var feedback = ShopFeedbackFormat.Format(
+            result,
+            gainedType.ToString(),
+            gainedAmt,
+            spentType.ToString(),
+            spentAmt);
+        view.ShowToast(feedback.Message, feedback.Success);
     }
 
     private ShopItem FindItem(string itemId) => model.GetAllItems().Find(x => x.Id == itemId);

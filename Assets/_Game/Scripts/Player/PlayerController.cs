@@ -14,6 +14,7 @@ namespace DungeonBuilder.Player
 
         private InputReader _inputReader;
         private Rigidbody2D _rigidbody;
+        private PlayerAnimation _animation;
         private Vector2 _moveInput;
         private float _lastDashTime = -999f;
 
@@ -29,6 +30,7 @@ namespace DungeonBuilder.Player
         private void Awake()
         {
             _rigidbody = GetComponent<Rigidbody2D>();
+            _animation = GetComponent<PlayerAnimation>();
         }
 
         public override void OnNetworkSpawn()
@@ -62,6 +64,12 @@ namespace DungeonBuilder.Player
                 return;
             }
 
+            if (_animation != null && _animation.IsForaging)
+            {
+                _rigidbody.linearVelocity = Vector2.zero;
+                return;
+            }
+
             _rigidbody.linearVelocity = _moveInput * Speed;
         }
 
@@ -72,6 +80,11 @@ namespace DungeonBuilder.Player
 
         private void HandleDashPressed()
         {
+            if (_animation != null && _animation.IsForaging)
+            {
+                return;
+            }
+
             if (_rigidbody == null || Time.time - _lastDashTime < DashCooldown)
             {
                 return;

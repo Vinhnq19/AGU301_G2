@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using DungeonBuilder.Core.Enums;
 
 [System.Serializable]
 public class ShopView
@@ -100,7 +99,7 @@ public class ShopView
     }
 
     // CẬP NHẬT: Xử lý hiển thị bằng cách tái sử dụng (Pooling)
-    public void CreateItemPanels(List<ShopItem> items, int ownedCurrency, System.Func<ResourceType, int> getResourceAmount, System.Action<string> onBuyCallback = null, System.Action<string> onSellCallback = null)
+    public void CreateItemPanels(List<ShopItem> items, int ownedCurrency, System.Action<string> onBuyCallback = null, System.Action<string> onSellCallback = null)
     {
         // 1. Tạm ẩn tất cả các panel đang có trong Pool
         foreach (var panel in panelPool)
@@ -111,14 +110,11 @@ public class ShopView
         // 2. Duyệt qua danh sách data mới
         for (int i = 0; i < items.Count; i++)
         {
-            // Số resource player đang có của item này — để enable/disable nút Sell.
-            int ownedResource = getResourceAmount != null ? getResourceAmount(items[i].ResourceType) : 0;
-
             if (i < panelPool.Count)
             {
                 // Nếu trong Pool đã có sẵn Panel -> Bật nó lên và gán data mới
                 panelPool[i].gameObject.SetActive(true);
-                panelPool[i].Setup(items[i], ownedCurrency, ownedResource, onBuyCallback, onSellCallback);
+                panelPool[i].Setup(items[i], ownedCurrency, onBuyCallback, onSellCallback);
             }
             else
             {
@@ -126,7 +122,7 @@ public class ShopView
                 var panelObj = GameObject.Instantiate(itemPanelPrefab.gameObject, itemPanelContainer);
                 var shopItemPanel = panelObj.GetComponent<ShopItemPanel>();
 
-                shopItemPanel.Setup(items[i], ownedCurrency, ownedResource, onBuyCallback, onSellCallback);
+                shopItemPanel.Setup(items[i], ownedCurrency, onBuyCallback, onSellCallback);
                 panelPool.Add(shopItemPanel);
             }
         }

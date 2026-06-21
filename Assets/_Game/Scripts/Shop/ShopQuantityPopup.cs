@@ -69,6 +69,7 @@ public class ShopQuantityPopup : MonoBehaviour
     /// <param name="onConfirm">Callback nhận số lượng đã clamp khi ấn xác nhận.</param>
     public void Show(string itemName, ShopAction action, int maxQty, int unitPrice, Action<int> onConfirm)
     {
+        Debug.Log($"[ShopQuantityPopup] Show called: item={itemName}, action={action}, maxQty={maxQty}, unitPrice={unitPrice}");
         _onConfirm = onConfirm;
         _maxQty = maxQty < 1 ? 1 : maxQty;
         _action = action;
@@ -86,10 +87,31 @@ public class ShopQuantityPopup : MonoBehaviour
             quantityInput.text = "1";
         }
 
+        // FIX: Popup nằm dưới ShopPanel (inactive mặc định). Đảm bảo parent chain
+        // đều active + đẩy popup lên sibling cuối (render trên cùng canvas).
+        ActivateParentChain();
+        transform.SetAsLastSibling();
+
         gameObject.SetActive(true);
+
+        Debug.Log($"[ShopQuantityPopup] Activated: activeInHierarchy={gameObject.activeInHierarchy}");
 
         // Đảm bảo label đúng cho thao tác/đơn giá mới dù onValueChanged không fire.
         UpdateConfirmLabel();
+    }
+
+    /// <summary>Bật mọi parent inactive lên active — fix lỗi popup invisible khi parent bị disable.</summary>
+    private void ActivateParentChain()
+    {
+        var parent = transform.parent;
+        while (parent != null)
+        {
+            if (!parent.gameObject.activeSelf)
+            {
+                parent.gameObject.SetActive(true);
+            }
+            parent = parent.parent;
+        }
     }
 
     /// <summary>Ẩn popup.</summary>

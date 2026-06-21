@@ -32,6 +32,18 @@ public class Shop : NetworkBehaviour
         presenter = new ShopPresenter(view, model, this);
     }
 
+    private void Start()
+    {
+        // FIX: VContainer inject có thể chạy SAU Awake trong một số setup.
+        // Nếu presenter null ở Awake (do `this` chưa inject xong), khởi tạo lại ở Start.
+        if (presenter == null && view != null && model != null)
+        {
+            Debug.LogWarning("[Shop] presenter was null in Awake — re-initializing in Start");
+            view.Initialize();
+            presenter = new ShopPresenter(view, model, this);
+        }
+    }
+
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
@@ -200,10 +212,11 @@ public class Shop : NetworkBehaviour
 
     private void HandleSharedResourceChanged(ResourceChanged change)
     {
-        // Refresh on any resource change: buy buttons depend on Coin/Token,
-        // sell buttons depend on per-item resource amounts (Wood/Stone/...).
-        // Panel pooling keeps this cheap even during frequent harvests.
-        presenter?.RefreshShop();
+        // Re-clamp/disable buy buttons only when a gating currency changes (cheap; ignores harvest spam).
+        if (change.Type == ResourceType.Coin || change.Type == ResourceType.Token)
+        {
+            presenter?.RefreshShop();
+        }
     }
 
     /// <summary>

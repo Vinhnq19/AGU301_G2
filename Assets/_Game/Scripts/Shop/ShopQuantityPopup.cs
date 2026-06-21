@@ -29,6 +29,10 @@ public class ShopQuantityPopup : MonoBehaviour
     [Tooltip("Tiêu đề popup, ví dụ 'Buy Wood'. Tùy chọn (bỏ trống nếu không dùng).")]
     [SerializeField] private TextMeshProUGUI titleLabel;
 
+    [SerializeField] private Image icon;
+
+    [SerializeField] private float maxSize = 170;
+
     private Action<int> _onConfirm;
     private int _maxQty = 1;
     private ShopAction _action;
@@ -67,13 +71,15 @@ public class ShopQuantityPopup : MonoBehaviour
     /// <param name="maxQty">Số lượng tối đa khả thi (stock cho Buy, resource đang có cho Sell).</param>
     /// <param name="unitPrice">Đơn giá để tính tổng trên nút (Price cho Buy, Sell cho Sell).</param>
     /// <param name="onConfirm">Callback nhận số lượng đã clamp khi ấn xác nhận.</param>
-    public void Show(string itemName, ShopAction action, int maxQty, int unitPrice, Action<int> onConfirm)
+    public void Show(string itemName, Sprite itemIcon, ShopAction action, int maxQty, int unitPrice, Action<int> onConfirm)
     {
         Debug.Log($"[ShopQuantityPopup] Show called: item={itemName}, action={action}, maxQty={maxQty}, unitPrice={unitPrice}");
         _onConfirm = onConfirm;
         _maxQty = maxQty < 1 ? 1 : maxQty;
         _action = action;
         _unitPrice = unitPrice;
+
+        SetIcon(itemIcon);
 
         if (titleLabel != null)
         {
@@ -98,6 +104,35 @@ public class ShopQuantityPopup : MonoBehaviour
 
         // Đảm bảo label đúng cho thao tác/đơn giá mới dù onValueChanged không fire.
         UpdateConfirmLabel();
+    }
+
+    /// <summary>Set icon cua item cho popup (null -> an icon).</summary>
+    private void SetIcon(Sprite itemIcon)
+    {
+        if (icon == null)
+        {
+            return;
+        }
+
+        if (itemIcon == null)
+        {
+            icon.enabled = false;
+            return;
+        }
+
+        icon.sprite = itemIcon;
+        icon.enabled = true;
+        RectTransform rt = icon.rectTransform;
+        float width = itemIcon.rect.width;
+        float height = itemIcon.rect.height;
+        if (width > height)
+        {
+            rt.sizeDelta = new Vector2(maxSize, maxSize * height / width);
+        }
+        else
+        {
+            rt.sizeDelta = new Vector2(maxSize * width / height, maxSize);
+        }
     }
 
     /// <summary>Bật mọi parent inactive lên active — fix lỗi popup invisible khi parent bị disable.</summary>

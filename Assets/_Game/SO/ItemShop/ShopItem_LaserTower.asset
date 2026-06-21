@@ -15,7 +15,7 @@ MonoBehaviour:
   Icon: {fileID: -351770265432550407, guid: 5e1603dd0a013364cacc84645a9af804, type: 3}
   Id: 6
   Name: Laser Tower
-  Price: 150
+  Price: 1
   Sell: 0
   isUnlimited: 0
   isSellable: 0

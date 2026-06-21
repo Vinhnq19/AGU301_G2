@@ -15,7 +15,7 @@ MonoBehaviour:
   Icon: {fileID: 6723963429988506304, guid: 67df81118ce908b409858ad09373d89f, type: 3}
   Id: 7
   Name: Spike Trap
-  Price: 150
+  Price: 1
   Sell: 0
   isUnlimited: 0
   isSellable: 0

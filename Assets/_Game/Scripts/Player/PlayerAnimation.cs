@@ -1,16 +1,15 @@
 using DungeonBuilder.Core.Debugging;
 using Unity.Netcode;
 using UnityEngine;
-using VContainer;
 
 namespace DungeonBuilder.Player
 {
     /// <summary>
     /// Drives the player's visual: 3 directional sprite sets (up/down/side) and
     /// 3 animation states (Idle/Run/Foraging). The owner computes facing + state
-    /// from velocity (and the attack input for Foraging) and syncs them via
-    /// NetworkVariables; every client advances frames locally and swaps sprites
-    /// on the child "Visual" SpriteRenderer.
+    /// from velocity and syncs them via NetworkVariables; every client advances
+    /// frames locally on the child "Visual" SpriteRenderer. Foraging is begun/ended
+    /// by the harvest tool (BeginForaging turns the player to face the node).
     /// </summary>
     public sealed class PlayerAnimation : NetworkBehaviour
     {
@@ -28,10 +27,8 @@ namespace DungeonBuilder.Player
         [SerializeField] private SpriteRenderer _renderer;
         [SerializeField, Min(0.01f)] private float _frameRate = 10f;
         [SerializeField, Min(0.001f)] private float _moveThreshold = 0.05f;
-        [SerializeField, Min(0.05f)] private float _foragingDuration = 0.5f;
 
         private Rigidbody2D _rigidbody;
-        private InputReader _inputReader;
 
         private readonly NetworkVariable<FacingDir> _netFacing =
             new(FacingDir.Down, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
@@ -41,13 +38,9 @@ namespace DungeonBuilder.Player
         private float _animElapsed;
         private FacingDir _lastDrivenFacing = FacingDir.Down;
         private AnimState _lastDrivenState = AnimState.Idle;
-        private float _foragingUntil = -1f;
 
-        [Inject]
-        public void Construct(InputReader inputReader)
-        {
-            _inputReader = inputReader;
-        }
+        /// <summary>True while a foraging swing is in progress. Read by PlayerController to lock movement.</summary>
+        public bool IsForaging { get; private set; }
 
         private void Awake()
         {
@@ -56,27 +49,22 @@ namespace DungeonBuilder.Player
 
         public override void OnNetworkSpawn()
         {
-            if (IsOwner && _inputReader != null)
-            {
-                _inputReader.OnAttackPressed += HandleAttackPressed;
-            }
-
             DriveVisual(immediate: true);
             DBLog.Info($"anim.spawn.{NetworkObjectId}", $"PlayerAnimation spawned. isOwner={IsOwner}.", 0f, this);
         }
 
-        public override void OnNetworkDespawn()
+        /// <summary>Called by the harvest tool when a swing starts: face the target node and enter Foraging.</summary>
+        public void BeginForaging(Vector3 worldTarget)
         {
-            if (_inputReader != null)
-            {
-                _inputReader.OnAttackPressed -= HandleAttackPressed;
-            }
+            IsForaging = true;
+            _netState.Value = AnimState.Foraging;
+            _netFacing.Value = PlayerAnimLogic.ComputeFacing((Vector2)(worldTarget - transform.position), 0f, _netFacing.Value);
         }
 
-        private void HandleAttackPressed()
+        /// <summary>Called by the harvest tool when the swing ends; State reverts to Idle/Run on the next update.</summary>
+        public void EndForaging()
         {
-            // Owner-only subscription; open a foraging window.
-            _foragingUntil = Time.time + _foragingDuration;
+            IsForaging = false;
         }
 
         private void Update()
@@ -91,12 +79,20 @@ namespace DungeonBuilder.Player
 
         private void SampleOwnerIntent()
         {
+            if (IsForaging)
+            {
+                if (_netState.Value != AnimState.Foraging)
+                {
+                    _netState.Value = AnimState.Foraging;
+                }
+                return; // keep node-facing + Foraging state for the whole swing
+            }
+
             Vector2 velocity = _rigidbody != null ? _rigidbody.linearVelocity : Vector2.zero;
             float thresholdSq = _moveThreshold * _moveThreshold;
-            bool foraging = Time.time < _foragingUntil;
 
             FacingDir facing = PlayerAnimLogic.ComputeFacing(velocity, thresholdSq, _netFacing.Value);
-            AnimState state = PlayerAnimLogic.ComputeState(velocity, thresholdSq, foraging);
+            AnimState state = PlayerAnimLogic.ComputeState(velocity, thresholdSq, foraging: false);
 
             if (facing != _netFacing.Value)
             {

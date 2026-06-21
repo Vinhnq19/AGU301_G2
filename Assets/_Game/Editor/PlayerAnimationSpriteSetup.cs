@@ -5,13 +5,16 @@ using UnityEditor;
 using UnityEngine;
 
 /// <summary>
-/// One-time setup that assigns the Bunny sprite frames to the PlayerAnimation
-/// component on DB_Player. Hand-writing nested Sprite[] references in prefab
-/// YAML is unreliable (Unity scrambles them on import), so this does it through
-/// the SerializedObject API and matches sprites by name.
+/// Assigns the Bunny sprite frames to the PlayerAnimation component on DB_Player.
+/// Hand-writing nested Sprite[] references in prefab YAML is unreliable — Unity
+/// scrambles/empties them on import — so this does it through the SerializedObject
+/// API and matches sprites by name.
 ///
-/// Run via menu: Tools > Player Animation > Setup Sprites
+/// It runs automatically once after each domain reload (via InitializeOnLoad) when
+/// the foraging array is still empty, and is also available as a menu item:
+///   Tools > Player Animation > Setup Sprites
 /// </summary>
+[InitializeOnLoad]
 public static class PlayerAnimationSpriteSetup
 {
     private const string PrefabPath = "Assets/_Game/Generated/Prefabs/Player/DB_Player.prefab";
@@ -20,28 +23,48 @@ public static class PlayerAnimationSpriteSetup
     private const string RunTexture = "Assets/Sprite/Bunny/RUN/Bunny_Run.png";
     private const string ForageTexture = "Assets/Sprite/Bunny/WATERING CAN/Bunny_WateringCan.png";
 
+    static PlayerAnimationSpriteSetup()
+    {
+        // Defer until the AssetDatabase is ready after a domain reload.
+        EditorApplication.delayCall += () => RunSetup(auto: true);
+    }
+
     [MenuItem("Tools/Player Animation/Setup Sprites")]
-    public static void Setup()
+    public static void SetupMenu()
+    {
+        RunSetup(auto: false);
+    }
+
+    private static void RunSetup(bool auto)
     {
         GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
         if (prefab == null)
         {
-            Debug.LogError($"[PlayerAnimationSpriteSetup] Prefab not found: {PrefabPath}");
-            return;
+            return; // not imported yet; the menu can be used once it is.
         }
 
         PlayerAnimation anim = prefab.GetComponent<PlayerAnimation>();
         if (anim == null)
         {
-            Debug.LogError("[PlayerAnimationSpriteSetup] PlayerAnimation component not found on DB_Player.");
+            if (!auto)
+            {
+                Debug.LogError("[PlayerAnimationSpriteSetup] PlayerAnimation component not found on DB_Player.");
+            }
+            return;
+        }
+
+        SerializedObject so = new SerializedObject(anim);
+
+        // Skip the auto-run if the arrays are already populated (idempotent).
+        SerializedProperty existing = so.FindProperty("_foraging.up");
+        if (auto && existing != null && existing.arraySize > 0)
+        {
             return;
         }
 
         Dictionary<string, Sprite> idle = LoadSprites(IdleTexture);
         Dictionary<string, Sprite> run = LoadSprites(RunTexture);
         Dictionary<string, Sprite> forage = LoadSprites(ForageTexture);
-
-        SerializedObject so = new SerializedObject(anim);
 
         // Idle: 5 frames/row, row order top->bottom = side-right, side-left, down, up.
         Assign(so, "_idle.up", Range(idle, "Bunny_Idle_", 15, 19));

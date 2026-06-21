@@ -14,7 +14,7 @@ public class ShopItemPanel : MonoBehaviour
     private Action<string> onBuy;
     private Action<string> onSell;
 
-    public void Setup(ShopItem item, int ownedCurrency, Action<string> onBuyCallback, Action<string> onSellCallback = null)
+    public void Setup(ShopItem item, int ownedCurrency, int ownedResource, Action<string> onBuyCallback, Action<string> onSellCallback = null)
     {
         itemId = item.Id;
         onBuy = onBuyCallback;
@@ -28,7 +28,8 @@ public class ShopItemPanel : MonoBehaviour
         // Sell button: disable + auto-dim (Unity ColorBlock.disabledColor) khi item không sellable
         if (sellButton != null)
         {
-            sellButton.interactable = item.isSellable;
+            // Sell enabled only if the item is sellable AND the player owns at least one.
+            sellButton.interactable = item.isSellable && ownedResource > 0;
 
             sellButton.onClick.RemoveAllListeners();
             if (item.isSellable)

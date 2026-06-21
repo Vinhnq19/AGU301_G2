@@ -30,7 +30,9 @@ public class ShopPresenter
         int ownedCurrency = shopNetwork != null
             ? shopNetwork.GetResourceAmount(currentCurrency.ToResourceType())
             : 0;
-        view.CreateItemPanels(items, ownedCurrency, HandleBuyItem, HandleSellItem);
+        System.Func<ResourceType, int> getResourceAmount =
+            rt => shopNetwork != null ? shopNetwork.GetResourceAmount(rt) : 0;
+        view.CreateItemPanels(items, ownedCurrency, getResourceAmount, HandleBuyItem, HandleSellItem);
     }
 
     private void HandleTabChanged(CurrencyType type)
@@ -107,7 +109,10 @@ public class ShopPresenter
         int maxQty = shopNetwork != null ? shopNetwork.GetResourceAmount(item.ResourceType) : 0;
         if (maxQty <= 0)
         {
-            Debug.LogWarning($"Cannot sell — player owns 0 of {item.ResourceType}");
+            // Player owns none of this resource — tell them instead of a silent no-op.
+            // (Sell button is disabled at 0 owned, so this fires only on a race.)
+            var fb = ShopFeedbackFormat.Format(ShopTxResult.FailedNoResource, "", 0, item.ResourceType.ToString(), 0);
+            view.ShowToast(fb.Message, fb.Success);
             return;
         }
 

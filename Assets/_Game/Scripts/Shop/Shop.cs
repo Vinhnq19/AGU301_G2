@@ -200,11 +200,10 @@ public class Shop : NetworkBehaviour
 
     private void HandleSharedResourceChanged(ResourceChanged change)
     {
-        // Re-clamp/disable buy buttons only when a gating currency changes (cheap; ignores harvest spam).
-        if (change.Type == ResourceType.Coin || change.Type == ResourceType.Token)
-        {
-            presenter?.RefreshShop();
-        }
+        // Refresh on any resource change: buy buttons depend on Coin/Token,
+        // sell buttons depend on per-item resource amounts (Wood/Stone/...).
+        // Panel pooling keeps this cheap even during frequent harvests.
+        presenter?.RefreshShop();
     }
 
     /// <summary>

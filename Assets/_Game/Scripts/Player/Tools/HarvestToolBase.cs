@@ -13,28 +13,62 @@ namespace DungeonBuilder.Player.Tools
         [SerializeField, Min(0.01f)] private float _targetRadius = 0.35f;
         [SerializeField, Min(0.1f)] private float _fallbackSearchRadius = 2f;
         [SerializeField, Min(0.1f)] private float _serverInteractionRange = 2f;
+        [SerializeField, Min(0.05f)] private float _swingDuration = 0.5f;
 
         private readonly Collider2D[] _fallbackResults = new Collider2D[16];
+        private bool _isSwinging;
+        private float _swingEnd;
+        private ulong _pendingTargetId;
+        private PlayerAnimation _animation;
 
         public abstract ToolType ToolType { get; }
 
+        private void Awake()
+        {
+            _animation = GetComponent<PlayerAnimation>();
+        }
+
         public void UseAction(Vector3 targetPosition)
         {
-            if (!IsOwner)
+            if (!IsOwner || _isSwinging)
             {
                 return;
             }
 
             NetworkObject target = FindTarget(targetPosition);
-            if (target != null)
+            if (target == null)
             {
-                float distance = Vector3.Distance(transform.position, target.transform.position);
-                DBLog.Info($"{ToolType}.send.{NetworkObjectId}", $"{ToolType} sending harvest intent. targetId={target.NetworkObjectId}, target={target.name}, distance={distance:0.00}, player={transform.position}, click={targetPosition}.", 0.2f, this);
-                InteractWithNodeServerRpc(target.NetworkObjectId);
+                DBLog.Warning($"{ToolType}.send.no-target.{NetworkObjectId}", $"{ToolType} found no harvest target. click={targetPosition}, player={transform.position}.", 0.5f, this);
                 return;
             }
 
-            DBLog.Warning($"{ToolType}.send.no-target.{NetworkObjectId}", $"{ToolType} found no harvest target. click={targetPosition}, player={transform.position}.", 0.5f, this);
+            _isSwinging = true;
+            _swingEnd = Time.time + _swingDuration;
+            _pendingTargetId = target.NetworkObjectId;
+            if (_animation != null)
+            {
+                _animation.BeginForaging(target.transform.position);
+            }
+        }
+
+        private void Update()
+        {
+            if (!IsOwner || !_isSwinging)
+            {
+                return;
+            }
+
+            if (Time.time < _swingEnd)
+            {
+                return;
+            }
+
+            _isSwinging = false;
+            if (_animation != null)
+            {
+                _animation.EndForaging();
+            }
+            InteractWithNodeServerRpc(_pendingTargetId);
         }
 
         public virtual void CancelAction()

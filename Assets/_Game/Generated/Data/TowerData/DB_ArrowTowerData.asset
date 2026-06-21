@@ -21,16 +21,14 @@ MonoBehaviour:
   bulletLifetime: 3
   buildCost:
   - type: 0
-    amount: 35
+    amount: 60
+  unlockTokenCost: 0
+  unlockResourceType: 10
   maxLevel: 3
   upgradeLevels:
   - costs:
-    - type: 0
-      amount: 40
-    - type: 1
-      amount: 15
+    - type: 9
+      amount: 100
   - costs:
-    - type: 0
-      amount: 45
-    - type: 1
-      amount: 20
+    - type: 9
+      amount: 250

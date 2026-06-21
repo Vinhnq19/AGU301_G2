@@ -24,6 +24,7 @@ namespace Assets._Game.Scripts.Enemy
         [SerializeField, Min(0f)] protected float _attackDamage = 10f;
         [SerializeField, Min(0.1f)] protected float _attackInterval = 1f;
         [SerializeField] protected NetworkObject _projectilePrefab;
+        [SerializeField] private NetworkObject _tokenDropPrefab;
 
         private readonly NetworkVariable<float> _currentHP = new(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
@@ -45,6 +46,9 @@ namespace Assets._Game.Scripts.Enemy
         private Tween _slowTween;
         private Vector3 _initialScale = Vector3.one;
         private bool _hasCachedScale;
+
+        protected Animator _animator;
+        private Vector3 _lastPosition;
 
         private void CacheInitialScaleIfNeeded()
         {
@@ -87,6 +91,12 @@ namespace Assets._Game.Scripts.Enemy
             {
                 Physics2D.IgnoreLayerCollision(enemyLayer, enemyLayer, true);
             }
+
+            _lastPosition = transform.position;
+            if (_visual != null)
+            {
+                _animator = _visual.GetComponent<Animator>();
+            }
         }
 
         public override void OnNetworkSpawn()
@@ -99,12 +109,49 @@ namespace Assets._Game.Scripts.Enemy
 
         protected virtual void Update()
         {
+            UpdateAnimator();
+
             if (!IsServer || _isDying)
             {
                 return;
             }
 
             _stateMachine.Update();
+        }
+
+        private void UpdateAnimator()
+        {
+            if (_animator == null) return;
+
+            float speed = 0f;
+            if (Time.deltaTime > 0f)
+            {
+                float distanceMoved = Vector3.Distance(transform.position, _lastPosition);
+                speed = distanceMoved / Time.deltaTime;
+            }
+
+            if (_isDying)
+            {
+                speed = 0f;
+            }
+
+            _animator.SetFloat("Speed", speed);
+
+            if (speed > 0.05f && _visual != null)
+            {
+                CacheInitialScaleIfNeeded();
+                float dx = transform.position.x - _lastPosition.x;
+                if (dx < -0.001f)
+                {
+                    _visual.localScale = new Vector3(-Mathf.Abs(_initialScale.x), _initialScale.y, _initialScale.z);
+                }
+                else if (dx > 0.001f)
+                {
+                    _visual.localScale = new Vector3(Mathf.Abs(_initialScale.x), _initialScale.y, _initialScale.z);
+                }
+            }
+
+            _lastPosition = transform.position;
         }
 
         public void TakeDamage(float amount, ulong attackerClientId = 0)
@@ -149,6 +196,7 @@ namespace Assets._Game.Scripts.Enemy
                 _visual.localPosition = Vector3.zero;
                 _visual.localScale = _initialScale;
             }
+            _lastPosition = transform.position;
         }
 
         public virtual void OnReturnToPool()
@@ -170,6 +218,7 @@ namespace Assets._Game.Scripts.Enemy
             _visual.DOKill();
             _visual.localPosition = Vector3.zero;
             _visual.localScale = _initialScale;
+            _lastPosition = transform.position;
         }
 
         public void ChangeState(IEnemyState nextState)
@@ -369,6 +418,11 @@ namespace Assets._Game.Scripts.Enemy
             _eventBus?.RaiseEnemyKilled(EnemyType);
             PlayDeathEffectClientRpc();
 
+            if (IsServer && _tokenDropPrefab != null && _data != null && _data.rewardToken > 0)
+            {
+                SpawnTokenDrops(_data.rewardToken);
+            }
+
             try
             {
                 await UniTask.Delay(TimeSpan.FromMilliseconds(500), cancellationToken: destroyCancellationToken);
@@ -376,6 +430,52 @@ namespace Assets._Game.Scripts.Enemy
             }
             catch (OperationCanceledException)
             {
+            }
+        }
+
+        private void SpawnTokenDrops(int totalTokens)
+        {
+            if (_pool == null || _tokenDropPrefab == null)
+            {
+                return;
+            }
+
+            int maxDrops = 5;
+            int dropCount = Mathf.Min(totalTokens, maxDrops);
+            if (dropCount <= 0)
+            {
+                return;
+            }
+
+            int baseAmount = totalTokens / dropCount;
+            int remainder = totalTokens % dropCount;
+
+            for (int i = 0; i < dropCount; i++)
+            {
+                int amount = baseAmount + (i == dropCount - 1 ? remainder : 0);
+                if (amount <= 0)
+                {
+                    continue;
+                }
+
+                float angle = UnityEngine.Random.Range(0f, 360f) * Mathf.Deg2Rad;
+                float distance = UnityEngine.Random.Range(0.5f, 1.2f);
+                Vector3 offset = new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f) * distance;
+
+                NetworkObject dropObj = _pool.Get(_tokenDropPrefab, transform.position, Quaternion.identity);
+                if (dropObj != null)
+                {
+                    var drop = dropObj.GetComponent<DungeonBuilder.Harvesting.ResourceDrop>();
+                    if (drop != null)
+                    {
+                        drop.ConfigureWithOffset(ResourceType.Token, amount, offset);
+                    }
+
+                    if (!dropObj.IsSpawned)
+                    {
+                        dropObj.Spawn();
+                    }
+                }
             }
         }
 
@@ -393,6 +493,22 @@ namespace Assets._Game.Scripts.Enemy
                     sr.DOColor(original, 0.15f);
                 }
             }
+        }
+
+        protected bool IsValidTarget(IDamageable damageable)
+        {
+            if (damageable == null) return false;
+
+            // Quái không tự bắn đồng bọn
+            if (damageable is BaseEnemy) return false;
+
+            // Quái không bắn mỏ tài nguyên
+            if (damageable is DungeonBuilder.Harvesting.HarvestableNode) return false;
+
+            // Quái không bắn người chơi
+            if (damageable is DungeonBuilder.Player.PlayerStats) return false;
+
+            return true;
         }
 
         protected void ShootProjectileAt(Transform targetTransform, Color color, float sizeMultiplier = 1f)

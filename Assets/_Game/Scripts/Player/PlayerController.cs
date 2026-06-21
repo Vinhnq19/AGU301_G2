@@ -90,7 +90,20 @@ namespace DungeonBuilder.Player
                 return;
             }
 
-            Vector2 dashDirection = _moveInput.sqrMagnitude > 0.01f ? _moveInput.normalized : Vector2.up;
+            Vector2 dashDirection;
+            if (_moveInput.sqrMagnitude > 0.01f)
+            {
+                dashDirection = _moveInput.normalized;
+            }
+            else if (_animation != null)
+            {
+                dashDirection = _animation.GetFacingVector();
+            }
+            else
+            {
+                dashDirection = Vector2.up;
+            }
+
             _lastDashTime = Time.time;
             _rigidbody.AddForce(dashDirection * _dashForce, ForceMode2D.Impulse);
             DBLog.Info($"player.dash.{NetworkObjectId}", $"Dash applied. direction={dashDirection}, force={_dashForce}.", 0.25f, this);

@@ -22,17 +22,13 @@ MonoBehaviour:
   buildCost:
   - type: 0
     amount: 45
-  - type: 1
-    amount: 5
+  - type: 4
+    amount: 25
   maxLevel: 3
   upgradeLevels:
   - costs:
-    - type: 0
-      amount: 50
-    - type: 4
-      amount: 5
+    - type: 9
+      amount: 450
   - costs:
-    - type: 0
-      amount: 55
-    - type: 4
-      amount: 5
+    - type: 9
+      amount: 600

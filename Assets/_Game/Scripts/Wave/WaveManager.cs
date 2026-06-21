@@ -32,6 +32,7 @@ namespace DungeonBuilder.Wave
         private readonly NetworkVariable<int> _currentWave = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         private readonly NetworkVariable<float> _phaseCountdown = new(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         private readonly NetworkVariable<GamePhase> _gamePhase = new(GamePhase.Build, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        private readonly NetworkVariable<bool> _allWavesCompleted = new(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
         private EventBus _eventBus;
         private INetworkPool _pool;
@@ -48,6 +49,7 @@ namespace DungeonBuilder.Wave
         public override void OnNetworkSpawn()
         {
             _phaseCountdown.OnValueChanged += HandlePhaseCountdownChanged;
+            _allWavesCompleted.OnValueChanged += HandleWavesCompleted;
 
             if (IsServer)
             {
@@ -59,6 +61,7 @@ namespace DungeonBuilder.Wave
         public override void OnNetworkDespawn()
         {
             _phaseCountdown.OnValueChanged -= HandlePhaseCountdownChanged;
+            _allWavesCompleted.OnValueChanged -= HandleWavesCompleted;
         }
 
         private void InitializePrefabLookup()
@@ -83,12 +86,14 @@ namespace DungeonBuilder.Wave
                 while (IsServer && IsSpawned && IsNetworkReady())
                 {
                     float buildDuration = 30f; // Default fallback
+                    float combatDuration = 120f; // Default fallback
                     if (_waveCatalog != null && _waveCatalog.waves != null && _currentWave.Value < _waveCatalog.waves.Count)
                     {
                         var waveConfig = _waveCatalog.waves[_currentWave.Value];
                         if (waveConfig != null)
                         {
                             buildDuration = waveConfig.buildPhaseDuration;
+                            combatDuration = waveConfig.combatPhaseDuration;
                         }
                     }
                     else if (_waveCatalog != null && _waveCatalog.waves != null && _waveCatalog.waves.Count > 0)
@@ -97,6 +102,7 @@ namespace DungeonBuilder.Wave
                         if (lastWave != null)
                         {
                             buildDuration = lastWave.buildPhaseDuration;
+                            combatDuration = lastWave.combatPhaseDuration;
                         }
                     }
 
@@ -117,11 +123,47 @@ namespace DungeonBuilder.Wave
                         return;
                     }
 
-                    await UniTask.WaitUntil(AllEnemiesDead, cancellationToken: destroyCancellationToken);
+                    await CountdownCombatAsync(combatDuration);
+
+                    if (_waveCatalog != null && _waveCatalog.waves != null
+                        && _currentWave.Value >= _waveCatalog.waves.Count)
+                    {
+                        _allWavesCompleted.Value = true;
+                        break;
+                    }
                 }
             }
             catch (OperationCanceledException)
             {
+            }
+        }
+
+        private async UniTask CountdownCombatAsync(float duration)
+        {
+            float remaining = duration;
+            while (remaining > 0f && !AllEnemiesDead())
+            {
+                if (!IsNetworkReady())
+                {
+                    return;
+                }
+
+                _phaseCountdown.Value = remaining;
+
+                // Yield frame by frame for 1 second OR until all enemies are dead
+                float elapsed = 0f;
+                while (elapsed < 1f && !AllEnemiesDead())
+                {
+                    await UniTask.Yield(cancellationToken: destroyCancellationToken);
+                    elapsed += Time.deltaTime;
+                }
+
+                remaining -= 1f;
+            }
+
+            if (IsNetworkReady())
+            {
+                _phaseCountdown.Value = 0f;
             }
         }
 
@@ -263,6 +305,12 @@ namespace DungeonBuilder.Wave
         private void HandlePhaseCountdownChanged(float previousValue, float newValue)
         {
             _eventBus?.RaisePhaseCountdownChanged(newValue);
+        }
+
+        private void HandleWavesCompleted(bool _, bool isCompleted)
+        {
+            if (isCompleted)
+                _eventBus?.RaiseGameEnded(true);
         }
 
         private bool IsNetworkReady()

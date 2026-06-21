@@ -34,6 +34,8 @@ namespace DungeonBuilder.Player
             new(FacingDir.Down, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
         private readonly NetworkVariable<AnimState> _netState =
             new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+        private readonly NetworkVariable<Color> _playerColor =
+            new(Color.white, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
         private float _animElapsed;
         private FacingDir _lastDrivenFacing = FacingDir.Down;
@@ -49,8 +51,34 @@ namespace DungeonBuilder.Player
 
         public override void OnNetworkSpawn()
         {
+            if (IsServer)
+            {
+                _playerColor.Value = Color.HSVToRGB((OwnerClientId * 0.3f) % 1f, 0.8f, 1f);
+            }
+
+            _playerColor.OnValueChanged += HandleColorChanged;
+            ApplyColor(_playerColor.Value);
+
             DriveVisual(immediate: true);
             DBLog.Info($"anim.spawn.{NetworkObjectId}", $"PlayerAnimation spawned. isOwner={IsOwner}.", 0f, this);
+        }
+
+        public override void OnNetworkDespawn()
+        {
+            _playerColor.OnValueChanged -= HandleColorChanged;
+        }
+
+        private void HandleColorChanged(Color previousValue, Color newValue)
+        {
+            ApplyColor(newValue);
+        }
+
+        private void ApplyColor(Color color)
+        {
+            if (_renderer != null)
+            {
+                _renderer.color = color;
+            }
         }
 
         /// <summary>Called by the harvest tool when a swing starts: face the target node and enter Foraging.</summary>
@@ -66,6 +94,15 @@ namespace DungeonBuilder.Player
         {
             IsForaging = false;
         }
+
+        /// <summary>Current facing as a unit vector (for dash direction, etc.).</summary>
+        public Vector2 GetFacingVector() => _netFacing.Value switch
+        {
+            FacingDir.Up => Vector2.up,
+            FacingDir.Down => Vector2.down,
+            FacingDir.Left => Vector2.left,
+            _ => Vector2.right,
+        };
 
         private void Update()
         {

@@ -29,5 +29,12 @@ namespace DungeonBuilder.Core
         {
             OnEnemyKilled?.Invoke(enemyType);
         }
+
+        public event Action<bool> OnGameEnded;
+
+        public void RaiseGameEnded(bool isWin)
+        {
+            OnGameEnded?.Invoke(isWin);
+        }
     }
 }

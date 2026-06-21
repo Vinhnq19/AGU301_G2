@@ -7,7 +7,7 @@
 
 ## Goal
 
-Make foraging feel like a committed swing: when the owner clicks a resource node, the player **locks movement**, **turns to face the node**, **plays the foraging animation**, and **deals damage only when the swing ends** (not instantly). The player must also stand **closer** (1.2 units) to interact.
+Make foraging feel like a committed swing: when the owner clicks, the player **locks movement**, **turns to face the mouse cursor** (4 directions), **plays the foraging animation**, and **deals damage only when the swing ends** (not instantly). The swing plays freely even with no resource nearby; a node in range is hit at the end. The player must stand **closer** (1.2 units) to actually hit a node.
 
 ## Context (current state)
 
@@ -19,11 +19,11 @@ Make foraging feel like a committed swing: when the owner clicks a resource node
 
 ## Requirements
 
-1. **Aim-facing foraging** — during foraging the player faces the **resource node** (not movement direction).
+1. **Aim-facing foraging** — during foraging the player faces the **mouse cursor** in 4 directions (Up/Down/Left/Right), not the movement direction.
 2. **Damage at end of swing** — the harvest RPC runs when the foraging animation/windup completes, not on click.
 3. **Movement lock** — the player cannot move or dash while foraging; the swing commits once started.
 4. **Shorter range** — `_fallbackSearchRadius` and `_serverInteractionRange` reduced from **2.0 → 1.2** on harvest tools.
-5. Swing only begins when a valid target node exists at click time (no swinging at empty ground).
+5. **Free foraging** — the swing always plays on attack (no resource need be nearby); a node in range is captured and hit at the swing end, swinging at empty ground just plays the animation.
 
 ## Approach (A — approved)
 
@@ -34,18 +34,18 @@ The **tool owns the swing windup + damage**; `PlayerAnimation` is pure visual (b
 ### Flow (owner)
 
 1. Click → `ToolController.UseCurrentTool` → `HarvestToolBase.UseAction(mouseWorldPos)`.
-2. `UseAction`: owner-only; `FindTarget(mouseWorldPos)`; **if no target → return (no swing)**; else begin swing: set `_isSwinging`, `_swingEnd = now + _swingDuration`, capture `_pendingTargetId`; call `_animation.BeginForaging(node.transform.position)`.
-3. `HarvestToolBase.Update` (owner): when `now >= _swingEnd` → `_isSwinging=false`; `_animation.EndForaging()`; `InteractWithNodeServerRpc(_pendingTargetId)` (server re-validates range + applies damage).
+2. `UseAction`: owner-only; **always** begin swing (`_isSwinging`, `_swingEnd = now + _swingDuration`, `_animation.BeginForaging(mouseWorldPos)` to face the cursor); then `FindTarget(mouseWorldPos)` to capture a node if one is in range (`_hasPendingTarget`, `_pendingTargetId`).
+3. `HarvestToolBase.Update` (owner): when `now >= _swingEnd` → `_isSwinging=false`; `_animation.EndForaging()`; if a node was captured → `InteractWithNodeServerRpc(_pendingTargetId)` (server re-validates range + applies damage).
 4. Remote clients see facing + foraging via the existing `NetworkVariable`s; the locked position syncs via `ClientNetworkTransform`.
 
 ### Component changes
 
 **`HarvestToolBase`** (`Assets/_Game/Scripts/Player/Tools/HarvestToolBase.cs`):
 - Add `[SerializeField, Min(0.05f)] private float _swingDuration = 0.5f;`.
-- Add fields `bool _isSwinging; float _swingEnd; ulong _pendingTargetId;` and `PlayerAnimation _animation;`.
+- Add fields `bool _isSwinging; bool _hasPendingTarget; float _swingEnd; ulong _pendingTargetId;` and `PlayerAnimation _animation;`.
 - `OnNetworkSpawn`: `_animation = GetComponent<PlayerAnimation>();`.
-- `UseAction(targetPosition)`: owner-only; if `_isSwinging` return; `NetworkObject target = FindTarget(targetPosition);` if null → log + return; else begin swing (set fields above) + `_animation?.BeginForaging(target.transform.position)`. **Remove the immediate `InteractWithNodeServerRpc` from here.**
-- New `Update()`: `if (!IsOwner || !_isSwinging) return;` if `Time.time >= _swingEnd` → `_isSwinging=false; _animation?.EndForaging(); InteractWithNodeServerRpc(_pendingTargetId);`.
+- `UseAction(targetPosition)`: owner-only; if `_isSwinging` return; **always** begin swing (`_isSwinging=true`, `_swingEnd = now + _swingDuration`, `_animation?.BeginForaging(targetPosition)` to face the **mouse cursor**), then `FindTarget(targetPosition)` to opportunistically capture a node (`_hasPendingTarget`, `_pendingTargetId`). No early-out when no node — the swing plays regardless.
+- New `Update()`: `if (!IsOwner || !_isSwinging) return;` if `Time.time >= _swingEnd` → `_isSwinging=false; _animation?.EndForaging(); if (_hasPendingTarget) InteractWithNodeServerRpc(_pendingTargetId);`.
 - `[Rpc(SendTo.Server, ...)] InteractWithNodeServerRpc(ulong, RpcParams)` stays unchanged (server validates range with the new 1.2 and applies damage).
 
 **`PlayerAnimation`** (`Assets/_Game/Scripts/Player/PlayerAnimation.cs`):

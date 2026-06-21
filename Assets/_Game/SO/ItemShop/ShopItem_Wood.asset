@@ -10,8 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 13252ffdbbc360d44b2eda0f2e423fe9, type: 3}
-  m_Name: ShopItem
+  m_Name: ShopItem_Wood
   m_EditorClassIdentifier: Assembly-CSharp::ShopItem
+  Icon: {fileID: -2067898546876541913, guid: 8fb03c1bcdf9a4a44938fd51db1d3e45, type: 3}
   Id: 1
   Name: Wood
   Price: 5

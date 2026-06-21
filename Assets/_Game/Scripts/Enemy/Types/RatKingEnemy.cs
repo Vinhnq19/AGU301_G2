@@ -186,7 +186,7 @@ namespace DungeonBuilder.Enemy.Types
                     endPositions[i] = hit.point;
 
                     IDamageable damageable = hit.collider.GetComponentInParent<IDamageable>();
-                    if (damageable != null && hit.collider.GetComponentInParent<BaseEnemy>() == null)
+                    if (IsValidTarget(damageable))
                     {
                         if (damagedTargets.Add(damageable))
                         {
@@ -266,8 +266,7 @@ namespace DungeonBuilder.Enemy.Types
                 if (_magicScanResults[i] == null) continue;
 
                 IDamageable damageable = _magicScanResults[i].GetComponentInParent<IDamageable>();
-                if (damageable == null) continue;
-                if (_magicScanResults[i].GetComponentInParent<BaseEnemy>() != null) continue;
+                if (!IsValidTarget(damageable)) continue;
 
                 float dist = Vector3.Distance(transform.position, _magicScanResults[i].transform.position);
 

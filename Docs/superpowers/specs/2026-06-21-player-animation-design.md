@@ -63,7 +63,7 @@ sealed class DirectionalSprites
 
 **Owner (`Update`, guarded by `IsOwner`):**
 1. `velocity = _rigidbody.linearVelocity`.
-2. Facing: if `velocity.sqrMagnitude > _moveThreshold²`: dominant axis wins → `Up/Down` (sign of y) or `Left/Right` (sign of x); else keep last facing.
+2. Facing: if `velocity.sqrMagnitude > _moveThreshold²`: if `|vy| >= |vx|` → `Up` (`vy > 0`) / `Down` (`vy < 0`); else → `Right` (`vx > 0`) / `Left` (`vx < 0`). Else keep last facing. Initial facing defaults to `Down`.
 3. State: if a foraging timer is active → `Foraging`; else `velocity.sqrMagnitude > threshold²` → `Run`; else `Idle`.
 4. On change, write `NetworkVariable<FacingDir>` and `NetworkVariable<AnimState>` (owner-write).
 
@@ -97,9 +97,11 @@ Sheets laid out by row (top→bottom): side-right, side-left, down, up.
 |-------|-----------|-------------|---------------------|
 | IDLE (5/row) | 15-19 | 10-14 | 0-4 |
 | RUN (8/row) | 24-31 | 16-23 | 0-7 |
-| Foraging (SCYTHE, TBD) | up row | down row | side-right row |
+| Foraging (Watering Can) | same frames | same frames | same frames |
 
-The side-left row is unused (left handled by `flipX`).
+IDLE/RUN rows are 4-directional (confirmed via `.meta`: Y rows 159→111→63→15 top-to-bottom = side-right, side-left, down, up). The side-left row is unused (left handled by `flipX`).
+
+**Foraging sheets are single-direction** (side-facing only — verified on Watering Can/Scythe/Hoe). So Foraging uses the **same** Watering Can frames for up/down/side; `flipX` still handles left. User may swap to Scythe/Hoe frames in the Inspector.
 
 ### Prefab / DI wiring
 
@@ -125,5 +127,5 @@ The side-left row is unused (left handled by `flipX`).
 
 ## Open items
 
-- Confirm exact slice rects / direction row order from the `.meta` files before wiring sprites (image analysis reads side-right/side-left/down/up top→bottom; verify against the slice Y coordinates).
-- Confirm which Foraging sheet to use (default: SCYTHE).
+- ~~Confirm exact slice rects / direction row order from `.meta`~~ **Resolved:** IDLE/RUN confirmed 4-directional by Y rows (159→111→63→15 = side-right/side-left/down/up).
+- ~~Confirm which Foraging sheet~~ **Resolved:** Foraging sheets are single-direction; use **Watering Can** frames for all 3 directions (swap to Scythe/Hoe in Inspector if desired).

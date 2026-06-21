@@ -266,8 +266,7 @@ namespace DungeonBuilder.Enemy.Types
                 if (_magicScanResults[i] == null) continue;
 
                 IDamageable damageable = _magicScanResults[i].GetComponentInParent<IDamageable>();
-                if (damageable == null) continue;
-                if (_magicScanResults[i].GetComponentInParent<BaseEnemy>() != null) continue;
+                if (!IsValidTarget(damageable)) continue;
 
                 float dist = Vector3.Distance(transform.position, _magicScanResults[i].transform.position);
 

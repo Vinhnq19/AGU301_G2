@@ -66,10 +66,7 @@ namespace DungeonBuilder.Enemy.Types
 
                 // Kiểm tra xem có thể gây sát thương không
                 IDamageable damageable = _targetScanResults[i].GetComponentInParent<IDamageable>();
-                if (damageable == null) continue;
-
-                // Không bắn quái khác
-                if (_targetScanResults[i].GetComponentInParent<BaseEnemy>() != null) continue;
+                if (!IsValidTarget(damageable)) continue;
 
                 float dist = Vector3.Distance(transform.position, _targetScanResults[i].transform.position);
 

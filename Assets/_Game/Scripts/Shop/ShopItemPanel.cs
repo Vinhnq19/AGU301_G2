@@ -16,14 +16,34 @@ public class ShopItemPanel : MonoBehaviour
     private Action<string> onBuy;
     private Action<string> onSell;
 
+    [SerializeField] private float maxSize = 64f;
+
     public void Setup(ShopItem item, int ownedCurrency, Action<string> onBuyCallback, Action<string> onSellCallback = null)
     {
         itemId = item.Id;
         onBuy = onBuyCallback;
         onSell = onSellCallback;
 
-        iconImage.sprite = item.Icon;
-        iconImage.SetNativeSize();
+        if (item.Icon && iconImage)
+        {
+            iconImage.sprite = item.Icon;
+
+            RectTransform rt = iconImage.rectTransform;
+            Sprite sprite = item.Icon;
+
+            float width = sprite.rect.width;
+            float height = sprite.rect.height;
+
+            if (width > height)
+            {
+                rt.sizeDelta = new Vector2(maxSize, maxSize * height / width);
+            }
+            else
+            {
+                rt.sizeDelta = new Vector2(maxSize * width / height, maxSize);
+            }
+        }
+
 
         nameText.text = item.Name;
 

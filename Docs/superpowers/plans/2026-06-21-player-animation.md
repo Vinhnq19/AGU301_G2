@@ -23,8 +23,8 @@
 
 - **Create** `Assets/_Game/Scripts/Player/Pure/PlayerAnimPure.asmdef` — assembly for testable logic (mirrors `ShopPure.asmdef`).
 - **Create** `Assets/_Game/Scripts/Player/Pure/PlayerAnimLogic.cs` — enums `FacingDir`/`AnimState` + static pure methods `ComputeFacing`, `ComputeState`, `FrameAtTime`.
-- **Create** `Assets/_Game/Tests/PlayerAnimPure.Tests.asmdef` — Editor-only test assembly (mirrors `ShopPure.Tests.asmdef`).
-- **Create** `Assets/_Game/Tests/PlayerAnimLogicTests.cs` — NUnit tests for the pure logic.
+- **Create** `Assets/_Game/Tests/PlayerAnimPure/PlayerAnimPure.Tests.asmdef` — Editor-only test assembly (mirrors `ShopPure.Tests.asmdef`). Must be in its **own subfolder** (Unity allows one `.asmdef` per folder; `Tests/` already holds `ShopPure.Tests.asmdef`).
+- **Create** `Assets/_Game/Tests/PlayerAnimPure/PlayerAnimLogicTests.cs` — NUnit tests for the pure logic.
 - **Create** `Assets/_Game/Scripts/Player/PlayerAnimation.cs` — the `NetworkBehaviour` glue (Assembly-CSharp).
 - **Modify** `Assets/_Game/Scripts/Networking/Scopes/PlayerLifetimeScope.cs` — register `PlayerAnimation` so VContainer injects `InputReader`.
 - **Modify** `Assets/_Game/Generated/Prefabs/Player/DB_Player.prefab` — add `PlayerAnimation` component, wire `_renderer` + DI field, assign sprite arrays (Unity Editor).
@@ -68,7 +68,7 @@ Create `Assets/_Game/Scripts/Player/Pure/PlayerAnimPure.asmdef` (exact mirror of
 
 - [ ] **Step 2: Create the test assembly definition**
 
-Create `Assets/_Game/Tests/PlayerAnimPure.Tests.asmdef` (exact mirror of `ShopPure.Tests.asmdef`, referencing `PlayerAnimPure`):
+Create `Assets/_Game/Tests/PlayerAnimPure/PlayerAnimPure.Tests.asmdef` (exact mirror of `ShopPure.Tests.asmdef`, referencing `PlayerAnimPure`). **Use a dedicated subfolder** — `Tests/` already contains `ShopPure.Tests.asmdef`, and Unity forbids two `.asmdef` files in one folder:
 
 ```json
 {
@@ -99,7 +99,7 @@ Create `Assets/_Game/Tests/PlayerAnimPure.Tests.asmdef` (exact mirror of `ShopPu
 
 - [ ] **Step 3: Write the failing tests**
 
-Create `Assets/_Game/Tests/PlayerAnimLogicTests.cs`:
+Create `Assets/_Game/Tests/PlayerAnimPure/PlayerAnimLogicTests.cs`:
 
 ```csharp
 using NUnit.Framework;
@@ -274,8 +274,8 @@ Expected: **19 tests pass, 0 fail.**
 ```bash
 git add Assets/_Game/Scripts/Player/Pure/PlayerAnimPure.asmdef \
         Assets/_Game/Scripts/Player/Pure/PlayerAnimLogic.cs \
-        Assets/_Game/Tests/PlayerAnimPure.Tests.asmdef \
-        Assets/_Game/Tests/PlayerAnimLogicTests.cs
+        Assets/_Game/Tests/PlayerAnimPure/PlayerAnimPure.Tests.asmdef \
+        Assets/_Game/Tests/PlayerAnimPure/PlayerAnimLogicTests.cs
 git commit -m "feat(player): add pure player animation logic + tests"
 ```
 

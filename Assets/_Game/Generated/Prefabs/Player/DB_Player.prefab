@@ -250,8 +250,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   _targetRadius: 0.35
-  _fallbackSearchRadius: 2
-  _serverInteractionRange: 2
+  _fallbackSearchRadius: 1.2
+  _serverInteractionRange: 1.2
 --- !u!114 &4199280064977222803
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -269,8 +269,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   _targetRadius: 0.35
-  _fallbackSearchRadius: 2
-  _serverInteractionRange: 2
+  _fallbackSearchRadius: 1.2
+  _serverInteractionRange: 1.2
 --- !u!114 &5523730212316939046
 MonoBehaviour:
   m_ObjectHideFlags: 0

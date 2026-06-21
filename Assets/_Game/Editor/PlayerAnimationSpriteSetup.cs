@@ -5,66 +5,43 @@ using UnityEditor;
 using UnityEngine;
 
 /// <summary>
-/// Assigns the Bunny sprite frames to the PlayerAnimation component on DB_Player.
-/// Hand-writing nested Sprite[] references in prefab YAML is unreliable — Unity
-/// scrambles/empties them on import — so this does it through the SerializedObject
-/// API and matches sprites by name.
+/// Fixes the IDLE and RUN directional sprite arrays on DB_Player's PlayerAnimation.
+/// Hand-writing nested Sprite[] references in prefab YAML gets scrambled by Unity on
+/// import, so this sets them through the SerializedObject API, matching by name.
 ///
-/// It runs automatically once after each domain reload (via InitializeOnLoad) when
-/// the foraging array is still empty, and is also available as a menu item:
-///   Tools > Player Animation > Setup Sprites
+/// Foraging sprites are managed manually in the Inspector (the chosen sheet is a
+/// content decision), so this script does NOT touch _foraging — it is safe to run
+/// without clobbering your foraging setup.
+///
+/// Run via menu: Tools > Player Animation > Fix Idle/Run Sprites
 /// </summary>
-[InitializeOnLoad]
 public static class PlayerAnimationSpriteSetup
 {
     private const string PrefabPath = "Assets/_Game/Generated/Prefabs/Player/DB_Player.prefab";
-
     private const string IdleTexture = "Assets/Sprite/Bunny/IDLE/Bunny_Idle.png";
     private const string RunTexture = "Assets/Sprite/Bunny/RUN/Bunny_Run.png";
-    private const string ForageTexture = "Assets/Sprite/Bunny/WATERING CAN/Bunny_WateringCan.png";
 
-    static PlayerAnimationSpriteSetup()
-    {
-        // Defer until the AssetDatabase is ready after a domain reload.
-        EditorApplication.delayCall += () => RunSetup(auto: true);
-    }
-
-    [MenuItem("Tools/Player Animation/Setup Sprites")]
-    public static void SetupMenu()
-    {
-        RunSetup(auto: false);
-    }
-
-    private static void RunSetup(bool auto)
+    [MenuItem("Tools/Player Animation/Fix Idle/Run Sprites")]
+    public static void Setup()
     {
         GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
         if (prefab == null)
         {
-            return; // not imported yet; the menu can be used once it is.
+            Debug.LogError($"[PlayerAnimationSpriteSetup] Prefab not found: {PrefabPath}");
+            return;
         }
 
         PlayerAnimation anim = prefab.GetComponent<PlayerAnimation>();
         if (anim == null)
         {
-            if (!auto)
-            {
-                Debug.LogError("[PlayerAnimationSpriteSetup] PlayerAnimation component not found on DB_Player.");
-            }
-            return;
-        }
-
-        SerializedObject so = new SerializedObject(anim);
-
-        // Skip the auto-run if the arrays are already populated (idempotent).
-        SerializedProperty existing = so.FindProperty("_foraging.up");
-        if (auto && existing != null && existing.arraySize > 0)
-        {
+            Debug.LogError("[PlayerAnimationSpriteSetup] PlayerAnimation component not found on DB_Player.");
             return;
         }
 
         Dictionary<string, Sprite> idle = LoadSprites(IdleTexture);
         Dictionary<string, Sprite> run = LoadSprites(RunTexture);
-        Dictionary<string, Sprite> forage = LoadSprites(ForageTexture);
+
+        SerializedObject so = new SerializedObject(anim);
 
         // Idle: 5 frames/row, row order top->bottom = side-right, side-left, down, up.
         Assign(so, "_idle.up", Range(idle, "Bunny_Idle_", 15, 19));
@@ -76,13 +53,7 @@ public static class PlayerAnimationSpriteSetup
         Assign(so, "_run.down", Range(run, "Bunny_Run_", 16, 23));
         Assign(so, "_run.side", Range(run, "Bunny_Run_", 0, 7));
 
-        // Foraging (Watering Can) is single-direction: same frames for up/down/side.
-        Sprite[] forageFrames = Range(forage, "Bunny_WateringCan_", 0, 35);
-        Assign(so, "_foraging.up", forageFrames);
-        Assign(so, "_foraging.down", forageFrames);
-        Assign(so, "_foraging.side", forageFrames);
-
-        // Ensure _renderer points at the Visual child's SpriteRenderer.
+        // Ensure _renderer points at the Visual child's SpriteRenderer (only if unset).
         SerializedProperty rendererProp = so.FindProperty("_renderer");
         if (rendererProp != null && rendererProp.objectReferenceValue == null)
         {
@@ -96,7 +67,7 @@ public static class PlayerAnimationSpriteSetup
         so.ApplyModifiedPropertiesWithoutUndo();
         AssetDatabase.SaveAssets();
 
-        Debug.Log("[PlayerAnimationSpriteSetup] Done. PlayerAnimation sprite arrays assigned on DB_Player.");
+        Debug.Log("[PlayerAnimationSpriteSetup] Done. IDLE/RUN directional sprite arrays fixed (foraging left untouched).");
     }
 
     private static Dictionary<string, Sprite> LoadSprites(string texturePath)

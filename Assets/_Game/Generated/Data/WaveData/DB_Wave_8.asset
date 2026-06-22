@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DB_Wave_8
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.WaveSO
   buildPhaseDuration: 120
-  combatPhaseDuration: 100
+  combatPhaseDuration: 120
   spawnGroups:
   - enemyType: 0
     count: 35
@@ -21,7 +21,7 @@ MonoBehaviour:
     spawnPointIndex: 0
     pathIndex: 0
   - enemyType: 1
-    count: 5
+    count: 9
     spawnInterval: 2
     spawnPointIndex: 0
     pathIndex: 0
@@ -36,22 +36,22 @@ MonoBehaviour:
     spawnPointIndex: 2
     pathIndex: 2
   - enemyType: 1
-    count: 5
+    count: 9
     spawnInterval: 2
     spawnPointIndex: 2
     pathIndex: 2
   - enemyType: 2
-    count: 1
+    count: 2
     spawnInterval: 3
     spawnPointIndex: 2
     pathIndex: 2
   - enemyType: 0
-    count: 25
+    count: 35
     spawnInterval: 1
     spawnPointIndex: 1
     pathIndex: 1
   - enemyType: 1
-    count: 8
+    count: 9
     spawnInterval: 2
     spawnPointIndex: 1
     pathIndex: 1

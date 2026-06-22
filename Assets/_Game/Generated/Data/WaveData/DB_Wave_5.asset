@@ -21,7 +21,7 @@ MonoBehaviour:
     spawnPointIndex: 0
     pathIndex: 0
   - enemyType: 1
-    count: 3
+    count: 8
     spawnInterval: 2
     spawnPointIndex: 0
     pathIndex: 0
@@ -31,17 +31,17 @@ MonoBehaviour:
     spawnPointIndex: 2
     pathIndex: 2
   - enemyType: 1
-    count: 3
+    count: 8
     spawnInterval: 2
     spawnPointIndex: 2
     pathIndex: 2
   - enemyType: 0
-    count: 20
+    count: 25
     spawnInterval: 1.2
     spawnPointIndex: 1
     pathIndex: 1
   - enemyType: 1
-    count: 4
+    count: 8
     spawnInterval: 1.5
     spawnPointIndex: 1
     pathIndex: 1

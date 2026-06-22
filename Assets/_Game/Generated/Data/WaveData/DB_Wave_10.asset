@@ -16,27 +16,27 @@ MonoBehaviour:
   combatPhaseDuration: 180
   spawnGroups:
   - enemyType: 0
-    count: 5
+    count: 40
     spawnInterval: 1
     spawnPointIndex: 0
     pathIndex: 0
   - enemyType: 1
-    count: 5
+    count: 10
     spawnInterval: 2
     spawnPointIndex: 0
     pathIndex: 0
   - enemyType: 0
-    count: 5
+    count: 40
     spawnInterval: 1
     spawnPointIndex: 2
     pathIndex: 2
   - enemyType: 1
-    count: 5
+    count: 10
     spawnInterval: 2
     spawnPointIndex: 2
     pathIndex: 2
   - enemyType: 2
-    count: 2
+    count: 5
     spawnInterval: 3
     spawnPointIndex: 1
     pathIndex: 1

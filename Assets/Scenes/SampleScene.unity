@@ -1638,9 +1638,9 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   _waveCatalog: {fileID: 11400000, guid: 2f3d0b3c66da4663a8a3c613e5519db3, type: 2}
   _enemyPrefabMappings:
-  - enemyType: 0
-    prefab: {fileID: 4663314838043120436, guid: 66be538882501b149ae4c21c82e67e50, type: 3}
   - enemyType: 1
+    prefab: {fileID: 4663314838043120436, guid: 66be538882501b149ae4c21c82e67e50, type: 3}
+  - enemyType: 0
     prefab: {fileID: 1860617485065313912, guid: 39a5f7e9b5755bd478ebe7d2ea518059, type: 3}
   - enemyType: 2
     prefab: {fileID: 3611466090651016692, guid: 26a2134d735ca374893c9f44c4549367, type: 3}
@@ -1841,7 +1841,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Core.CoreManager
   ShowTopMostFoldoutHeaderGroup: 1
-  _maxHealth: 100
+  _maxHealth: 1000
 --- !u!1001 &228007453
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2054,7 +2054,7 @@ Transform:
   m_GameObject: {fileID: 262669580}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 10.705666, y: -5.0022125, z: 0}
+  m_LocalPosition: {x: 10.194081, y: -5.0022125, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2936,7 +2936,7 @@ Transform:
   m_GameObject: {fileID: 455990666}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 10.206907, y: -7.0200005, z: 0}
+  m_LocalPosition: {x: 11.377161, y: -7.0200005, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -10973,7 +10973,7 @@ Transform:
   m_GameObject: {fileID: 1114637193}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -6.4533577, y: -6.10687, z: 0}
+  m_LocalPosition: {x: -5.9296722, y: -6.10687, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -90656,7 +90656,6 @@ MonoBehaviour:
   - {fileID: 823687103}
   - {fileID: 2084073089}
   - {fileID: 455990667}
-  - {fileID: 2060313353}
 --- !u!1 &1876082102
 GameObject:
   m_ObjectHideFlags: 0
@@ -91218,7 +91217,7 @@ Transform:
   m_GameObject: {fileID: 2060313352}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 11.73, y: -7.0200005, z: 0}
+  m_LocalPosition: {x: 11.128665, y: -7.0200005, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

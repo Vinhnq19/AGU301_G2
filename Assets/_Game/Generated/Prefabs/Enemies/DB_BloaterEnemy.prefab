@@ -395,8 +395,8 @@ MonoBehaviour:
   _coreTarget: {fileID: 0}
   _visual: {fileID: 6975265989002531296}
   _attackRange: 1.25
-  _attackDamage: 10
-  _attackInterval: 1
+  _attackDamage: 20
+  _attackInterval: 1.5
   _projectilePrefab: {fileID: 0}
   _tokenDropPrefab: {fileID: 19318099078005837, guid: a909bb052c4c38c41a1821dd6bb37455, type: 3}
   _gasRadius: 2.5

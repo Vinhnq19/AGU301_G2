@@ -303,7 +303,7 @@ MonoBehaviour:
   _coreTarget: {fileID: 0}
   _visual: {fileID: 3775484947159366371}
   _attackRange: 1.25
-  _attackDamage: 20
-  _attackInterval: 3
+  _attackDamage: 10
+  _attackInterval: 1
   _projectilePrefab: {fileID: 0}
   _tokenDropPrefab: {fileID: 19318099078005837, guid: a909bb052c4c38c41a1821dd6bb37455, type: 3}

@@ -729,10 +729,9 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 99
+  m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 6192732464615301489, guid: 84d9093efbfd6824e80f965ceaa48699,
-    type: 3}
+  m_Sprite: {fileID: 6192732464615301489, guid: 84d9093efbfd6824e80f965ceaa48699, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -1157,8 +1156,7 @@ MonoBehaviour:
     tokenTabButton: {fileID: 7096244633474247187}
     coinTabImage: {fileID: 365007795725969953}
     tokenTabImage: {fileID: 3149268903805271732}
-    itemPanelPrefab: {fileID: 7522098285268557388, guid: a0c9da3098c14324caa45ef08cd541b6,
-      type: 3}
+    itemPanelPrefab: {fileID: 7522098285268557388, guid: a0c9da3098c14324caa45ef08cd541b6, type: 3}
     itemPanelContainer: {fileID: 2599878949102540546}
     quantityPopup: {fileID: 1785572779711691128}
     toast: {fileID: 0}

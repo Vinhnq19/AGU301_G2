@@ -71,7 +71,7 @@ public class ShopView
 
     /// <summary>Mở popup nhập số lượng cho 1 item + thao tác (Buy/Sell).</summary>
     /// <param name="unitPrice">Đơn giá để hiện tổng trên nút (Price cho Buy, Sell cho Sell).</param>
-    public void ShowQuantityPopup(string itemName, ShopAction action, int maxQty, int unitPrice, Action<int> onConfirm)
+    public void ShowQuantityPopup(string itemName, Sprite itemIcon, ShopAction action, int maxQty, int unitPrice, Action<int> onConfirm)
     {
         if (quantityPopup == null)
         {
@@ -81,7 +81,7 @@ public class ShopView
             return;
         }
 
-        quantityPopup.Show(itemName, action, maxQty, unitPrice, onConfirm);
+        quantityPopup.Show(itemName, itemIcon, action, maxQty, unitPrice, onConfirm);
     }
 
     public void HideQuantityPopup() => quantityPopup?.Hide();

@@ -131,9 +131,24 @@ namespace DungeonBuilder.Networking
             {
                 if (!existing.Contains(type))
                 {
-                    _resources.Add(new ResourceAmount(type, 0));
+                    int initial = GetInitialAmount(type);
+                    _resources.Add(new ResourceAmount(type, initial));
                 }
             }
+        }
+
+        /// <summary>
+        /// Skill resources bắt đầu ở mức 1 (công thức damage yêu cầu skill >= 1);
+        /// các resource khác bắt đầu ở 0.
+        /// </summary>
+        private static int GetInitialAmount(ResourceType type)
+        {
+            return type switch
+            {
+                ResourceType.MiningSkill  => 1,
+                ResourceType.ForgingSkill => 1,
+                _ => 0
+            };
         }
 
         private void SyncStoreFromNetworkList()

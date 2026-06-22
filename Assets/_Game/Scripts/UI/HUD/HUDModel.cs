@@ -15,7 +15,9 @@ namespace DungeonBuilder.UI.HUD
             [ResourceType.Crystal] = 0,
             [ResourceType.Copper] = 0,
             [ResourceType.Coin] = 0,
-            [ResourceType.Token] = 0
+            [ResourceType.Token] = 0,
+            [ResourceType.MiningSkill] = 1,
+            [ResourceType.ForgingSkill] = 1
         };
 
         public event Action OnChanged;

@@ -10,16 +10,19 @@ namespace DungeonBuilder.Player
     public sealed class PlayerController : NetworkBehaviour
     {
         [SerializeField] private PlayerDataSO _data;
-        [SerializeField, Min(0f)] private float _dashForce = 8f;
+        [SerializeField, Min(0.01f)] private float _dashDuration = 0.2f;
 
         private InputReader _inputReader;
         private Rigidbody2D _rigidbody;
         private PlayerAnimation _animation;
         private Vector2 _moveInput;
         private float _lastDashTime = -999f;
+        private bool _isDashing;
+        private float _dashEndTime;
 
         private float Speed => _data != null ? _data.speed : 5f;
         private float DashCooldown => _data != null ? _data.dashCooldown : 1f;
+        private float DashForce => _data != null ? _data.dashForce : 8f;
 
         [Inject]
         public void Construct(InputReader inputReader)
@@ -70,6 +73,19 @@ namespace DungeonBuilder.Player
                 return;
             }
 
+            // While dashing, keep the dash velocity; don't let normal movement overwrite it.
+            if (_isDashing)
+            {
+                if (Time.time >= _dashEndTime)
+                {
+                    _isDashing = false;
+                }
+                else
+                {
+                    return;
+                }
+            }
+
             _rigidbody.linearVelocity = _moveInput * Speed;
         }
 
@@ -85,7 +101,7 @@ namespace DungeonBuilder.Player
                 return;
             }
 
-            if (_rigidbody == null || Time.time - _lastDashTime < DashCooldown)
+            if (_rigidbody == null || _isDashing || Time.time - _lastDashTime < DashCooldown)
             {
                 return;
             }
@@ -104,9 +120,11 @@ namespace DungeonBuilder.Player
                 dashDirection = Vector2.up;
             }
 
+            _isDashing = true;
+            _dashEndTime = Time.time + _dashDuration;
             _lastDashTime = Time.time;
-            _rigidbody.AddForce(dashDirection * _dashForce, ForceMode2D.Impulse);
-            DBLog.Info($"player.dash.{NetworkObjectId}", $"Dash applied. direction={dashDirection}, force={_dashForce}.", 0.25f, this);
+            _rigidbody.linearVelocity = dashDirection * DashForce;
+            DBLog.Info($"player.dash.{NetworkObjectId}", $"Dash applied. direction={dashDirection}, speed={DashForce}, duration={_dashDuration}.", 0.25f, this);
         }
     }
 }

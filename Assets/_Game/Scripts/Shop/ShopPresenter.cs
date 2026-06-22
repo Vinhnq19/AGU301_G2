@@ -79,8 +79,16 @@ public class ShopPresenter
 
         // Mở popup nhập số lượng; khi xác nhận → DoTransaction (Buy).
         // Popup tự clamp số lượng về [1, maxQty].
-        view.ShowQuantityPopup(item.Name, ShopAction.Buy, maxQty, item.Price,
-            qty => DoTransaction(item, ShopAction.Buy, qty));
+        view.ShowQuantityPopup(item.Name, item.Icon, ShopAction.Buy, maxQty, item.Price,
+            qty =>
+            {
+                DoTransaction(item, ShopAction.Buy, qty);
+                // Mua het stock remaining -> item sold out -> dong popup (khong mua them duoc).
+                if (!item.isUnlimited && qty >= item.RemainingQuantity)
+                {
+                    view.HideQuantityPopup();
+                }
+            });
     }
 
     private void HandleSellItem(string itemId)
@@ -112,7 +120,7 @@ public class ShopPresenter
         }
 
         // Mở popup nhập số lượng; khi xác nhận → DoTransaction (Sell).
-        view.ShowQuantityPopup(item.Name, ShopAction.Sell, maxQty, item.Sell,
+        view.ShowQuantityPopup(item.Name, item.Icon, ShopAction.Sell, maxQty, item.Sell,
             qty => DoTransaction(item, ShopAction.Sell, qty));
     }
 

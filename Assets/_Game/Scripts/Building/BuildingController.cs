@@ -2,6 +2,7 @@ using Assets._Game.Scripts.Data;
 using DungeonBuilder.Core.Debugging;
 using DungeonBuilder.Core.Enums;
 using DungeonBuilder.Core.Interfaces;
+using DungeonBuilder.Data;
 using DungeonBuilder.Networking.Pool;
 using System;
 using System.Collections.Generic;
@@ -20,13 +21,15 @@ namespace DungeonBuilder.Building
         private IResourceService _sharedResources;
         private GridManager _grid;
         private INetworkPool _pool;
+        private TowerUnlockConfigSO _unlockConfig;
 
         [Inject]
-        public void Construct(IResourceService sharedResources, GridManager grid, INetworkPool pool)
+        public void Construct(IResourceService sharedResources, GridManager grid, INetworkPool pool, TowerUnlockConfigSO unlockConfig)
         {
             _sharedResources = sharedResources;
             _grid = grid;
             _pool = pool;
+            _unlockConfig = unlockConfig;
         }
 
         // ─── Place ──────────────────────────────────────────────────────
@@ -57,8 +60,11 @@ namespace DungeonBuilder.Building
                 return;
             }
 
-            // Check if tower is unlocked
-            if (data.unlockTokenCost > 0 && _sharedResources.GetAmount(data.unlockResourceType) <= 0)
+            // Check if tower is unlocked (default-unlocked via config OR purchased via flag)
+            int unlockAmount = _sharedResources.GetAmount(data.unlockResourceType);
+            bool unlocked = IsDefaultUnlocked(towerType) || unlockAmount > 0;
+            DBLog.Info($"build.unlockcheck.{towerType}", $"[BuildingController] Unlock check. type={towerType}, unlockRT={data.unlockResourceType} ({(int)data.unlockResourceType}), amount={unlockAmount}, defaultUnlocked={IsDefaultUnlocked(towerType)}, unlocked={unlocked}.", 0f, this);
+            if (!unlocked)
             {
                 DBLog.Warning($"build.reject.locked.{towerType}", $"[BuildingController] Place rejected: {towerType} is not unlocked.", 0.5f, this);
                 return;
@@ -201,40 +207,6 @@ namespace DungeonBuilder.Building
             DBLog.Info($"remove.accept.{gridPosition}", $"[BuildingController] Tower removed at {gridPosition}.", 0.25f, this);
         }
 
-        // ─── Shop / Unlock ──────────────────────────────────────────────
-
-        public void RequestBuyTowerUnlock(TowerType towerType)
-        {
-            DBLog.Info($"shop.send.{OwnerClientId}", $"[BuildingController] Buy unlock request sent for type={towerType}.", 0.25f, this);
-            BuyTowerUnlockServerRpc(towerType);
-        }
-
-        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
-        private void BuyTowerUnlockServerRpc(TowerType towerType, RpcParams rpcParams = default)
-        {
-            TowerDataSO data = GetTowerData(towerType);
-            if (data == null || _sharedResources == null) return;
-
-            // Nếu đã unlock rồi thì thôi
-            if (_sharedResources.GetAmount(data.unlockResourceType) > 0)
-            {
-                DBLog.Warning($"shop.reject.already_unlocked.{towerType}", $"[BuildingController] Already unlocked {towerType}.", 0.5f, this);
-                return;
-            }
-
-            // Kiểm tra và trừ token
-            if (!_sharedResources.TrySpend(new ResourceCost[] { new ResourceCost(ResourceType.Token, data.unlockTokenCost) }))
-            {
-                DBLog.Warning($"shop.reject.cost.{towerType}", $"[BuildingController] Buy rejected: not enough tokens.", 0.5f, this);
-                return;
-            }
-
-            // Cộng 1 vào unlock resource tương ứng (dùng _sharedResources.TryAdd hoặc hàm tương đương)
-            // Trong IResourceService, ta có thể dùng method TryAdd (nếu có)
-            _sharedResources.TryAdd(data.unlockResourceType, 1);
-            DBLog.Info($"shop.accept.{towerType}", $"[BuildingController] Unlocked tower {towerType}.", 0.25f, this);
-        }
-
         // ─── Helpers ────────────────────────────────────────────────────
 
         private bool TryGetTower(Vector2Int gridPosition, string action, out BaseTower tower, out TowerDataSO data)
@@ -275,6 +247,17 @@ namespace DungeonBuilder.Building
             }
 
             return true;
+        }
+
+        /// <summary>True if the tower is unlocked from the start per TowerUnlockConfigSO.</summary>
+        private bool IsDefaultUnlocked(TowerType towerType)
+        {
+            if (_unlockConfig == null) return false;
+            foreach (TowerType t in _unlockConfig.DefaultUnlocked)
+            {
+                if (t == towerType) return true;
+            }
+            return false;
         }
 
         private TowerDataSO GetTowerData(TowerType towerType)

@@ -32,6 +32,7 @@ namespace DungeonBuilder.Networking.Scopes
 
         [Header("Data")]
         [SerializeField] private TowerCatalogSO _towerCatalog;
+        [SerializeField] private TowerUnlockConfigSO _towerUnlockConfig;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -92,6 +93,10 @@ namespace DungeonBuilder.Networking.Scopes
             {
                 builder.RegisterInstance(_towerCatalog);
             }
+
+            // Always register a TowerUnlockConfigSO so injection into TowerSelectionPresenter /
+            // BuildingController never fails. Fall back to a default instance (Arrow unlocked) if unassigned.
+            builder.RegisterInstance(_towerUnlockConfig != null ? _towerUnlockConfig : ScriptableObject.CreateInstance<TowerUnlockConfigSO>());
 
             builder.Register<GameResultModel>(Lifetime.Singleton);
             builder.RegisterEntryPoint<GameResultPresenter>(Lifetime.Singleton);

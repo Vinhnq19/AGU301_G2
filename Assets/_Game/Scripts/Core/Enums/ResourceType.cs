@@ -17,6 +17,8 @@ namespace DungeonBuilder.Core.Enums
         FrostTowerUnlock = 12,
         SpikeTrapTowerUnlock = 13,
         LaserTowerUnlock = 14,
+        MiningSkill = 15,
+        ForgingSkill = 16,
         MAX
     }
 }

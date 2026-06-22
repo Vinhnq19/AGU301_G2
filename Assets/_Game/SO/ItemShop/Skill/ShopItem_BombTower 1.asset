@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 13252ffdbbc360d44b2eda0f2e423fe9, type: 3}
-  m_Name: ShopItem_BombTower
+  m_Name: ShopItem_BombTower 1
   m_EditorClassIdentifier: Assembly-CSharp::ShopItem
-  Icon: {fileID: -7240515471977461613, guid: 220d184522419f14c9c24d4b67eccc97, type: 3}
+  Icon: {fileID: -5522529318680141169, guid: bb2e83693108377489e6b6945c0bb101, type: 3}
   Id: 3
-  Name: Bomb Tower
-  Price: 1
+  Name: Mining Lv Up
+  Price: 1000
   Sell: 0
   isUnlimited: 0
   isSellable: 0
-  CurrencyType: 1
-  RemainingQuantity: 1
-  ResourceType: 11
+  CurrencyType: 0
+  RemainingQuantity: 2
+  ResourceType: 15

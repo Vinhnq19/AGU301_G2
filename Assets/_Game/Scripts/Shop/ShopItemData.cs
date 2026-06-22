@@ -3,7 +3,7 @@ using Unity.Netcode;
 using DungeonBuilder.Core.Enums;
 
 [System.Serializable]
-public struct ShopItemData : IEquatable<ShopItemData>
+public struct ShopItemData : INetworkSerializeByMemcpy, IEquatable<ShopItemData>
 {
     // Loại tài nguyên mà item này cung cấp
     public ResourceType ResourceType;

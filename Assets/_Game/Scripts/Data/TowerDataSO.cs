@@ -38,7 +38,6 @@ namespace Assets._Game.Scripts.Data
         public ResourceCost[] buildCost = { new ResourceCost(ResourceType.Wood, 25) };
 
         [Header("Unlock Shop")]
-        public int unlockTokenCost = 10;
         public ResourceType unlockResourceType = ResourceType.ArrowTowerUnlock;
 
         [Header("Upgrade")]

@@ -15,7 +15,7 @@ MonoBehaviour:
   Icon: {fileID: -7240515471977461613, guid: 220d184522419f14c9c24d4b67eccc97, type: 3}
   Id: 3
   Name: Bomb Tower
-  Price: 1
+  Price: 100
   Sell: 0
   isUnlimited: 0
   isSellable: 0

@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: DB_IronNodeData
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.ResourceNodeDataSO
   resourceType: 5
-  hitsToBreak: 8
-  amountPerHit: 5
+  hitsToBreak: 7
+  amountPerHit: 2
   maxAmount: 50
-  respawnTime: 18
-  minWaveToAppear: 3
+  respawnTime: 17
+  minWaveToAppear: 4

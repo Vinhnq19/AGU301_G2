@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: DB_BlueGemData
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.ResourceNodeDataSO
   resourceType: 6
-  hitsToBreak: 4
-  amountPerHit: 20
+  hitsToBreak: 10
+  amountPerHit: 1
   maxAmount: 100
-  respawnTime: 8
+  respawnTime: 15
   minWaveToAppear: 5

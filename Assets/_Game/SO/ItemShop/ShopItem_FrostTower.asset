@@ -15,7 +15,7 @@ MonoBehaviour:
   Icon: {fileID: -7640645784331865333, guid: 20bd1d87459f6b047a61e095911a7a27, type: 3}
   Id: 5
   Name: Frost Tower
-  Price: 1
+  Price: 120
   Sell: 0
   isUnlimited: 0
   isSellable: 0

@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d5b78599a977c843b12cef96b39d25a, type: 3}
   m_Name: DB_Wave_6
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.WaveSO
-  buildPhaseDuration: 180
+  buildPhaseDuration: 120
+  combatPhaseDuration: 100
   spawnGroups:
   - enemyType: 0
     count: 20

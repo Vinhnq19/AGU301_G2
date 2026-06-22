@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.ResourceNodeDataSO
   resourceType: 1
   hitsToBreak: 5
-  amountPerHit: 15
+  amountPerHit: 5
   maxAmount: 90
-  respawnTime: 10
+  respawnTime: 15
   minWaveToAppear: 1

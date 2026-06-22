@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: DB_WoodNodeData
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.ResourceNodeDataSO
   resourceType: 0
-  hitsToBreak: 4
-  amountPerHit: 20
+  hitsToBreak: 5
+  amountPerHit: 6
   maxAmount: 100
-  respawnTime: 8
+  respawnTime: 10
   minWaveToAppear: 1

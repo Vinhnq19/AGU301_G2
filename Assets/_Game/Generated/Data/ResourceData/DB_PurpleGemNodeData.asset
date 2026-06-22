@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: DB_PurpleGemNodeData
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.ResourceNodeDataSO
   resourceType: 7
-  hitsToBreak: 12
-  amountPerHit: 4
+  hitsToBreak: 5
+  amountPerHit: 1
   maxAmount: 40
   respawnTime: 12
-  minWaveToAppear: 6
+  minWaveToAppear: 7

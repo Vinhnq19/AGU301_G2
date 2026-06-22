@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DB_CopperNodeData
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.ResourceNodeDataSO
   resourceType: 4
-  hitsToBreak: 5
+  hitsToBreak: 7
   amountPerHit: 3
   maxAmount: 15
   respawnTime: 20

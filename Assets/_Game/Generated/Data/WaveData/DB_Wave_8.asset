@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: DB_Wave_8
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.WaveSO
   buildPhaseDuration: 120
+  combatPhaseDuration: 100
   spawnGroups:
   - enemyType: 0
     count: 35

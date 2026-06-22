@@ -8877,6 +8877,7 @@ MonoBehaviour:
   _towerSelectionView: {fileID: 2126735506}
   _gameResultView: {fileID: 0}
   _towerCatalog: {fileID: 11400000, guid: c538ae4d5c52d88429b26f23d85d7da7, type: 2}
+  _towerUnlockConfig: {fileID: 0}
 --- !u!114 &211244832
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -113065,6 +113066,8 @@ MonoBehaviour:
   _copperText: {fileID: 949500971}
   _coinText: {fileID: 949500982}
   _tokenText: {fileID: 1950000014}
+  _miningSkillText: {fileID: 0}
+  _forgingSkillText: {fileID: 0}
   _waveText: {fileID: 1595910222}
   _countdownText: {fileID: 111479715}
   _coreHealthText: {fileID: 1344586778}
@@ -114006,7 +114009,7 @@ PrefabInstance:
     - target: {fileID: 1912059041924409463, guid: a67b43fe3b2ef0a47b929beb099dd9b7,
         type: 3}
       propertyPath: GlobalObjectIdHash
-      value: 3572531470
+      value: 214232980
       objectReference: {fileID: 0}
     - target: {fileID: 1912059041924409463, guid: a67b43fe3b2ef0a47b929beb099dd9b7,
         type: 3}

@@ -388,17 +388,33 @@ public class Shop : NetworkBehaviour
 
     public void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player"))
-        {
-            view.OpenShop();
-        }
+        if (!collision.CompareTag("Player"))
+            return;
+
+        // Physics chạy trên mọi client (mỗi client có simulation riêng), nên trigger này
+        // sẽ fire trên MỌI client khi BẤT KỲ player nào (kể cả remote đã replicate qua
+        // NetworkTransform) đi vào vùng trigger. Không filter thì shop sẽ mở cho toàn bộ
+        // client khi chỉ 1 player bước vào — đó là bug.
+        //
+        // Shop UI là UI cá nhân, chỉ mở cho player local (player do client này sở hữu).
+        var networkObject = collision.GetComponentInParent<NetworkObject>();
+        if (networkObject == null || !networkObject.IsOwner)
+            return;
+
+        view.OpenShop();
     }
 
     public void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player"))
-        {
-            view.CloseShop();
-        }
+        if (!collision.CompareTag("Player"))
+            return;
+
+        // Đóng shop cũng phải filter theo IsOwner — chỉ đóng UI của chính player local
+        // đang rời khỏi trigger (không đóng nhầm UI khi player khác rời đi).
+        var networkObject = collision.GetComponentInParent<NetworkObject>();
+        if (networkObject == null || !networkObject.IsOwner)
+            return;
+
+        view.CloseShop();
     }
 }

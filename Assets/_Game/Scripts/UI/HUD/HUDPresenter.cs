@@ -71,9 +71,9 @@ namespace DungeonBuilder.UI.HUD
             Model.SetResource(change.Type, change.CurrentAmount);
         }
 
-        private void HandleWaveStarted(int wave)
+        private void HandleWaveStarted(int currentWave, bool isBossWave)
         {
-            Model.SetWave(wave);
+            Model.SetWave(currentWave);
         }
 
         private void HandleCoreHealthChanged(int coreHealth)

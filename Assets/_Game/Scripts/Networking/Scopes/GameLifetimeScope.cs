@@ -1,3 +1,4 @@
+using DungeonBuilder.Audio;
 using DungeonBuilder.Building;
 using DungeonBuilder.Core;
 using DungeonBuilder.Core.Interfaces;
@@ -23,6 +24,7 @@ namespace DungeonBuilder.Networking.Scopes
         [SerializeField] private GridManager _gridManager;
         [SerializeField] private BuildingController _buildingController;
         [SerializeField] private WaveManager _waveManager;
+        [SerializeField] private GameAudioController _gameAudioController;
         [SerializeField] private ResourceSpawner _resourceSpawner;
 
         [Header("UI")]
@@ -70,6 +72,20 @@ namespace DungeonBuilder.Networking.Scopes
                 builder.RegisterComponent(_waveManager);
             }
 
+            if (AudioManager.Instance != null)
+            {
+                builder.RegisterInstance<IAudioService>(AudioManager.Instance);
+            }
+            else
+            {
+                Debug.LogWarning("[GameLifetimeScope] AudioManager.Instance is null. Is AudioManager prefab in the boot scene?");
+            }
+
+            if (_gameAudioController != null)
+            {
+                builder.RegisterComponent(_gameAudioController);
+            }
+
             if (_resourceSpawner != null)
             {
                 builder.RegisterComponent(_resourceSpawner);
@@ -105,6 +121,11 @@ namespace DungeonBuilder.Networking.Scopes
 
             builder.RegisterBuildCallback(resolver =>
             {
+                if (_gameAudioController != null)
+                {
+                    resolver.Inject(_gameAudioController);
+                }
+
                 foreach (HarvestableNode node in FindObjectsByType<HarvestableNode>(FindObjectsInactive.Include, FindObjectsSortMode.None))
                 {
                     resolver.InjectGameObject(node.gameObject);

@@ -121,12 +121,9 @@ namespace DungeonBuilder.Harvesting
             }
         }
 
-        private void HandleWaveStarted(int wave)
+        private void HandleWaveStarted(int wave, bool isBossWave)
         {
-            if (!IsServer)
-            {
-                return;
-            }
+            if (!IsServer) return;
 
             _currentWave = wave;
             ApplyWaveGate();

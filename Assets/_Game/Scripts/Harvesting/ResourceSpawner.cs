@@ -68,7 +68,7 @@ namespace DungeonBuilder.Harvesting
             _occupiedSlots.Clear();
         }
 
-        private void HandleWaveStarted(int wave)
+        private void HandleWaveStarted(int wave, bool isBossWave)
         {
             if (!IsServer || _config == null || _pool == null)
             {

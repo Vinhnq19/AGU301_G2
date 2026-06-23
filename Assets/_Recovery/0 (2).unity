@@ -310,7 +310,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 3927816198
+  GlobalObjectIdHash: 3233305874
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -1546,7 +1546,6 @@ GameObject:
   - component: {fileID: 211244832}
   - component: {fileID: 211244831}
   - component: {fileID: 211244837}
-  - component: {fileID: 211244838}
   m_Layer: 0
   m_Name: GameRoot
   m_TagString: Untagged
@@ -1566,7 +1565,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 3497724088
+  GlobalObjectIdHash: 2865055245
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -1618,7 +1617,7 @@ MonoBehaviour:
   _gridManager: {fileID: 211244834}
   _buildingController: {fileID: 211244833}
   _waveManager: {fileID: 211244832}
-  _gameAudioController: {fileID: 211244838}
+  _gameAudioController: {fileID: 0}
   _resourceSpawner: {fileID: 30289404}
   _hudView: {fileID: 1418454807}
   _towerSelectionView: {fileID: 2126735506}
@@ -1844,18 +1843,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Core.CoreManager
   ShowTopMostFoldoutHeaderGroup: 1
   _maxHealth: 1000
---- !u!114 &211244838
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 211244828}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 987f58c2f96db634eb31f0b1ef06c615, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Audio.GameAudioController
 --- !u!1001 &228007453
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -34,10 +34,13 @@ namespace DungeonBuilder.Wave
         private readonly NetworkVariable<GamePhase> _gamePhase = new(GamePhase.Build, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         private readonly NetworkVariable<bool> _allWavesCompleted = new(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
+        private bool _isGameEnded = false;
+
         private EventBus _eventBus;
         private INetworkPool _pool;
         private readonly HashSet<ulong> _activeEnemyIds = new();
         private readonly Dictionary<EnemyType, NetworkObject> _prefabLookup = new();
+        private bool _isSpawningWave = false;
 
         [Inject]
         public void Construct(EventBus eventBus, INetworkPool pool)
@@ -50,9 +53,12 @@ namespace DungeonBuilder.Wave
         {
             _phaseCountdown.OnValueChanged += HandlePhaseCountdownChanged;
             _allWavesCompleted.OnValueChanged += HandleWavesCompleted;
+            _gamePhase.OnValueChanged += HandleGamePhaseChanged;
 
             if (IsServer)
             {
+                _eventBus.OnGameEnded += HandleGameEndedEvent;
+                _eventBus.OnEnemyKilled += HandleEnemyKilled;
                 InitializePrefabLookup();
                 RunWaveLoopAsync().Forget();
             }
@@ -62,6 +68,12 @@ namespace DungeonBuilder.Wave
         {
             _phaseCountdown.OnValueChanged -= HandlePhaseCountdownChanged;
             _allWavesCompleted.OnValueChanged -= HandleWavesCompleted;
+            _gamePhase.OnValueChanged -= HandleGamePhaseChanged;
+            if (IsServer && _eventBus != null)
+            {
+                _eventBus.OnGameEnded -= HandleGameEndedEvent;
+                _eventBus.OnEnemyKilled -= HandleEnemyKilled;
+            }
         }
 
         private void InitializePrefabLookup()
@@ -83,7 +95,7 @@ namespace DungeonBuilder.Wave
         {
             try
             {
-                while (IsServer && IsSpawned && IsNetworkReady())
+                while (IsServer && IsSpawned && IsNetworkReady() && !_isGameEnded)
                 {
                     float buildDuration = 30f; // Default fallback
                     float combatDuration = 120f; // Default fallback
@@ -108,17 +120,32 @@ namespace DungeonBuilder.Wave
 
                     _gamePhase.Value = GamePhase.Build;
                     await CountdownAsync(buildDuration);
-                    if (!IsNetworkReady())
+                    if (!IsNetworkReady() || _isGameEnded)
                     {
                         return;
                     }
 
                     _currentWave.Value++;
-                    _gamePhase.Value = GamePhase.Combat;
-                    _eventBus?.RaiseWaveStarted(_currentWave.Value);
 
-                    await SpawnWaveAsync(_currentWave.Value);
-                    if (!IsNetworkReady())
+                    bool isBoss = false;
+                    int waveIndex = _currentWave.Value - 1;
+                    if (_waveCatalog != null && _waveCatalog.waves != null)
+                    {
+                        if (waveIndex < _waveCatalog.waves.Count && _waveCatalog.waves[waveIndex] != null)
+                        {
+                            isBoss = _waveCatalog.waves[waveIndex].isBossWave;
+                        }
+                        else if (_waveCatalog.waves.Count > 0 && _waveCatalog.waves[_waveCatalog.waves.Count - 1] != null)
+                        {
+                            isBoss = _waveCatalog.waves[_waveCatalog.waves.Count - 1].isBossWave;
+                        }
+                    }
+
+                    _eventBus?.RaiseWaveStarted(_currentWave.Value, isBoss);
+
+                    // Khong block timer de timer chay song song voi luc spawn
+                    SpawnWaveAsync(_currentWave.Value).Forget();
+                    if (!IsNetworkReady() || _isGameEnded)
                     {
                         return;
                     }
@@ -141,7 +168,7 @@ namespace DungeonBuilder.Wave
         private async UniTask CountdownCombatAsync(float duration)
         {
             float remaining = duration;
-            while (remaining > 0f && !AllEnemiesDead())
+            while (remaining > 0f && (_isSpawningWave || !AllEnemiesDead()) && !_isGameEnded)
             {
                 if (!IsNetworkReady())
                 {
@@ -152,7 +179,7 @@ namespace DungeonBuilder.Wave
 
                 // Yield frame by frame for 1 second OR until all enemies are dead
                 float elapsed = 0f;
-                while (elapsed < 1f && !AllEnemiesDead())
+                while (elapsed < 1f && (_isSpawningWave || !AllEnemiesDead()) && !_isGameEnded)
                 {
                     await UniTask.Yield(cancellationToken: destroyCancellationToken);
                     elapsed += Time.deltaTime;
@@ -170,7 +197,7 @@ namespace DungeonBuilder.Wave
         private async UniTask CountdownAsync(float duration)
         {
             float remaining = duration;
-            while (remaining > 0f)
+            while (remaining > 0f && !_isGameEnded)
             {
                 if (!IsNetworkReady())
                 {
@@ -190,12 +217,15 @@ namespace DungeonBuilder.Wave
 
         private async UniTask SpawnWaveAsync(int waveNumber)
         {
+            _isSpawningWave = true;
             _activeEnemyIds.Clear();
 
-            if (!IsNetworkReady() || _pool == null || _waveCatalog == null || _waveCatalog.waves == null || _waveCatalog.waves.Count == 0)
+            try
             {
-                return;
-            }
+                if (!IsNetworkReady() || _pool == null || _waveCatalog == null || _waveCatalog.waves == null || _waveCatalog.waves.Count == 0 || _isGameEnded)
+                {
+                    return;
+                }
 
             WaveSO waveConfig = null;
             int waveIndex = waveNumber - 1;
@@ -215,6 +245,8 @@ namespace DungeonBuilder.Wave
             {
                 return;
             }
+
+            bool isFirstEnemy = true;
 
             foreach (var group in waveConfig.spawnGroups)
             {
@@ -237,9 +269,15 @@ namespace DungeonBuilder.Wave
 
                 for (int i = 0; i < spawnCount; i++)
                 {
-                    if (!IsNetworkReady())
+                    if (!IsNetworkReady() || _isGameEnded)
                     {
                         return;
+                    }
+
+                    if (isFirstEnemy && IsServer)
+                    {
+                        _gamePhase.Value = GamePhase.Combat;
+                        isFirstEnemy = false;
                     }
 
                     Transform spawnPoint = GetSpawnPoint(group.spawnPointIndex);
@@ -275,6 +313,17 @@ namespace DungeonBuilder.Wave
                     await UniTask.Delay(TimeSpan.FromSeconds(group.spawnInterval), cancellationToken: destroyCancellationToken);
                 }
             }
+
+            if (isFirstEnemy && IsServer)
+            {
+                // Fallback if no enemies were spawned
+                _gamePhase.Value = GamePhase.Combat;
+            }
+            }
+            finally
+            {
+                _isSpawningWave = false;
+            }
         }
 
         private Transform GetSpawnPoint(int index)
@@ -305,6 +354,25 @@ namespace DungeonBuilder.Wave
         private void HandlePhaseCountdownChanged(float previousValue, float newValue)
         {
             _eventBus?.RaisePhaseCountdownChanged(newValue);
+        }
+
+        private void HandleGamePhaseChanged(GamePhase previousValue, GamePhase newValue)
+        {
+            _eventBus?.RaiseGamePhaseChanged(newValue);
+        }
+
+        private void HandleGameEndedEvent(bool isWin)
+        {
+            _isGameEnded = true;
+        }
+
+        private void HandleEnemyKilled(EnemyType type, bool isBoss)
+        {
+            if (isBoss && IsServer)
+            {
+                Debug.Log($"[WaveManager] Boss killed! Ending game with victory.");
+                _allWavesCompleted.Value = true; // Trigger win
+            }
         }
 
         private void HandleWavesCompleted(bool _, bool isCompleted)

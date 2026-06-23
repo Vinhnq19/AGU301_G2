@@ -19,6 +19,7 @@ namespace DungeonBuilder.Data
     {
         public float buildPhaseDuration = 30f;
         public float combatPhaseDuration = 120f;
+        public bool isBossWave = false;
         public List<SpawnGroup> spawnGroups = new();
     }
 }

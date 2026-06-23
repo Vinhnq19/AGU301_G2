@@ -10,5 +10,6 @@ namespace Assets._Game.Scripts.Data
         public float maxHealth = 100f;
         public float moveSpeed = 2f;
         public int rewardToken = 10;
+        public bool isBoss = false;
     }
 }

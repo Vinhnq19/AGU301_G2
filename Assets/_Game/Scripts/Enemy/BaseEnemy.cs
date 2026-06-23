@@ -415,7 +415,8 @@ namespace Assets._Game.Scripts.Enemy
             }
 
             _isDying = true;
-            _eventBus?.RaiseEnemyKilled(EnemyType);
+            bool isBoss = _data != null && _data.isBoss;
+            _eventBus?.RaiseEnemyKilled(EnemyType, isBoss);
             PlayDeathEffectClientRpc();
 
             if (IsServer && _tokenDropPrefab != null && _data != null && _data.rewardToken > 0)

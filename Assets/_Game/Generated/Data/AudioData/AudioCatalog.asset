@@ -1,0 +1,94 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a065668234189a4d8e3698858500fb7, type: 3}
+  m_Name: AudioCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.AudioCatalogSO
+  BgmEntries:
+  - Type: 100
+    Clip: {fileID: 8300000, guid: f1d377d046d4626459317b688d59a4a8, type: 3}
+    VolumeScale: 0.5
+  - Type: 101
+    Clip: {fileID: 8300000, guid: d8ef6418294b56144b3038f39f729da1, type: 3}
+    VolumeScale: 0.3
+  - Type: 102
+    Clip: {fileID: 0}
+    VolumeScale: 0
+  - Type: 102
+    Clip: {fileID: 8300000, guid: ce86be6621a39e6408d9e603ec39004f, type: 3}
+    VolumeScale: 0.3
+  - Type: 103
+    Clip: {fileID: 8300000, guid: bed51bce1d3ca12469596d77c473f56d, type: 3}
+    VolumeScale: 0.5
+  - Type: 104
+    Clip: {fileID: 8300000, guid: 5734af00da2cdaf46b9bd3b500c2f656, type: 3}
+    VolumeScale: 0.5
+  - Type: 105
+    Clip: {fileID: 8300000, guid: 80fb7f889869a4c4c903673ea4a83402, type: 3}
+    VolumeScale: 0.5
+  SfxEntries:
+  - Type: 200
+    Clip: {fileID: 0}
+    VolumeScale: 0
+  - Type: 201
+    Clip: {fileID: 0}
+    VolumeScale: 0
+  - Type: 202
+    Clip: {fileID: 0}
+    VolumeScale: 0
+  - Type: 203
+    Clip: {fileID: 0}
+    VolumeScale: 0
+  - Type: 204
+    Clip: {fileID: 0}
+    VolumeScale: 0
+  - Type: 205
+    Clip: {fileID: 0}
+    VolumeScale: 0
+  - Type: 206
+    Clip: {fileID: 0}
+    VolumeScale: 0
+  - Type: 207
+    Clip: {fileID: 0}
+    VolumeScale: 0
+  - Type: 208
+    Clip: {fileID: 0}
+    VolumeScale: 0
+  - Type: 209
+    Clip: {fileID: 0}
+    VolumeScale: 0
+  - Type: 210
+    Clip: {fileID: 0}
+    VolumeScale: 0
+  - Type: 211
+    Clip: {fileID: 0}
+    VolumeScale: 0
+  - Type: 212
+    Clip: {fileID: 0}
+    VolumeScale: 0
+  - Type: 213
+    Clip: {fileID: 0}
+    VolumeScale: 0
+  - Type: 214
+    Clip: {fileID: 0}
+    VolumeScale: 0
+  - Type: 215
+    Clip: {fileID: 0}
+    VolumeScale: 0
+  - Type: 216
+    Clip: {fileID: 0}
+    VolumeScale: 0
+  - Type: 217
+    Clip: {fileID: 0}
+    VolumeScale: 0
+  - Type: 218
+    Clip: {fileID: 0}
+    VolumeScale: 0

@@ -57,7 +57,7 @@ namespace DungeonBuilder.Networking.Lobby
             _net.NetworkConfig.ConnectionData = Encoding.UTF8.GetBytes(playerName ?? string.Empty);
 
             bool ok = _net.StartHost();
-            StatusChanged?.Invoke(ok ? "Hosting" : "Khong the start host");
+            StatusChanged?.Invoke(ok ? "Hosting" : "Failed to start host");
             return ok;
         }
 
@@ -71,7 +71,7 @@ namespace DungeonBuilder.Networking.Lobby
 
             if (string.IsNullOrWhiteSpace(hostIp))
             {
-                StatusChanged?.Invoke("Nhap IP phong (ID) truoc khi join");
+                StatusChanged?.Invoke("Enter Room IP (ID) before joining");
                 return false;
             }
 
@@ -86,7 +86,7 @@ namespace DungeonBuilder.Networking.Lobby
             _net.NetworkConfig.ConnectionData = Encoding.UTF8.GetBytes(playerName ?? string.Empty);
 
             bool ok = _net.StartClient();
-            StatusChanged?.Invoke(ok ? $"Dang ket noi toi {hostIp}..." : "Khong the start client");
+            StatusChanged?.Invoke(ok ? $"Connecting to {hostIp}..." : "Failed to start client");
             return ok;
         }
 
@@ -97,7 +97,7 @@ namespace DungeonBuilder.Networking.Lobby
                 _net.Shutdown();
             }
 
-            StatusChanged?.Invoke("Da ngat ket noi");
+            StatusChanged?.Invoke("Disconnected");
         }
 
         /// <summary>Lay IPv4 LAN cua may nay de hien thi lam Room ID.</summary>
@@ -160,14 +160,14 @@ namespace DungeonBuilder.Networking.Lobby
             _net ??= NetworkManager.Singleton;
             if (_net == null)
             {
-                StatusChanged?.Invoke("Khong tim thay NetworkManager");
+                StatusChanged?.Invoke("NetworkManager not found");
                 DBLog.Warning("lobby.no-nm", "NetworkManager.Singleton null khi start ket noi.", 0f, this);
                 return false;
             }
 
             if (_net.IsListening)
             {
-                StatusChanged?.Invoke("Da o trong mot phien ket noi");
+                StatusChanged?.Invoke("Already in a session");
                 return false;
             }
 

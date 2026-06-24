@@ -44,6 +44,8 @@ namespace DungeonBuilder.Player
         /// <summary>True while a foraging swing is in progress. Read by PlayerController to lock movement.</summary>
         public bool IsForaging { get; private set; }
 
+        public Sprite DefaultSprite => _idle?.down?.Length > 0 ? _idle.down[0] : null;
+
         private void Awake()
         {
             _rigidbody = GetComponent<Rigidbody2D>();

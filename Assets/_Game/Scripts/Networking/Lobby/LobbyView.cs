@@ -35,6 +35,7 @@ namespace DungeonBuilder.Networking.Lobby
             _joinButton?.onClick.AddListener(OnJoinClicked);
             _startButton?.onClick.AddListener(OnStartClicked);
             _disconnectButton?.onClick.AddListener(OnDisconnectClicked);
+            _playerNameInput?.onEndEdit.AddListener(OnPlayerNameChanged);
         }
 
         private void OnDestroy()
@@ -43,6 +44,7 @@ namespace DungeonBuilder.Networking.Lobby
             _joinButton?.onClick.RemoveListener(OnJoinClicked);
             _startButton?.onClick.RemoveListener(OnStartClicked);
             _disconnectButton?.onClick.RemoveListener(OnDisconnectClicked);
+            _playerNameInput?.onEndEdit.RemoveListener(OnPlayerNameChanged);
             Presenter?.Dispose();
         }
 
@@ -62,7 +64,7 @@ namespace DungeonBuilder.Networking.Lobby
             // Room ID = IP host. Chi co y nghia khi minh la host.
             if (_roomIdText != null)
             {
-                _roomIdText.text = model.IsHost ? $"Room ID (IP): {model.LocalIp}" : $"IP may nay: {model.LocalIp}";
+                _roomIdText.text = model.IsHost ? $"Room ID (IP): {model.LocalIp}" : $"Local IP: {model.LocalIp}";
             }
 
             if (_statusText != null)
@@ -76,7 +78,8 @@ namespace DungeonBuilder.Networking.Lobby
             // Truoc khi vao lobby moi cho phep Host/Join.
             if (_hostButton != null) _hostButton.interactable = disconnected;
             if (_joinButton != null) _joinButton.interactable = disconnected;
-            if (_playerNameInput != null) _playerNameInput.interactable = disconnected;
+            // Host có thể đổi tên ngay cả khi đã tạo phòng
+            if (_playerNameInput != null) _playerNameInput.interactable = disconnected || model.IsHost;
             if (_joinIpInput != null) _joinIpInput.interactable = disconnected;
 
             // Start: chi host, dang trong lobby, va co it nhat 1 nguoi.
@@ -118,7 +121,7 @@ namespace DungeonBuilder.Networking.Lobby
                 {
                     LobbySlot slot = slots[i];
                     _spawnedItems[i].gameObject.SetActive(true);
-                    _spawnedItems[i].Setup(i, slot.PlayerName.ToString(), slot.ClientId == hostId);
+                    _spawnedItems[i].Setup(i, slot.PlayerName.ToString(), slot.ClientId == hostId, slot.ClientId);
                 }
                 else
                 {
@@ -153,6 +156,11 @@ namespace DungeonBuilder.Networking.Lobby
         private void OnDisconnectClicked()
         {
             Presenter?.OnDisconnectClicked();
+        }
+
+        private void OnPlayerNameChanged(string newName)
+        {
+            Presenter?.OnPlayerNameChanged(GetPlayerName());
         }
 
         private string GetPlayerName()

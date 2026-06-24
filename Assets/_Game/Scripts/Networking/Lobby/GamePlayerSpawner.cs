@@ -2,6 +2,8 @@ using DungeonBuilder.Core.Debugging;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections.Generic;
+using DungeonBuilder.Player;
 
 namespace DungeonBuilder.Networking.Lobby
 {
@@ -17,9 +19,10 @@ namespace DungeonBuilder.Networking.Lobby
         private NetworkManager _net;
         private string _gameSceneName;
         private bool _armed;
+        private Dictionary<ulong, string> _playerNames = new();
 
         /// <summary>Goi tren server truoc khi LoadScene. Idempotent.</summary>
-        public static void Arm(NetworkManager net, string gameSceneName)
+        public static void Arm(NetworkManager net, string gameSceneName, Dictionary<ulong, string> playerNames)
         {
             if (net == null)
             {
@@ -34,6 +37,11 @@ namespace DungeonBuilder.Networking.Lobby
 
             spawner._net = net;
             spawner._gameSceneName = gameSceneName;
+            
+            if (playerNames != null)
+            {
+                spawner._playerNames = new Dictionary<ulong, string>(playerNames);
+            }
 
             // Unsubscribe trước để tránh duplicate nếu Arm() được gọi lại (ví dụ: sau Shutdown → StartHost lại).
             // SceneManager bị reset sau Shutdown nên unsubscribe cũ là no-op, sau đó subscribe mới là bắt buộc.
@@ -85,11 +93,26 @@ namespace DungeonBuilder.Networking.Lobby
                 return;
             }
 
+            NetworkObject playerObj = prefabNo;
             _net.SpawnManager.InstantiateAndSpawn(
-                prefabNo,
+                playerObj,
                 ownerClientId: clientId,
                 destroyWithScene: true,
                 isPlayerObject: true);
+
+            // Gán tên cho Player
+            if (_playerNames.TryGetValue(clientId, out string pName))
+            {
+                // InstantiateAndSpawn internally creates a new GameObject, so we need to get the actual spawned object
+                if (_net.ConnectedClients.TryGetValue(clientId, out NetworkClient newlySpawnedClient) && newlySpawnedClient.PlayerObject != null)
+                {
+                    PlayerNameplate nameplate = newlySpawnedClient.PlayerObject.GetComponent<PlayerNameplate>();
+                    if (nameplate != null)
+                    {
+                        nameplate.PlayerName.Value = new Unity.Collections.FixedString32Bytes(pName);
+                    }
+                }
+            }
 
             DBLog.Info($"spawn.player.{clientId}", $"Spawned player cho client {clientId}.", 0f, this);
         }

@@ -107,7 +107,14 @@ namespace DungeonBuilder.Networking.Lobby
             // (Khi connect o lobby ta dat CreatePlayerObject=false nen NGO khong tu spawn.)
             // GamePlayerSpawner song tren NetworkManager (DontDestroyOnLoad) nen ton tai qua scene,
             // khac voi LobbyController (in-scene, bi huy khi LobbyScene unload).
-            GamePlayerSpawner.Arm(NetworkManager, _gameSceneName);
+            
+            Dictionary<ulong, string> names = new Dictionary<ulong, string>();
+            foreach (var slot in _slots)
+            {
+                names[slot.ClientId] = slot.PlayerName.ToString();
+            }
+
+            GamePlayerSpawner.Arm(NetworkManager, _gameSceneName, names);
 
             NetworkManager.SceneManager.LoadScene(_gameSceneName, LoadSceneMode.Single);
         }
@@ -132,6 +139,20 @@ namespace DungeonBuilder.Networking.Lobby
                 if (_slots[i].ClientId == clientId)
                 {
                     _slots.RemoveAt(i);
+                }
+            }
+        }
+
+        public void ChangeHostName(string newName)
+        {
+            if (!IsServer) return;
+
+            for (int i = 0; i < _slots.Count; i++)
+            {
+                if (_slots[i].ClientId == NetworkManager.LocalClientId)
+                {
+                    _slots[i] = new LobbySlot(_slots[i].ClientId, Truncate(newName));
+                    break;
                 }
             }
         }

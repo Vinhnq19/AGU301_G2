@@ -57,6 +57,14 @@ namespace DungeonBuilder.Networking.Lobby
             }
         }
 
+        public void OnPlayerNameChanged(string newName)
+        {
+            if (Model.IsHost && _controller != null)
+            {
+                _controller.ChangeHostName(newName);
+            }
+        }
+
         /// <summary>Nguoi choi bam Join voi IP (ID phong).</summary>
         public void OnJoinClicked(string hostIp, string playerName)
         {

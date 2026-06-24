@@ -19,12 +19,16 @@ namespace Assets._Game.Scripts.Building
         private TowerView _view;
         private GridManager _gridManager;
         private BuildingController _buildingController;
+        private DungeonBuilder.Core.EventBus _eventBus;
+
+        public TowerModel Model => _model;
 
         [Inject]
-        public void Construct(BuildingController buildingController, GridManager gridManager)
+        public void Construct(BuildingController buildingController, GridManager gridManager, DungeonBuilder.Core.EventBus eventBus)
         {
             _buildingController = buildingController;
             _gridManager = gridManager;
+            _eventBus = eventBus;
         }
 
         /// <summary>
@@ -55,7 +59,6 @@ namespace Assets._Game.Scripts.Building
         {
             Vector2Int gridPos = GetGridPosition();
             DBLog.Info($"tower.upgrade.request.{gridPos}", $"[TowerPresenter] Upgrade request. grid={gridPos}.", 0.25f, this);
-            _view?.HidePanel();
             _buildingController?.RequestUpgradeTower(gridPos);
         }
 
@@ -66,7 +69,6 @@ namespace Assets._Game.Scripts.Building
         {
             Vector2Int gridPos = GetGridPosition();
             DBLog.Info($"tower.remove.request.{gridPos}", $"[TowerPresenter] Remove request. grid={gridPos}.", 0.25f, this);
-            _view?.HidePanel();
             _buildingController?.RequestRemoveTower(gridPos);
         }
 
@@ -76,7 +78,7 @@ namespace Assets._Game.Scripts.Building
         /// </summary>
         public void OnPointerClick(PointerEventData eventData)
         {
-            _view?.TogglePanel();
+            _eventBus?.RaiseTowerClicked(this);
         }
 
         private void OnModelChanged()

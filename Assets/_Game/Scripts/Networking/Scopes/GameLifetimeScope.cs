@@ -31,6 +31,7 @@ namespace DungeonBuilder.Networking.Scopes
         [SerializeField] private HUDView _hudView;
         [SerializeField] private TowerSelectionView _towerSelectionView;
         [SerializeField] private GameResultView _gameResultView;
+        [SerializeField] private DungeonBuilder.UI.TowerAction.TowerActionPopupView _towerActionPopupView;
 
         [Header("Data")]
         [SerializeField] private TowerCatalogSO _towerCatalog;
@@ -103,6 +104,12 @@ namespace DungeonBuilder.Networking.Scopes
             if (_towerSelectionView != null)
             {
                 builder.RegisterComponent(_towerSelectionView);
+            }
+
+            if (_towerActionPopupView != null)
+            {
+                builder.RegisterComponent(_towerActionPopupView);
+                builder.Register<DungeonBuilder.UI.TowerAction.TowerActionPopupPresenter>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
             }
 
             if (_towerCatalog != null)

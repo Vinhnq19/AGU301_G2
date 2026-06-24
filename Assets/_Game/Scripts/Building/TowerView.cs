@@ -23,21 +23,13 @@ namespace Assets._Game.Scripts.Building
         [SerializeField] private LineRenderer _rangeLine;
         [SerializeField] private int _circleSegments = 40;
 
-        [Header("Action Panel")]
-        [SerializeField] private GameObject _actionPanel;
-        [SerializeField] private Button _upgradeButton;
-        [SerializeField] private Button _removeButton;
-        [SerializeField] private TMP_Text _upgradeCostText;
-
         [Header("Health Bar")]
         [SerializeField] private Image _healthFillImage;
         [SerializeField] private CanvasGroup _healthBarGroup;
 
         private TowerPresenter _presenter;
         private bool _isProximityUiVisible = false;
-        private CanvasGroup _actionPanelGroup;
         private Vector3 _baseRangeScale = Vector3.one;
-        private Tween _autoCloseTween;
 
         private void Awake()
         {
@@ -58,19 +50,6 @@ namespace Assets._Game.Scripts.Building
                 _levelText.color = c;
             }
 
-            if (_actionPanel != null)
-            {
-                _actionPanelGroup = _actionPanel.GetComponent<CanvasGroup>();
-                if (_actionPanelGroup == null) _actionPanelGroup = _actionPanel.AddComponent<CanvasGroup>();
-
-                EventTrigger trigger = _actionPanel.GetComponent<EventTrigger>() ?? _actionPanel.AddComponent<EventTrigger>();
-                EventTrigger.Entry exitEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerExit };
-                exitEntry.callback.AddListener((_) => HidePanel());
-                trigger.triggers.Add(exitEntry);
-
-
-                _actionPanel.SetActive(false);
-            }
         }
 
         /// <summary>
@@ -79,18 +58,6 @@ namespace Assets._Game.Scripts.Building
         public void SetPresenter(TowerPresenter presenter)
         {
             _presenter = presenter;
-
-            if (_upgradeButton != null)
-            {
-                _upgradeButton.onClick.RemoveAllListeners();
-                _upgradeButton.onClick.AddListener(() => _presenter?.RequestUpgrade());
-            }
-
-            if (_removeButton != null)
-            {
-                _removeButton.onClick.RemoveAllListeners();
-                _removeButton.onClick.AddListener(() => _presenter?.RequestRemove());
-            }
         }
 
         /// <summary>
@@ -117,26 +84,6 @@ namespace Assets._Game.Scripts.Building
                 }
             }
 
-            if (_upgradeButton != null)
-            {
-                _upgradeButton.interactable = model.CanUpgrade;
-            }
-
-            if (_upgradeCostText != null)
-            {
-                if (model.CanUpgrade)
-                {
-                    string costStr = model.UpgradeCost.Count > 0
-                        ? string.Join("  ", model.UpgradeCost.Select(c => $"{c.amount}{ResourceCost.Abbr(c.type)}"))
-                        : "Free";
-                    _upgradeCostText.text = $"Upgrade: {costStr}";
-                }
-                else
-                {
-                    _upgradeCostText.text = "MAX";
-                }
-            }
-
             if (_healthFillImage != null && model.MaxHealth > 0)
             {
                 float targetFill = Mathf.Clamp01(model.CurrentHealth / model.MaxHealth);
@@ -151,46 +98,7 @@ namespace Assets._Game.Scripts.Building
             }
         }
 
-        public void TogglePanel()
-        {
-            if (_actionPanel == null) return;
-            if (_actionPanel.activeSelf)
-            {
-                HidePanel();
-            }
-            else
-            {
-                _actionPanel.SetActive(true);
-                if (_actionPanelGroup != null)
-                {
-                    _actionPanelGroup.DOKill();
-                    _actionPanelGroup.alpha = 0f;
-                    _actionPanelGroup.DOFade(1f, 0.2f);
-                }
 
-                // Tự động tắt panel sau 3 giây
-                _autoCloseTween?.Kill();
-                _autoCloseTween = DOVirtual.DelayedCall(3f, HidePanel);
-            }
-        }
-
-        public void HidePanel()
-        {
-            _autoCloseTween?.Kill();
-
-            if (_actionPanel != null && _actionPanel.activeSelf)
-            {
-                if (_actionPanelGroup != null)
-                {
-                    _actionPanelGroup.DOKill();
-                    _actionPanelGroup.DOFade(0f, 0.2f).OnComplete(() => _actionPanel.SetActive(false));
-                }
-                else
-                {
-                    _actionPanel.SetActive(false);
-                }
-            }
-        }
 
         public void ShowProximityUI()
         {

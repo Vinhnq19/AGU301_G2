@@ -29,11 +29,12 @@ namespace Assets._Game.Scripts.Data
             ResourceType.Crystal     => "C",
             ResourceType.Copper      => "Cu",
             ResourceType.Iron        => "Fe",
-            ResourceType.BlueGems    => "BG",
-            ResourceType.PurpleGems  => "PG",
-            ResourceType.MiningSkill  => "Mining",
-            ResourceType.ForgingSkill => "Forging",
-            _                        => type.ToString()
+            ResourceType.BlueGems    => " BG",
+            ResourceType.PurpleGems  => " PG",
+            ResourceType.MiningSkill  => " Mining",
+            ResourceType.ForgingSkill => " Forging",
+            ResourceType.Coin         => " coins",
+            _                        => $" {type.ToString()}"
         };
 
         public override string ToString() => $"{amount}{Abbr(type)}";

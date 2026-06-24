@@ -13,6 +13,7 @@ namespace Assets._Game.Scripts.Building
     public sealed class TowerModel
     {
         private readonly TowerDataSO _data;
+        public TowerDataSO Data => _data;
 
         public event Action OnChanged;
 

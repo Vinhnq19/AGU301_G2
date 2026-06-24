@@ -5,11 +5,17 @@ namespace DungeonBuilder.Core
 {
     public sealed class EventBus
     {
+        public event Action<Assets._Game.Scripts.Building.TowerPresenter> OnTowerClicked;
         public event Action<int> OnCoreHealthChanged;
         public event Action<int, bool> OnWaveStarted;
         public event Action<float> OnPhaseCountdownChanged;
         public event Action<GamePhase> OnGamePhaseChanged;
         public event Action<EnemyType, bool> OnEnemyKilled;
+
+        public void RaiseTowerClicked(Assets._Game.Scripts.Building.TowerPresenter tower)
+        {
+            OnTowerClicked?.Invoke(tower);
+        }
 
         public void RaiseCoreHealthChanged(int currentHealth)
         {

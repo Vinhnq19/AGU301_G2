@@ -1,61 +1,7 @@
 fileFormatVersion: 2
-guid: 5239ca51674b85849a1a59e045fd2709
+guid: 24b6626351cd4b848be8cad1d40c51e2
 TextureImporter:
-  internalIDToNameTable:
-  - first:
-      213: 5717465431152502704
-    second: artdecoUI_PIPO_tr_0
-  - first:
-      213: -8483078968825879121
-    second: artdecoUI_PIPO_tr_1
-  - first:
-      213: 5667886818184199621
-    second: artdecoUI_PIPO_tr_2
-  - first:
-      213: 8873148660884924651
-    second: artdecoUI_PIPO_tr_3
-  - first:
-      213: -4337061765396970221
-    second: artdecoUI_PIPO_tr_4
-  - first:
-      213: 6922482108924444203
-    second: artdecoUI_PIPO_tr_5
-  - first:
-      213: -6224963432242557824
-    second: artdecoUI_PIPO_tr_6
-  - first:
-      213: -5346903199351845522
-    second: artdecoUI_PIPO_tr_7
-  - first:
-      213: -130124589838805200
-    second: artdecoUI_PIPO_tr_8
-  - first:
-      213: 6800534220888195548
-    second: artdecoUI_PIPO_tr_9
-  - first:
-      213: 695676408987397256
-    second: artdecoUI_PIPO_tr_10
-  - first:
-      213: -7807677970352061694
-    second: artdecoUI_PIPO_tr_11
-  - first:
-      213: -5746767291029893529
-    second: artdecoUI_PIPO_tr_12
-  - first:
-      213: -6717455920843234165
-    second: artdecoUI_PIPO_tr_13
-  - first:
-      213: -2129552351283700800
-    second: artdecoUI_PIPO_tr_14
-  - first:
-      213: -8315971036930536292
-    second: artdecoUI_PIPO_tr_15
-  - first:
-      213: -8366100132398584210
-    second: artdecoUI_PIPO_tr_16
-  - first:
-      213: -4395108056127522735
-    second: artdecoUI_PIPO_tr_17
+  internalIDToNameTable: []
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -88,7 +34,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -123,6 +69,32 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -135,7 +107,7 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
-    buildTarget: Standalone
+    buildTarget: Android
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -152,7 +124,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -165,7 +137,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -177,397 +149,441 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: artdecoUI_PIPO_tr_0
+      name: 01 Border 02_0
       rect:
         serializedVersion: 2
-        x: 27
-        y: 658
-        width: 224
-        height: 214
+        x: 0
+        y: 192
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 0b7ab676484885f40800000000000000
-      internalID: 5717465431152502704
+      spriteID: 87cb1008ecd6f9344b5dbc2f23d015f6
+      internalID: -1037923760
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: artdecoUI_PIPO_tr_1
+      name: 01 Border 02_1
       rect:
         serializedVersion: 2
-        x: 311
-        y: 673
-        width: 312
-        height: 195
+        x: 64
+        y: 192
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      border: {x: 17, y: 16, z: 18, w: 16}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: fa5eb858f9c064a80800000000000000
-      internalID: -8483078968825879121
+      spriteID: 9021e9ff5690d2b43b46dc75d3f7c0ab
+      internalID: -1285131718
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: artdecoUI_PIPO_tr_2
+      name: 01 Border 02_2
       rect:
         serializedVersion: 2
-        x: 680
-        y: 680
-        width: 245
-        height: 185
+        x: 128
+        y: 192
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 5cdfcf8080168ae40800000000000000
-      internalID: 5667886818184199621
+      spriteID: 600240f92d2942b43ab882e6d6995af2
+      internalID: 1605837038
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: artdecoUI_PIPO_tr_3
+      name: 01 Border 02_3
       rect:
         serializedVersion: 2
-        x: 992
-        y: 712
-        width: 178
-        height: 155
+        x: 192
+        y: 192
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      border: {x: 27, y: 28, z: 27, w: 26}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: be86743f1b1c32b70800000000000000
-      internalID: 8873148660884924651
+      spriteID: 7c1718288964bfb4caa1eb60264b926c
+      internalID: -1382721939
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: artdecoUI_PIPO_tr_4
+      name: 01 Border 02_4
       rect:
         serializedVersion: 2
-        x: 1229
-        y: 750
-        width: 178
-        height: 112
+        x: 256
+        y: 192
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      border: {x: 27, y: 28, z: 26, w: 29}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 315c5989d49afc3c0800000000000000
-      internalID: -4337061765396970221
+      spriteID: 97ededd2b35ed3647a3ad3783c307093
+      internalID: 501749870
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: artdecoUI_PIPO_tr_5
+      name: 01 Border 02_5
       rect:
         serializedVersion: 2
-        x: 708
-        y: 432
-        width: 205
-        height: 203
+        x: 0
+        y: 128
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: b2e307a1dc8911060800000000000000
-      internalID: 6922482108924444203
+      spriteID: 48a90bda4a798b0488e59c20807722dd
+      internalID: 178473072
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: artdecoUI_PIPO_tr_6
+      name: 01 Border 02_6
       rect:
         serializedVersion: 2
-        x: 992
-        y: 582
-        width: 56
-        height: 52
+        x: 64
+        y: 128
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 08cc2695dbc7c99a0800000000000000
-      internalID: -6224963432242557824
+      spriteID: fc06a3454a60ec549ba89bde68bec25e
+      internalID: -2056938788
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: artdecoUI_PIPO_tr_7
+      name: 01 Border 02_7
       rect:
         serializedVersion: 2
-        x: 1073
-        y: 593
-        width: 12
-        height: 36
+        x: 128
+        y: 128
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      border: {x: 21, y: 22, z: 23, w: 27}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: e6dcb3a8edbfbc5b0800000000000000
-      internalID: -5346903199351845522
+      spriteID: a344e7a0ceb8d504c89cb49cb63aa9a6
+      internalID: 1018438633
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: artdecoUI_PIPO_tr_8
+      name: 01 Border 02_8
       rect:
         serializedVersion: 2
-        x: 1083
-        y: 617
-        width: 38
-        height: 12
+        x: 192
+        y: 128
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 0375d1eff54b13ef0800000000000000
-      internalID: -130124589838805200
+      spriteID: 75200feeed8416540800cae19a4490e3
+      internalID: -414834476
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: artdecoUI_PIPO_tr_9
+      name: 01 Border 02_9
       rect:
         serializedVersion: 2
-        x: 1109
-        y: 583
-        width: 12
-        height: 36
+        x: 256
+        y: 128
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: cd1cde6d7d9506e50800000000000000
-      internalID: 6800534220888195548
+      spriteID: 1e655921a7dba0540ae91e80fa919d38
+      internalID: 335015712
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: artdecoUI_PIPO_tr_10
+      name: 01 Border 02_10
       rect:
         serializedVersion: 2
-        x: 1225
-        y: 612
-        width: 172
-        height: 84
+        x: 0
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 88c2054120a87a900800000000000000
-      internalID: 695676408987397256
+      spriteID: b6c78e86a6098e946b147d848da327ef
+      internalID: -1129542701
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: artdecoUI_PIPO_tr_11
+      name: 01 Border 02_11
       rect:
         serializedVersion: 2
-        x: 18
-        y: 403
-        width: 285
-        height: 182
+        x: 64
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 203c588b04e85a390800000000000000
-      internalID: -7807677970352061694
+      spriteID: 9029d7658180a2f42992c309e432c8b4
+      internalID: 814439313
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: artdecoUI_PIPO_tr_12
+      name: 01 Border 02_12
       rect:
         serializedVersion: 2
-        x: 1073
-        y: 583
-        width: 38
-        height: 12
+        x: 128
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 76e4453b8916f30b0800000000000000
-      internalID: -5746767291029893529
+      spriteID: ea24d99eacccee34e8d640fc30d46670
+      internalID: 53732473
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: artdecoUI_PIPO_tr_13
+      name: 01 Border 02_13
       rect:
         serializedVersion: 2
-        x: 343
-        y: 460
-        width: 226
-        height: 117
+        x: 192
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: b846bcb3e6dc6c2a0800000000000000
-      internalID: -6717455920843234165
+      spriteID: 9ece47b6d96feb64abfc407f88699c52
+      internalID: -1157051678
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: artdecoUI_PIPO_tr_14
+      name: 01 Border 02_14
       rect:
         serializedVersion: 2
-        x: 971
-        y: 446
-        width: 91
-        height: 85
+        x: 256
+        y: 64
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 0cb132b5b6f4272e0800000000000000
-      internalID: -2129552351283700800
+      spriteID: 0eeb271aae0592d4592dbbbbb1f918ea
+      internalID: 485034032
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: artdecoUI_PIPO_tr_15
+      name: 01 Border 02_15
       rect:
         serializedVersion: 2
-        x: 1204
-        y: 423
-        width: 206
-        height: 118
+        x: 0
+        y: 0
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: c9c815dd66cb79c80800000000000000
-      internalID: -8315971036930536292
+      spriteID: dea59c32b7f5f114aa3e3af1c9b5f906
+      internalID: -1562117380
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: artdecoUI_PIPO_tr_16
+      name: 01 Border 02_16
       rect:
         serializedVersion: 2
-        x: 16
-        y: 157
-        width: 301
-        height: 172
+        x: 64
+        y: 0
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: e6ea80d4144a5eb80800000000000000
-      internalID: -8366100132398584210
+      spriteID: ad18dc51e808ee0409a122f0da7bf2f9
+      internalID: 2046996961
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: artdecoUI_PIPO_tr_17
+      name: 01 Border 02_17
       rect:
         serializedVersion: 2
-        x: 365
-        y: 91
-        width: 357
-        height: 289
+        x: 128
+        y: 0
+        width: 64
+        height: 64
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 158bf0d52807103c0800000000000000
-      internalID: -4395108056127522735
+      spriteID: 27aff77bfff9e4646bbb1f711a21f047
+      internalID: 378188794
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: 01 Border 02_18
+      rect:
+        serializedVersion: 2
+        x: 192
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6f21f6d5e9ae8964290efb06c31f02fb
+      internalID: 443742838
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: 01 Border 02_19
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c0ffdc955317c8246ac0551cae7cae71
+      internalID: -574126979
       vertices: []
       indices: 
       edges: []
@@ -576,7 +592,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 60a0537f6282eff4a9c9c52f43f40e04
+    spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
     indices: 
@@ -584,28 +600,28 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries:
-      - key: SpriteEditor.SliceSettings
-        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
+      entries: []
     nameFileIdTable:
-      artdecoUI_PIPO_tr_0: 5717465431152502704
-      artdecoUI_PIPO_tr_1: -8483078968825879121
-      artdecoUI_PIPO_tr_10: 695676408987397256
-      artdecoUI_PIPO_tr_11: -7807677970352061694
-      artdecoUI_PIPO_tr_12: -5746767291029893529
-      artdecoUI_PIPO_tr_13: -6717455920843234165
-      artdecoUI_PIPO_tr_14: -2129552351283700800
-      artdecoUI_PIPO_tr_15: -8315971036930536292
-      artdecoUI_PIPO_tr_16: -8366100132398584210
-      artdecoUI_PIPO_tr_17: -4395108056127522735
-      artdecoUI_PIPO_tr_2: 5667886818184199621
-      artdecoUI_PIPO_tr_3: 8873148660884924651
-      artdecoUI_PIPO_tr_4: -4337061765396970221
-      artdecoUI_PIPO_tr_5: 6922482108924444203
-      artdecoUI_PIPO_tr_6: -6224963432242557824
-      artdecoUI_PIPO_tr_7: -5346903199351845522
-      artdecoUI_PIPO_tr_8: -130124589838805200
-      artdecoUI_PIPO_tr_9: 6800534220888195548
+      01 Border 02_0: -1037923760
+      01 Border 02_1: -1285131718
+      01 Border 02_10: -1129542701
+      01 Border 02_11: 814439313
+      01 Border 02_12: 53732473
+      01 Border 02_13: -1157051678
+      01 Border 02_14: 485034032
+      01 Border 02_15: -1562117380
+      01 Border 02_16: 2046996961
+      01 Border 02_17: 378188794
+      01 Border 02_18: 443742838
+      01 Border 02_19: -574126979
+      01 Border 02_2: 1605837038
+      01 Border 02_3: -1382721939
+      01 Border 02_4: 501749870
+      01 Border 02_5: 178473072
+      01 Border 02_6: -2056938788
+      01 Border 02_7: 1018438633
+      01 Border 02_8: -414834476
+      01 Border 02_9: 335015712
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

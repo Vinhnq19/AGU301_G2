@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2801272298673662309}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: FirePoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -42,7 +42,7 @@ GameObject:
   - component: {fileID: 8417000794621339499}
   - component: {fileID: 1610377629734114834}
   - component: {fileID: 236127073635329518}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: LevelText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -179,7 +179,7 @@ GameObject:
   - component: {fileID: 3241640081971897846}
   - component: {fileID: 3353846639046937249}
   - component: {fileID: 7440120742989132462}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: HealthBar_Fill
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -255,7 +255,7 @@ GameObject:
   - component: {fileID: 5558760249553202562}
   - component: {fileID: 3627213707869629302}
   - component: {fileID: 8053959754047243319}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: HealthBar_BG
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -345,7 +345,7 @@ GameObject:
   - component: {fileID: 564194199867609790}
   - component: {fileID: 1292150075222954820}
   - component: {fileID: 3999913451210299202}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: TowerUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -460,7 +460,7 @@ GameObject:
   - component: {fileID: 2324583115670562313}
   - component: {fileID: 3478046164296056714}
   - component: {fileID: 1811789985120455920}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Visual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -577,7 +577,7 @@ GameObject:
   - component: {fileID: 5387479086195645814}
   - component: {fileID: 2883970682126632225}
   - component: {fileID: 4385794062056464093}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: DB_ArrowTower
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -758,7 +758,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5069726684093652913}
   - component: {fileID: 8905108216235528945}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: RangeCircle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -900,7 +900,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7767036292402994083}
   - component: {fileID: 6222986055903453155}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: TowerView
   m_TagString: Untagged
   m_Icon: {fileID: 0}

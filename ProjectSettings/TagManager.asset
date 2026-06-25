@@ -15,8 +15,8 @@ TagManager:
   - Tower
   - Bullet
   - Enemy
-  - 
-  - 
+  - Minimap
+  - Map
   - 
   - 
   - 
@@ -52,6 +52,9 @@ TagManager:
     locked: 0
   - name: UI
     uniqueID: 1432896413
+    locked: 0
+  - name: Minimap
+    uniqueID: 2575303553
     locked: 0
   m_RenderingLayers:
   - Default

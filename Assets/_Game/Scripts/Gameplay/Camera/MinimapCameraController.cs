@@ -29,11 +29,7 @@ namespace DungeonBuilder.Gameplay.Camera
 
             _cam.orthographic = true;
             _cam.orthographicSize = _orthographicSize;
-            _cam.clearFlags = CameraClearFlags.SolidColor;
-
-            // Màu nền của Minimap (ví dụ màu tối để dễ nhìn map)
-
-            _cam.backgroundColor = new Color(0.1f, 0.1f, 0.1f, 1f);
+            _cam.clearFlags = CameraClearFlags.Skybox;
 
             // Tự động đưa Camera lùi lại phía sau (rất quan trọng trong 2D) để có thể nhìn thấy Map
             Vector3 pos = transform.position;

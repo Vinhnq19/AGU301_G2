@@ -25,6 +25,9 @@ namespace DungeonBuilder.UI.HUD
         [SerializeField] private TMP_Text _countdownText;
         [SerializeField] private TMP_Text _coreHealthText;  
 
+        [Header("Minimap")]
+        [SerializeField] private UnityEngine.UI.RawImage _minimapRawImage;
+
         private void OnDestroy()
         {
             Presenter?.Dispose();

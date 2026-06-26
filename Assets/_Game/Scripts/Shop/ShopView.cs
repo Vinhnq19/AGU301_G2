@@ -60,6 +60,8 @@ public class ShopView
             : new Color(0f, 1f, 0f);
     }
 
+    public bool IsOpen => shopPanel != null && shopPanel.activeSelf;
+
     public void OpenShop() => shopPanel.SetActive(true);
 
     public void CloseShop()

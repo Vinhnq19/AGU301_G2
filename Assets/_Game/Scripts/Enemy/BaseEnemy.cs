@@ -99,12 +99,27 @@ namespace Assets._Game.Scripts.Enemy
             }
         }
 
+        public event Action<float, float> OnHealthChanged;
+
+        public NetworkVariable<float> CurrentHPNetVar => _currentHP;
+
         public override void OnNetworkSpawn()
         {
+            _currentHP.OnValueChanged += HandleHealthChanged;
             if (IsServer)
             {
                 ResetEnemy();
             }
+        }
+
+        public override void OnNetworkDespawn()
+        {
+            _currentHP.OnValueChanged -= HandleHealthChanged;
+        }
+
+        private void HandleHealthChanged(float previousValue, float newValue)
+        {
+            OnHealthChanged?.Invoke(newValue, MaxHealth);
         }
 
         protected virtual void Update()

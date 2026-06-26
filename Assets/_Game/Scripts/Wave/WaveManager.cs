@@ -54,6 +54,7 @@ namespace DungeonBuilder.Wave
             _phaseCountdown.OnValueChanged += HandlePhaseCountdownChanged;
             _allWavesCompleted.OnValueChanged += HandleWavesCompleted;
             _gamePhase.OnValueChanged += HandleGamePhaseChanged;
+            _currentWave.OnValueChanged += HandleCurrentWaveChanged;
 
             if (IsServer)
             {
@@ -69,6 +70,7 @@ namespace DungeonBuilder.Wave
             _phaseCountdown.OnValueChanged -= HandlePhaseCountdownChanged;
             _allWavesCompleted.OnValueChanged -= HandleWavesCompleted;
             _gamePhase.OnValueChanged -= HandleGamePhaseChanged;
+            _currentWave.OnValueChanged -= HandleCurrentWaveChanged;
             if (IsServer && _eventBus != null)
             {
                 _eventBus.OnGameEnded -= HandleGameEndedEvent;
@@ -126,22 +128,6 @@ namespace DungeonBuilder.Wave
                     }
 
                     _currentWave.Value++;
-
-                    bool isBoss = false;
-                    int waveIndex = _currentWave.Value - 1;
-                    if (_waveCatalog != null && _waveCatalog.waves != null)
-                    {
-                        if (waveIndex < _waveCatalog.waves.Count && _waveCatalog.waves[waveIndex] != null)
-                        {
-                            isBoss = _waveCatalog.waves[waveIndex].isBossWave;
-                        }
-                        else if (_waveCatalog.waves.Count > 0 && _waveCatalog.waves[_waveCatalog.waves.Count - 1] != null)
-                        {
-                            isBoss = _waveCatalog.waves[_waveCatalog.waves.Count - 1].isBossWave;
-                        }
-                    }
-
-                    _eventBus?.RaiseWaveStarted(_currentWave.Value, isBoss);
 
                     // Khong block timer de timer chay song song voi luc spawn
                     SpawnWaveAsync(_currentWave.Value).Forget();
@@ -359,6 +345,27 @@ namespace DungeonBuilder.Wave
         private void HandleGamePhaseChanged(GamePhase previousValue, GamePhase newValue)
         {
             _eventBus?.RaiseGamePhaseChanged(newValue);
+        }
+
+        private void HandleCurrentWaveChanged(int previousValue, int newValue)
+        {
+            if (newValue <= 0) return;
+
+            bool isBoss = false;
+            int waveIndex = newValue - 1;
+            if (_waveCatalog != null && _waveCatalog.waves != null)
+            {
+                if (waveIndex < _waveCatalog.waves.Count && _waveCatalog.waves[waveIndex] != null)
+                {
+                    isBoss = _waveCatalog.waves[waveIndex].isBossWave;
+                }
+                else if (_waveCatalog.waves.Count > 0 && _waveCatalog.waves[_waveCatalog.waves.Count - 1] != null)
+                {
+                    isBoss = _waveCatalog.waves[_waveCatalog.waves.Count - 1].isBossWave;
+                }
+            }
+
+            _eventBus?.RaiseWaveStarted(newValue, isBoss);
         }
 
         private void HandleGameEndedEvent(bool isWin)

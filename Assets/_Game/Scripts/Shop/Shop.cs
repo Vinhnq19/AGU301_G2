@@ -20,6 +20,8 @@ public class Shop : NetworkBehaviour
     private IResourceService _sharedResources;
     private INetworkPool _pool;
 
+    public bool IsOpen => view != null && view.IsOpen;
+
     // Network synchronized shop item data
     private NetworkList<ShopItemData> networkItemData;
 

@@ -32,6 +32,8 @@ namespace DungeonBuilder.Networking.Scopes
         [SerializeField] private TowerSelectionView _towerSelectionView;
         [SerializeField] private GameResultView _gameResultView;
         [SerializeField] private DungeonBuilder.UI.TowerAction.TowerActionPopupView _towerActionPopupView;
+        [SerializeField] private Assets._Game.Scripts.UI.WaveAnnouncementView _waveAnnouncementView;
+        [SerializeField] private Assets._Game.Scripts.UI.Tutorial.TutorialManager _tutorialManager;
 
         [Header("Data")]
         [SerializeField] private TowerCatalogSO _towerCatalog;
@@ -104,6 +106,16 @@ namespace DungeonBuilder.Networking.Scopes
             if (_towerSelectionView != null)
             {
                 builder.RegisterComponent(_towerSelectionView);
+            }
+
+            if (_waveAnnouncementView != null)
+            {
+                builder.RegisterComponent(_waveAnnouncementView);
+            }
+
+            if (_tutorialManager != null)
+            {
+                builder.RegisterComponent(_tutorialManager);
             }
 
             if (_towerActionPopupView != null)

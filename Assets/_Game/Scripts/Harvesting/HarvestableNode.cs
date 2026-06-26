@@ -47,6 +47,7 @@ namespace DungeonBuilder.Harvesting
         private Tween _flashTween;
 
         public bool IsDepletable => true;
+        public ResourceType NodeType => _data != null ? _data.resourceType : ResourceType.Wood;
 
         [Inject]
         public void Construct(INetworkPool pool, EventBus eventBus, IResourceService sharedResources)

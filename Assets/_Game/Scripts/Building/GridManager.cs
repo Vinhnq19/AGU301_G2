@@ -24,6 +24,8 @@ namespace DungeonBuilder.Building
         private readonly Dictionary<Vector2Int, GridCell> _cells = new();
         private readonly HashSet<Vector2Int> _allowedTowerSpots = new();
 
+        public Transform[] PredefinedSpotTransforms => _predefinedSpotTransforms;
+
         private void Awake()
         {
             if (_predefinedSpotTransforms == null) return;

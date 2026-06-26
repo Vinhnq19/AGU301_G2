@@ -1,4 +1,3 @@
-using System.Text;
 using DungeonBuilder.Core.Enums;
 using DungeonBuilder.UI.Base;
 using TMPro;
@@ -12,13 +11,27 @@ namespace DungeonBuilder.UI.GameResult
         [SerializeField] private TMP_Text _titleText;
         [SerializeField] private Button _returnButton;
 
-        [Header("Stats")]
+        [Header("Combat Stats")]
         [SerializeField] private TMP_Text _enemiesKilledText;
         [SerializeField] private TMP_Text _bossesKilledText;
         [SerializeField] private TMP_Text _wavesCompletedText;
         [SerializeField] private TMP_Text _towersBuiltText;
-        [SerializeField] private TMP_Text _resourcesText;
-        [SerializeField] private TMP_Text _skillsText;
+
+        [Header("Resources")]
+        [SerializeField] private TMP_Text _woodText;
+        [SerializeField] private TMP_Text _stoneText;
+        [SerializeField] private TMP_Text _oreText;
+        [SerializeField] private TMP_Text _ironText;
+        [SerializeField] private TMP_Text _copperText;
+        [SerializeField] private TMP_Text _crystalText;
+        [SerializeField] private TMP_Text _blueGemsText;
+        [SerializeField] private TMP_Text _purpleGemsText;
+        [SerializeField] private TMP_Text _tokenText;
+        [SerializeField] private TMP_Text _coinText;
+
+        [Header("Skills")]
+        [SerializeField] private TMP_Text _miningSkillText;
+        [SerializeField] private TMP_Text _forgingSkillText;
 
         private void OnDestroy()
         {
@@ -36,63 +49,39 @@ namespace DungeonBuilder.UI.GameResult
 
             gameObject.SetActive(Presenter.IsVisible);
 
-            if (_titleText != null)
-                _titleText.text = Presenter.IsWin
-                    ? "Victory! Core Defended!"
-                    : "Defeat! Core Destroyed!";
+            SetText(_titleText, Presenter.IsWin ? "Victory! Core Defended!" : "Defeat! Core Destroyed!");
+            SetText(_enemiesKilledText, $"Enemies Killed: {Presenter.EnemyKillCount}");
+            SetText(_bossesKilledText,  $"Bosses Killed: {Presenter.BossKillCount}");
+            SetText(_wavesCompletedText,$"Waves Completed: {Presenter.WavesCompleted}");
+            SetText(_towersBuiltText,   $"Towers Built: {Presenter.TowersBuilt}");
 
-            if (_enemiesKilledText != null)
-                _enemiesKilledText.text = $"Enemies Killed: {Presenter.EnemyKillCount}";
-
-            if (_bossesKilledText != null)
-                _bossesKilledText.text = $"Bosses Killed: {Presenter.BossKillCount}";
-
-            if (_wavesCompletedText != null)
-                _wavesCompletedText.text = $"Waves Completed: {Presenter.WavesCompleted}";
-
-            if (_towersBuiltText != null)
-                _towersBuiltText.text = $"Towers Built: {Presenter.TowersBuilt}";
-
-            if (_resourcesText != null)
-                _resourcesText.text = BuildResourcesText();
-
-            if (_skillsText != null)
-                _skillsText.text = BuildSkillsText();
-        }
-
-        private string BuildResourcesText()
-        {
             var res = Presenter.FinalResources;
-            if (res == null) return "Resources: -";
-
-            var sb = new StringBuilder("Resources:\n");
-            AppendIfNonZero(sb, res, ResourceType.Wood,      "Wood");
-            AppendIfNonZero(sb, res, ResourceType.Stone,     "Stone");
-            AppendIfNonZero(sb, res, ResourceType.Ore,       "Ore");
-            AppendIfNonZero(sb, res, ResourceType.Iron,      "Iron");
-            AppendIfNonZero(sb, res, ResourceType.Copper,    "Copper");
-            AppendIfNonZero(sb, res, ResourceType.Crystal,   "Crystal");
-            AppendIfNonZero(sb, res, ResourceType.BlueGems,  "Blue Gems");
-            AppendIfNonZero(sb, res, ResourceType.PurpleGems,"Purple Gems");
-            AppendIfNonZero(sb, res, ResourceType.Token,     "Token");
-            AppendIfNonZero(sb, res, ResourceType.Coin,      "Coin");
-            return sb.ToString().TrimEnd();
+            SetRes(_woodText,       "Wood",         res, ResourceType.Wood);
+            SetRes(_stoneText,      "Stone",        res, ResourceType.Stone);
+            SetRes(_oreText,        "Ore",          res, ResourceType.Ore);
+            SetRes(_ironText,       "Iron",         res, ResourceType.Iron);
+            SetRes(_copperText,     "Copper",       res, ResourceType.Copper);
+            SetRes(_crystalText,    "Crystal",      res, ResourceType.Crystal);
+            SetRes(_blueGemsText,   "Blue Gems",    res, ResourceType.BlueGems);
+            SetRes(_purpleGemsText, "Purple Gems",  res, ResourceType.PurpleGems);
+            SetRes(_tokenText,      "Token",        res, ResourceType.Token);
+            SetRes(_coinText,       "Coin",         res, ResourceType.Coin);
+            SetRes(_miningSkillText, "Mining Skill Lv", res, ResourceType.MiningSkill);
+            SetRes(_forgingSkillText,"Forging Skill Lv",res, ResourceType.ForgingSkill);
         }
 
-        private string BuildSkillsText()
+        private static void SetText(TMP_Text label, string value)
         {
-            var res = Presenter.FinalResources;
-            if (res == null) return "Skills: -";
-
-            res.TryGetValue(ResourceType.MiningSkill,  out int mining);
-            res.TryGetValue(ResourceType.ForgingSkill, out int forging);
-            return $"Skills:\nMining: Lv.{mining}  Forging: Lv.{forging}";
+            if (label != null) label.text = value;
         }
 
-        private static void AppendIfNonZero(StringBuilder sb, System.Collections.Generic.IReadOnlyDictionary<ResourceType, int> res, ResourceType type, string label)
+        private static void SetRes(TMP_Text label, string name,
+            System.Collections.Generic.IReadOnlyDictionary<ResourceType, int> res, ResourceType type)
         {
-            res.TryGetValue(type, out int val);
-            if (val > 0) sb.AppendLine($"  {label}: {val}");
+            if (label == null) return;
+            int val = 0;
+            res?.TryGetValue(type, out val);
+            label.text = $"{name}: {val}";
         }
     }
 }

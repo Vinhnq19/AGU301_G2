@@ -21,115 +21,186 @@ namespace DungeonBuilder.Editor
             root.AddComponent<CanvasGroup>();
             var view = root.AddComponent<GameResultView>();
 
-            // Background
+            // Dim background
             var bg = new GameObject("Background");
             bg.transform.SetParent(root.transform, false);
             var bgRect = bg.AddComponent<RectTransform>();
             bgRect.anchorMin = Vector2.zero;
             bgRect.anchorMax = Vector2.one;
             bgRect.sizeDelta = Vector2.zero;
-            var bgImage = bg.AddComponent<Image>();
-            bgImage.color = new Color(0f, 0f, 0f, 0.75f);
-            bgImage.raycastTarget = true;
+            var bgImg = bg.AddComponent<Image>();
+            bgImg.color = new Color(0f, 0f, 0f, 0.75f);
 
-            // Inner panel
-            var panel = new GameObject("Panel");
-            panel.transform.SetParent(root.transform, false);
-            var panelRect = panel.AddComponent<RectTransform>();
-            panelRect.anchorMin = new Vector2(0.25f, 0.15f);
-            panelRect.anchorMax = new Vector2(0.75f, 0.85f);
-            panelRect.sizeDelta = Vector2.zero;
-            var panelImage = panel.AddComponent<Image>();
-            panelImage.color = new Color(0.08f, 0.08f, 0.12f, 0.95f);
-            var vLayout = panel.AddComponent<VerticalLayoutGroup>();
-            vLayout.childControlWidth = true;
-            vLayout.childControlHeight = false;
-            vLayout.childForceExpandWidth = true;
-            vLayout.childForceExpandHeight = false;
-            vLayout.spacing = 8f;
-            vLayout.padding = new RectOffset(20, 20, 20, 20);
+            // Scrollable inner panel
+            var panel = CreateScrollablePanel(root.transform, out var contentTr);
 
-            // Title
-            var titleText = CreateLabel(panel.transform, "TitleText", "Victory! Core Defended!", 28f, Color.yellow, FontStyles.Bold);
+            // ── Title ──
+            var titleText = AddLabel(contentTr, "TitleText", "Victory! Core Defended!", 26f, Color.yellow, FontStyles.Bold);
 
-            // Stats group header
-            CreateLabel(panel.transform, "StatsHeader", "── Stats ──", 14f, new Color(0.7f, 0.7f, 0.7f), FontStyles.Normal);
+            // ── Combat stats ──
+            AddSectionHeader(contentTr, "── Combat ──");
+            var enemiesText       = AddLabel(contentTr, "EnemiesKilledText",  "Enemies Killed: 0",   16f, Color.white, FontStyles.Normal);
+            var bossesText        = AddLabel(contentTr, "BossesKilledText",   "Bosses Killed: 0",    16f, Color.white, FontStyles.Normal);
+            var wavesText         = AddLabel(contentTr, "WavesCompletedText", "Waves Completed: 0",  16f, Color.white, FontStyles.Normal);
+            var towersText        = AddLabel(contentTr, "TowersBuiltText",    "Towers Built: 0",     16f, Color.white, FontStyles.Normal);
 
-            // Stat rows
-            var enemiesText      = CreateLabel(panel.transform, "EnemiesKilledText",  "Enemies Killed: 0",    16f, Color.white, FontStyles.Normal);
-            var bossesText       = CreateLabel(panel.transform, "BossesKilledText",   "Bosses Killed: 0",     16f, Color.white, FontStyles.Normal);
-            var wavesText        = CreateLabel(panel.transform, "WavesCompletedText", "Waves Completed: 0",   16f, Color.white, FontStyles.Normal);
-            var towersText       = CreateLabel(panel.transform, "TowersBuiltText",    "Towers Built: 0",      16f, Color.white, FontStyles.Normal);
-            var resourcesText    = CreateLabel(panel.transform, "ResourcesText",      "Resources:\n  -",      14f, new Color(0.8f, 0.95f, 0.8f), FontStyles.Normal);
-            resourcesText.enableWordWrapping = true;
-            var skillsText       = CreateLabel(panel.transform, "SkillsText",         "Skills:\n  -",         14f, new Color(0.8f, 0.9f, 1f), FontStyles.Normal);
+            // ── Resources ──
+            AddSectionHeader(contentTr, "── Resources ──");
+            var woodText        = AddLabel(contentTr, "WoodText",        "Wood: 0",         14f, Color.white, FontStyles.Normal);
+            var stoneText       = AddLabel(contentTr, "StoneText",       "Stone: 0",        14f, Color.white, FontStyles.Normal);
+            var oreText         = AddLabel(contentTr, "OreText",         "Ore: 0",          14f, Color.white, FontStyles.Normal);
+            var ironText        = AddLabel(contentTr, "IronText",        "Iron: 0",         14f, Color.white, FontStyles.Normal);
+            var copperText      = AddLabel(contentTr, "CopperText",      "Copper: 0",       14f, Color.white, FontStyles.Normal);
+            var crystalText     = AddLabel(contentTr, "CrystalText",     "Crystal: 0",      14f, Color.white, FontStyles.Normal);
+            var blueGemsText    = AddLabel(contentTr, "BlueGemsText",    "Blue Gems: 0",    14f, Color.white, FontStyles.Normal);
+            var purpleGemsText  = AddLabel(contentTr, "PurpleGemsText",  "Purple Gems: 0",  14f, Color.white, FontStyles.Normal);
+            var tokenText       = AddLabel(contentTr, "TokenText",       "Token: 0",        14f, Color.white, FontStyles.Normal);
+            var coinText        = AddLabel(contentTr, "CoinText",        "Coin: 0",         14f, Color.white, FontStyles.Normal);
 
-            // Spacer
-            var spacer = new GameObject("Spacer");
-            spacer.transform.SetParent(panel.transform, false);
-            var spacerRect = spacer.AddComponent<RectTransform>();
-            spacerRect.sizeDelta = new Vector2(0f, 10f);
+            // ── Skills ──
+            AddSectionHeader(contentTr, "── Skills ──");
+            var miningSkillText  = AddLabel(contentTr, "MiningSkillText",  "Mining Skill Lv: 1",  14f, new Color(0.6f, 0.9f, 1f), FontStyles.Normal);
+            var forgingSkillText = AddLabel(contentTr, "ForgingSkillText", "Forging Skill Lv: 1", 14f, new Color(0.6f, 0.9f, 1f), FontStyles.Normal);
 
-            // Return button
-            var btnGO = new GameObject("ReturnButton");
-            btnGO.transform.SetParent(panel.transform, false);
-            var btnRect = btnGO.AddComponent<RectTransform>();
-            btnRect.sizeDelta = new Vector2(0f, 44f);
-            var btnImage = btnGO.AddComponent<Image>();
-            btnImage.color = new Color(0.15f, 0.45f, 0.8f);
-            var btn = btnGO.AddComponent<Button>();
-            var btnColors = btn.colors;
-            btnColors.highlightedColor = new Color(0.25f, 0.6f, 1f);
-            btnColors.pressedColor = new Color(0.1f, 0.3f, 0.6f);
-            btn.colors = btnColors;
+            // ── Return button (outside scroll, pinned to bottom of panel) ──
+            var btn = AddReturnButton(panel.transform);
 
-            var btnLabel = new GameObject("Label");
-            btnLabel.transform.SetParent(btnGO.transform, false);
-            var btnLabelRect = btnLabel.AddComponent<RectTransform>();
-            btnLabelRect.anchorMin = Vector2.zero;
-            btnLabelRect.anchorMax = Vector2.one;
-            btnLabelRect.sizeDelta = Vector2.zero;
-            var btnText = btnLabel.AddComponent<TextMeshProUGUI>();
-            btnText.text = "Về Lobby";
-            btnText.fontSize = 18f;
-            btnText.color = Color.white;
-            btnText.alignment = TextAlignmentOptions.Center;
-            btnText.fontStyle = FontStyles.Bold;
-
-            // Wire all refs into GameResultView
+            // Wire all SerializedFields on GameResultView
             var so = new SerializedObject(view);
-            so.FindProperty("_titleText").objectReferenceValue           = titleText;
-            so.FindProperty("_returnButton").objectReferenceValue        = btn;
-            so.FindProperty("_enemiesKilledText").objectReferenceValue   = enemiesText;
-            so.FindProperty("_bossesKilledText").objectReferenceValue    = bossesText;
-            so.FindProperty("_wavesCompletedText").objectReferenceValue  = wavesText;
-            so.FindProperty("_towersBuiltText").objectReferenceValue     = towersText;
-            so.FindProperty("_resourcesText").objectReferenceValue       = resourcesText;
-            so.FindProperty("_skillsText").objectReferenceValue          = skillsText;
+            so.FindProperty("_titleText").objectReferenceValue          = titleText;
+            so.FindProperty("_returnButton").objectReferenceValue       = btn;
+            so.FindProperty("_enemiesKilledText").objectReferenceValue  = enemiesText;
+            so.FindProperty("_bossesKilledText").objectReferenceValue   = bossesText;
+            so.FindProperty("_wavesCompletedText").objectReferenceValue = wavesText;
+            so.FindProperty("_towersBuiltText").objectReferenceValue    = towersText;
+            so.FindProperty("_woodText").objectReferenceValue           = woodText;
+            so.FindProperty("_stoneText").objectReferenceValue          = stoneText;
+            so.FindProperty("_oreText").objectReferenceValue            = oreText;
+            so.FindProperty("_ironText").objectReferenceValue           = ironText;
+            so.FindProperty("_copperText").objectReferenceValue         = copperText;
+            so.FindProperty("_crystalText").objectReferenceValue        = crystalText;
+            so.FindProperty("_blueGemsText").objectReferenceValue       = blueGemsText;
+            so.FindProperty("_purpleGemsText").objectReferenceValue     = purpleGemsText;
+            so.FindProperty("_tokenText").objectReferenceValue          = tokenText;
+            so.FindProperty("_coinText").objectReferenceValue           = coinText;
+            so.FindProperty("_miningSkillText").objectReferenceValue    = miningSkillText;
+            so.FindProperty("_forgingSkillText").objectReferenceValue   = forgingSkillText;
             so.ApplyModifiedPropertiesWithoutUndo();
 
             PrefabUtility.SaveAsPrefabAsset(root, PrefabOutputPath);
             Object.DestroyImmediate(root);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-
-            Debug.Log("[GameResultPrefabSetup] Prefab created at " + PrefabOutputPath);
+            Debug.Log("[GameResultPrefabSetup] Prefab saved to " + PrefabOutputPath);
         }
 
-        private static TextMeshProUGUI CreateLabel(Transform parent, string name, string text, float fontSize, Color color, FontStyles style)
+        // ── Helpers ───────────────────────────────────────────────────────────────
+
+        private static GameObject CreateScrollablePanel(Transform parent, out Transform contentTransform)
         {
-            var go = new GameObject(name);
+            // Outer panel card
+            var panel = new GameObject("Panel");
+            panel.transform.SetParent(parent, false);
+            var panelRect = panel.AddComponent<RectTransform>();
+            panelRect.anchorMin = new Vector2(0.2f, 0.05f);
+            panelRect.anchorMax = new Vector2(0.8f, 0.95f);
+            panelRect.sizeDelta = Vector2.zero;
+            var panelImg = panel.AddComponent<Image>();
+            panelImg.color = new Color(0.08f, 0.08f, 0.12f, 0.95f);
+
+            // ScrollRect fills top portion, leaving room for button at bottom
+            var scrollGO = new GameObject("ScrollView");
+            scrollGO.transform.SetParent(panel.transform, false);
+            var scrollRect_rt = scrollGO.AddComponent<RectTransform>();
+            scrollRect_rt.anchorMin = new Vector2(0f, 0.12f);
+            scrollRect_rt.anchorMax = Vector2.one;
+            scrollRect_rt.sizeDelta = Vector2.zero;
+            var scroll = scrollGO.AddComponent<ScrollRect>();
+            scroll.horizontal = false;
+
+            // Viewport
+            var viewportGO = new GameObject("Viewport");
+            viewportGO.transform.SetParent(scrollGO.transform, false);
+            var vpRect = viewportGO.AddComponent<RectTransform>();
+            vpRect.anchorMin = Vector2.zero;
+            vpRect.anchorMax = Vector2.one;
+            vpRect.sizeDelta = Vector2.zero;
+            viewportGO.AddComponent<RectMask2D>();
+            scroll.viewport = vpRect;
+
+            // Content with VerticalLayoutGroup + ContentSizeFitter
+            var contentGO = new GameObject("Content");
+            contentGO.transform.SetParent(viewportGO.transform, false);
+            var contentRect = contentGO.AddComponent<RectTransform>();
+            contentRect.anchorMin = new Vector2(0f, 1f);
+            contentRect.anchorMax = Vector2.one;
+            contentRect.pivot = new Vector2(0.5f, 1f);
+            contentRect.sizeDelta = Vector2.zero;
+
+            var vlg = contentGO.AddComponent<VerticalLayoutGroup>();
+            vlg.childControlWidth = true;
+            vlg.childControlHeight = true;
+            vlg.childForceExpandWidth = true;
+            vlg.childForceExpandHeight = false;
+            vlg.spacing = 4f;
+            vlg.padding = new RectOffset(12, 12, 12, 12);
+
+            var csf = contentGO.AddComponent<ContentSizeFitter>();
+            csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            scroll.content = contentRect;
+            contentTransform = contentGO.transform;
+            return panel;
+        }
+
+        private static Button AddReturnButton(Transform panel)
+        {
+            var btnGO = new GameObject("ReturnButton");
+            btnGO.transform.SetParent(panel, false);
+            var btnRect = btnGO.AddComponent<RectTransform>();
+            btnRect.anchorMin = new Vector2(0.1f, 0.01f);
+            btnRect.anchorMax = new Vector2(0.9f, 0.11f);
+            btnRect.sizeDelta = Vector2.zero;
+            var btnImg = btnGO.AddComponent<Image>();
+            btnImg.color = new Color(0.15f, 0.45f, 0.8f);
+            var btn = btnGO.AddComponent<Button>();
+
+            var labelGO = new GameObject("Label");
+            labelGO.transform.SetParent(btnGO.transform, false);
+            var lblRect = labelGO.AddComponent<RectTransform>();
+            lblRect.anchorMin = Vector2.zero;
+            lblRect.anchorMax = Vector2.one;
+            lblRect.sizeDelta = Vector2.zero;
+            var tmp = labelGO.AddComponent<TextMeshProUGUI>();
+            tmp.text = "Về Lobby";
+            tmp.fontSize = 18f;
+            tmp.color = Color.white;
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.fontStyle = FontStyles.Bold;
+            tmp.raycastTarget = false;
+
+            return btn;
+        }
+
+        private static TextMeshProUGUI AddLabel(Transform parent, string goName, string text, float size, Color color, FontStyles style)
+        {
+            var go = new GameObject(goName);
             go.transform.SetParent(parent, false);
-            var rect = go.AddComponent<RectTransform>();
-            rect.sizeDelta = new Vector2(0f, fontSize * 1.6f);
+            go.AddComponent<RectTransform>();   // VerticalLayoutGroup drives size
             var tmp = go.AddComponent<TextMeshProUGUI>();
             tmp.text = text;
-            tmp.fontSize = fontSize;
+            tmp.fontSize = size;
             tmp.color = color;
             tmp.fontStyle = style;
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.raycastTarget = false;
+            tmp.enableWordWrapping = false;
             return tmp;
+        }
+
+        private static void AddSectionHeader(Transform parent, string text)
+        {
+            AddLabel(parent, "Header_" + text.Replace(" ", ""), text, 12f, new Color(0.55f, 0.55f, 0.55f), FontStyles.Normal);
         }
     }
 }

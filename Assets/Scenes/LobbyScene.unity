@@ -3523,26 +3523,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 186199768}
     m_Modifications:
-    - target: {fileID: 462705922050889042, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
-      propertyPath: m_Color.a
-      value: 0.19215687
-      objectReference: {fileID: 0}
-    - target: {fileID: 462705922050889042, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
-      propertyPath: m_Color.b
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 462705922050889042, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
-      propertyPath: m_Color.g
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 462705922050889042, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
-      propertyPath: m_Color.r
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2937940200294099667, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
-      propertyPath: m_fontSize
-      value: 5
-      objectReference: {fileID: 0}
     - target: {fileID: 5158872636480614891, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
       propertyPath: m_Name
       value: ChatPanel
@@ -3630,10 +3610,6 @@ PrefabInstance:
     - target: {fileID: 7781562473015992553, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
       propertyPath: m_SizeDelta.y
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8405989623799630000, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
-      propertyPath: m_fontSize
-      value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

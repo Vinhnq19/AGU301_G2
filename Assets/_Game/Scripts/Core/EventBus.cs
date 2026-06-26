@@ -48,5 +48,12 @@ namespace DungeonBuilder.Core
         {
             OnGameEnded?.Invoke(isWin);
         }
+
+        public event Action OnTowerPlaced;
+
+        public void RaiseTowerPlaced()
+        {
+            OnTowerPlaced?.Invoke();
+        }
     }
 }

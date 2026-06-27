@@ -1,4 +1,5 @@
 using Assets._Game.Scripts.Data;
+using DungeonBuilder.Core;
 using DungeonBuilder.Core.Debugging;
 using DungeonBuilder.Core.Enums;
 using DungeonBuilder.Core.Interfaces;
@@ -22,14 +23,16 @@ namespace DungeonBuilder.Building
         private GridManager _grid;
         private INetworkPool _pool;
         private TowerUnlockConfigSO _unlockConfig;
+        private EventBus _eventBus;
 
         [Inject]
-        public void Construct(IResourceService sharedResources, GridManager grid, INetworkPool pool, TowerUnlockConfigSO unlockConfig)
+        public void Construct(IResourceService sharedResources, GridManager grid, INetworkPool pool, TowerUnlockConfigSO unlockConfig, EventBus eventBus)
         {
             _sharedResources = sharedResources;
             _grid = grid;
             _pool = pool;
             _unlockConfig = unlockConfig;
+            _eventBus = eventBus;
         }
 
         // ─── Place ──────────────────────────────────────────────────────
@@ -96,6 +99,7 @@ namespace DungeonBuilder.Building
 
             _grid.SetTowerNetworkObjectId(gridPosition, tower.NetworkObjectId);
             tower.GetComponent<BaseTower>()?.OnPlaced(gridPosition);
+            _eventBus?.RaiseTowerPlaced();
 
             DBLog.Info($"build.accept.{gridPosition}", $"[BuildingController] Tower placed (under construction). type={towerType}, networkId={tower.NetworkObjectId}.", 0.25f, tower);
         }

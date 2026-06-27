@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using DungeonBuilder.Core;
+using DungeonBuilder.Core.Enums;
 using DungeonBuilder.UI.Base;
 using Unity.Netcode;
 using UnityEngine.SceneManagement;
@@ -9,10 +11,13 @@ namespace DungeonBuilder.UI.GameResult
     public sealed class GameResultPresenter : BasePresenter<GameResultView, GameResultModel>, IInitializable
     {
         private readonly EventBus _eventBus;
+        private readonly GameStatsTracker _statsTracker;
 
-        public GameResultPresenter(GameResultView view, GameResultModel model, EventBus eventBus) : base(view, model)
+        public GameResultPresenter(GameResultView view, GameResultModel model, EventBus eventBus, GameStatsTracker statsTracker)
+            : base(view, model)
         {
             _eventBus = eventBus;
+            _statsTracker = statsTracker;
             _eventBus.OnGameEnded += HandleGameEnded;
         }
 
@@ -37,8 +42,13 @@ namespace DungeonBuilder.UI.GameResult
             SceneManager.LoadScene("LobbyScene");
         }
 
-        public bool IsVisible => Model.IsVisible;
-        public bool IsWin => Model.IsWin;
+        public bool IsVisible      => Model.IsVisible;
+        public bool IsWin          => Model.IsWin;
+        public int EnemyKillCount  => Model.EnemyKillCount;
+        public int BossKillCount   => Model.BossKillCount;
+        public int WavesCompleted  => Model.WavesCompleted;
+        public int TowersBuilt     => Model.TowersBuilt;
+        public IReadOnlyDictionary<ResourceType, int> FinalResources => Model.FinalResources;
 
         protected override void OnModelChanged()
         {
@@ -47,7 +57,7 @@ namespace DungeonBuilder.UI.GameResult
 
         private void HandleGameEnded(bool isWin)
         {
-            Model.Show(isWin);
+            Model.Show(isWin, _statsTracker);
         }
     }
 }

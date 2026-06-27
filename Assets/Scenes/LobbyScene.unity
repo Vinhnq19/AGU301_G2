@@ -426,11 +426,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.CanvasScaler
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 800, y: 600}
-  m_ScreenMatchMode: 0
+  m_ScreenMatchMode: 1
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
@@ -474,6 +474,7 @@ RectTransform:
   m_Children:
   - {fileID: 460872127}
   - {fileID: 2109573186}
+  - {fileID: 2096504008}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -640,6 +641,75 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1001 &403630944
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1104475673228863833, guid: a0847238070b6e848b7e36e97a1aee2e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 39.58363
+      objectReference: {fileID: 0}
+    - target: {fileID: 1104475673228863833, guid: a0847238070b6e848b7e36e97a1aee2e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 31.2519
+      objectReference: {fileID: 0}
+    - target: {fileID: 1104475673228863833, guid: a0847238070b6e848b7e36e97a1aee2e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1104475673228863833, guid: a0847238070b6e848b7e36e97a1aee2e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1104475673228863833, guid: a0847238070b6e848b7e36e97a1aee2e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1104475673228863833, guid: a0847238070b6e848b7e36e97a1aee2e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1104475673228863833, guid: a0847238070b6e848b7e36e97a1aee2e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1104475673228863833, guid: a0847238070b6e848b7e36e97a1aee2e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1104475673228863833, guid: a0847238070b6e848b7e36e97a1aee2e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1104475673228863833, guid: a0847238070b6e848b7e36e97a1aee2e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1540451557432348546, guid: a0847238070b6e848b7e36e97a1aee2e, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 3840697550
+      objectReference: {fileID: 0}
+    - target: {fileID: 1540451557432348546, guid: a0847238070b6e848b7e36e97a1aee2e, type: 3}
+      propertyPath: InScenePlacedSourceGlobalObjectIdHash
+      value: 3114179762
+      objectReference: {fileID: 0}
+    - target: {fileID: 2201653381060944136, guid: a0847238070b6e848b7e36e97a1aee2e, type: 3}
+      propertyPath: m_Name
+      value: ChatManagerObject
+      objectReference: {fileID: 0}
+    - target: {fileID: 3613668950606083327, guid: a0847238070b6e848b7e36e97a1aee2e, type: 3}
+      propertyPath: _lobbyController
+      value: 
+      objectReference: {fileID: 2092606496}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: a0847238070b6e848b7e36e97a1aee2e, type: 3}
 --- !u!1 &460872126
 GameObject:
   m_ObjectHideFlags: 0
@@ -1271,6 +1341,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 827366306}
   m_CullTransparentMesh: 1
+--- !u!114 &930884685 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3613668950606083327, guid: a0847238070b6e848b7e36e97a1aee2e, type: 3}
+  m_PrefabInstance: {fileID: 403630944}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6920f3427244cd94f8e943c5a3de09a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Chat.ChatManager
 --- !u!1 &1020535988
 GameObject:
   m_ObjectHideFlags: 0
@@ -1916,6 +1997,8 @@ MonoBehaviour:
   _lobbyView: {fileID: 186199769}
   _lobbyController: {fileID: 2092606496}
   _connectionService: {fileID: 1840418824}
+  _chatManager: {fileID: 930884685}
+  _chatView: {fileID: 2096504009}
 --- !u!4 &1490750622
 Transform:
   m_ObjectHideFlags: 0
@@ -3432,6 +3515,123 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Networking.Lobby.LobbyController
   ShowTopMostFoldoutHeaderGroup: 1
   _gameSceneName: SampleScene
+--- !u!1001 &2096504007
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 186199768}
+    m_Modifications:
+    - target: {fileID: 5158872636480614891, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
+      propertyPath: m_Name
+      value: ChatPanel
+      objectReference: {fileID: 0}
+    - target: {fileID: 6797191823032912635, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
+      propertyPath: m_Pivot.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6797191823032912635, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
+      propertyPath: m_Pivot.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6797191823032912635, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6797191823032912635, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6797191823032912635, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6797191823032912635, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6797191823032912635, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 350
+      objectReference: {fileID: 0}
+    - target: {fileID: 6797191823032912635, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 130
+      objectReference: {fileID: 0}
+    - target: {fileID: 6797191823032912635, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6797191823032912635, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6797191823032912635, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6797191823032912635, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6797191823032912635, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6797191823032912635, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6797191823032912635, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6797191823032912635, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 134
+      objectReference: {fileID: 0}
+    - target: {fileID: 6797191823032912635, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6797191823032912635, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6797191823032912635, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6797191823032912635, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7781562473015992553, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
+--- !u!224 &2096504008 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 6797191823032912635, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
+  m_PrefabInstance: {fileID: 2096504007}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2096504009 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 772522683723421751, guid: 2f81cfb42dc1bb54e93fbde48d25608e, type: 3}
+  m_PrefabInstance: {fileID: 2096504007}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e0cc82695b21c84d91c03d76888a6c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.UI.Chat.ChatView
 --- !u!1 &2109573185
 GameObject:
   m_ObjectHideFlags: 0
@@ -3530,3 +3730,4 @@ SceneRoots:
   - {fileID: 1490750622}
   - {fileID: 1921438367}
   - {fileID: 1625470515}
+  - {fileID: 403630944}

@@ -1,10 +1,12 @@
 using DungeonBuilder.Audio;
 using DungeonBuilder.Building;
+using DungeonBuilder.Chat;
 using DungeonBuilder.Core;
 using DungeonBuilder.Core.Interfaces;
 using DungeonBuilder.Data;
 using DungeonBuilder.Harvesting;
 using DungeonBuilder.Networking.Pool;
+using DungeonBuilder.UI.Chat;
 using DungeonBuilder.UI.GameResult;
 using DungeonBuilder.UI.HUD;
 using DungeonBuilder.UI.TowerSelection;
@@ -34,6 +36,10 @@ namespace DungeonBuilder.Networking.Scopes
         [SerializeField] private DungeonBuilder.UI.TowerAction.TowerActionPopupView _towerActionPopupView;
         [SerializeField] private Assets._Game.Scripts.UI.WaveAnnouncementView _waveAnnouncementView;
         [SerializeField] private Assets._Game.Scripts.UI.Tutorial.TutorialManager _tutorialManager;
+
+        [Header("Chat")]
+        [SerializeField] private ChatManager _chatManager;
+        [SerializeField] private ChatView _chatView;
 
         [Header("Data")]
         [SerializeField] private TowerCatalogSO _towerCatalog;
@@ -133,10 +139,25 @@ namespace DungeonBuilder.Networking.Scopes
             // BuildingController never fails. Fall back to a default instance (Arrow unlocked) if unassigned.
             builder.RegisterInstance(_towerUnlockConfig != null ? _towerUnlockConfig : ScriptableObject.CreateInstance<TowerUnlockConfigSO>());
 
+            builder.Register<GameStatsTracker>(Lifetime.Singleton);
             builder.Register<GameResultModel>(Lifetime.Singleton);
             builder.RegisterEntryPoint<GameResultPresenter>(Lifetime.Singleton);
             if (_gameResultView != null)
                 builder.RegisterComponent(_gameResultView);
+
+            if (_chatManager != null)
+            {
+                builder.RegisterComponent(_chatManager);
+            }
+
+            if (_chatView != null)
+            {
+                builder.RegisterComponent(_chatView);
+            }
+
+            builder.Register<ChatModel>(Lifetime.Singleton);
+            builder.Register<ChatPresenter>(Lifetime.Singleton).AsSelf();
+            builder.RegisterBuildCallback(resolver => resolver.Resolve<ChatPresenter>().Initialize());
 
             builder.RegisterBuildCallback(resolver =>
             {

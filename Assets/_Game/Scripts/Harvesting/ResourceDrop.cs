@@ -29,9 +29,14 @@ namespace DungeonBuilder.Harvesting
         private readonly NetworkVariable<int> _amount = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         private readonly NetworkVariable<Vector3> _jumpOffset = new(Vector3.zero, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
+        [Header("Magnet")]
+        [SerializeField] private float _attractSpeed = 6f;
+
         private IResourceService _sharedResources;
         private INetworkPool _pool;
         private bool _canPickup;
+        private bool _isMagnetted;
+        private Transform _magnetTarget;
 
         [Inject]
         public void Construct(IResourceService sharedResources, INetworkPool pool)
@@ -96,6 +101,20 @@ namespace DungeonBuilder.Harvesting
             _visual.DOPunchScale(Vector3.one * 0.25f, 0.3f, 6, 0.6f);
         }
 
+        public void BeginMagnetAttract(Transform target)
+        {
+            if (!IsServer || _isMagnetted || !_canPickup) return;
+            _isMagnetted = true;
+            _magnetTarget = target;
+        }
+
+        private void Update()
+        {
+            if (!IsServer || !_isMagnetted || _magnetTarget == null) return;
+            transform.position = Vector3.MoveTowards(
+                transform.position, _magnetTarget.position, _attractSpeed * Time.deltaTime);
+        }
+
         public void OnGetFromPool()
         {
             _canPickup = true;
@@ -113,6 +132,8 @@ namespace DungeonBuilder.Harvesting
         public void OnReturnToPool()
         {
             _canPickup = false;
+            _isMagnetted = false;
+            _magnetTarget = null;
             SetCollisionActive(false);
 
             if (_visual == null)

@@ -29,6 +29,18 @@ namespace DungeonBuilder.Player
         public event Action OnPrevToolPressed;
         public event Action<int> OnHotbarPressed;
 
+        /// <summary>
+        /// Bật / tắt toàn bộ Player action map runtime.
+        /// Dùng để khóa mọi input khi player chết / đang revive (không nhận attack, dash, move, hotbar…).
+        /// Khác với component.enabled: cái này chỉ đụng action map, không ảnh hưởng subscription.
+        /// </summary>
+        public void SetEnabled(bool enabled)
+        {
+            if (_playerMap == null) return;
+            if (enabled) _playerMap.Enable();
+            else _playerMap.Disable();
+        }
+
         private void OnEnable()
         {
             BindActions();

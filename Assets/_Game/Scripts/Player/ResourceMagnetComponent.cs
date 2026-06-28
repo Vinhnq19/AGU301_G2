@@ -15,6 +15,7 @@ namespace DungeonBuilder.Player
 
         private IResourceService _resourceService;
         private float _currentRadius;
+        private PlayerStats _playerStats;
 
         private readonly Collider2D[] _overlapBuffer = new Collider2D[32];
 
@@ -22,6 +23,11 @@ namespace DungeonBuilder.Player
         public void Construct(IResourceService resourceService)
         {
             _resourceService = resourceService;
+        }
+
+        private void Awake()
+        {
+            _playerStats = GetComponent<PlayerStats>();
         }
 
         public override void OnNetworkSpawn()
@@ -45,6 +51,8 @@ namespace DungeonBuilder.Player
         private void FixedUpdate()
         {
             if (!IsServer || _currentRadius <= 0f) return;
+            // Player chết thì không hút đồ.
+            if (_playerStats != null && _playerStats.IsDead) return;
 
             int count = Physics2D.OverlapCircleNonAlloc(transform.position, _currentRadius, _overlapBuffer, _dropLayer);
             for (int i = 0; i < count; i++)

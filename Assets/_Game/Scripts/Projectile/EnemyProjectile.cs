@@ -128,8 +128,9 @@ namespace DungeonBuilder.Projectile
 
                     if (damageable != null && results[i].GetComponentInParent<BaseEnemy>() == null)
                     {
-                        // Bỏ qua người chơi
-                        if (damageable is DungeonBuilder.Player.PlayerStats) continue;
+                        // Player là mục tiêu hợp lệ — bị đạn enemy gây damage (HP đồng bộ qua NetworkVariable).
+                        // OnHit gọi TakeDamage trên server; NetworkVariable.OnValueChanged replicate về mọi client
+                        // và PlayerStats sẽ tự bắn OnPlayerHit local cho feedback (flash, knockback…).
 
                         // Bỏ qua các tháp không thể target (vd: bẫy gai)
                         var tower = damageable as DungeonBuilder.Building.BaseTower;

@@ -24,9 +24,12 @@ namespace DungeonBuilder.Player
         [SerializeField] private DirectionalSprites _idle;
         [SerializeField] private DirectionalSprites _run;
         [SerializeField] private DirectionalSprites _foraging;
+        [SerializeField] private DirectionalSprites _death;
         [SerializeField] private SpriteRenderer _renderer;
         [SerializeField, Min(0.01f)] private float _frameRate = 10f;
         [SerializeField, Min(0.001f)] private float _moveThreshold = 0.05f;
+        [SerializeField, Min(0.01f)] private float _deathFrameRate = 12f;
+        [SerializeField] private PlayerStats _playerStats;
 
         private Rigidbody2D _rigidbody;
 
@@ -41,6 +44,13 @@ namespace DungeonBuilder.Player
         private FacingDir _lastDrivenFacing = FacingDir.Down;
         private AnimState _lastDrivenState = AnimState.Idle;
 
+        // Death state — local per-client, driven bởi PlayerStats.OnDeadStateChanged.
+        // Khi chết: chạy _death[] từ frame 0, dừng ở frame cuối.
+        // Khi hồi sinh: reset _animElapsed để idle/run chạy lại từ đầu.
+        private bool _isDead;
+        private float _deathElapsed;
+        private bool _deathSequenceFinished;
+
         /// <summary>True while a foraging swing is in progress. Read by PlayerController to lock movement.</summary>
         public bool IsForaging { get; private set; }
 
@@ -49,6 +59,10 @@ namespace DungeonBuilder.Player
         private void Awake()
         {
             _rigidbody = GetComponent<Rigidbody2D>();
+            if (_playerStats == null)
+            {
+                _playerStats = GetComponent<PlayerStats>();
+            }
         }
 
         public override void OnNetworkSpawn()
@@ -61,6 +75,12 @@ namespace DungeonBuilder.Player
             _playerColor.OnValueChanged += HandleColorChanged;
             ApplyColor(_playerColor.Value);
 
+            if (_playerStats != null)
+            {
+                _playerStats.OnDeadStateChanged += HandleDeadStateChanged;
+                HandleDeadStateChanged(_playerStats.IsDead);
+            }
+
             DriveVisual(immediate: true);
             DBLog.Info($"anim.spawn.{NetworkObjectId}", $"PlayerAnimation spawned. isOwner={IsOwner}.", 0f, this);
         }
@@ -68,6 +88,30 @@ namespace DungeonBuilder.Player
         public override void OnNetworkDespawn()
         {
             _playerColor.OnValueChanged -= HandleColorChanged;
+            if (_playerStats != null)
+            {
+                _playerStats.OnDeadStateChanged -= HandleDeadStateChanged;
+            }
+        }
+
+        private void HandleDeadStateChanged(bool isDead)
+        {
+            if (isDead && !_isDead)
+            {
+                _isDead = true;
+                _deathElapsed = 0f;
+                _deathSequenceFinished = false;
+                // Giữ nguyên _lastDrivenFacing để chọn sprite death theo hướng cuối cùng
+                // trước khi chết (up/down/side).
+            }
+            else if (!isDead && _isDead)
+            {
+                _isDead = false;
+                _deathSequenceFinished = false;
+                _animElapsed = 0f;
+                _lastDrivenState = AnimState.Idle;
+                // KHÔNG reset _lastDrivenFacing — giữ facing cũ cho nhất quán.
+            }
         }
 
         private void HandleColorChanged(Color previousValue, Color newValue)
@@ -146,6 +190,43 @@ namespace DungeonBuilder.Player
 
         private void DriveVisual(bool immediate)
         {
+            if (_renderer == null)
+            {
+                return;
+            }
+
+            // Ưu tiên death animation: chạy 1 lần theo direction cuối, dừng ở frame cuối.
+            if (_isDead && _death != null)
+            {
+                Sprite[] deathArr = SelectDeathArray(_lastDrivenFacing);
+                if (deathArr != null && deathArr.Length > 0)
+                {
+                    if (!_deathSequenceFinished)
+                    {
+                        if (immediate)
+                        {
+                            _deathElapsed = 0f;
+                        }
+                        else
+                        {
+                            _deathElapsed += Time.deltaTime;
+                        }
+
+                        int deathFrame = PlayerAnimLogic.FrameAtTime(_deathElapsed, 1f / _deathFrameRate, deathArr.Length);
+                        if (deathFrame >= deathArr.Length - 1)
+                        {
+                            _deathSequenceFinished = true;
+                            deathFrame = deathArr.Length - 1;
+                        }
+
+                        _renderer.sprite = deathArr[deathFrame];
+                        _renderer.flipX = _lastDrivenFacing == FacingDir.Left;
+                    }
+                    // Nếu đã chạy xong: giữ nguyên frame cuối, không update.
+                    return;
+                }
+            }
+
             FacingDir facing = _netFacing.Value;
             AnimState state = _netState.Value;
 
@@ -158,11 +239,6 @@ namespace DungeonBuilder.Player
             else if (!immediate)
             {
                 _animElapsed += Time.deltaTime;
-            }
-
-            if (_renderer == null)
-            {
-                return;
             }
 
             Sprite[] arr = SelectArray(state, facing);
@@ -194,6 +270,21 @@ namespace DungeonBuilder.Player
                 FacingDir.Up => set.up,
                 FacingDir.Down => set.down,
                 _ => set.side,
+            };
+        }
+
+        /// <summary>
+        /// Pick death sprite array theo direction cuối cùng trước khi chết.
+        /// Cùng pattern với SelectArray để dễ mở rộng sau này (vd: death_up riêng).
+        /// </summary>
+        private Sprite[] SelectDeathArray(FacingDir facing)
+        {
+            if (_death == null) return null;
+            return facing switch
+            {
+                FacingDir.Up => _death.up,
+                FacingDir.Down => _death.down,
+                _ => _death.side,
             };
         }
     }

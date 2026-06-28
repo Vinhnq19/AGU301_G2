@@ -21,7 +21,8 @@ namespace Assets._Game.Scripts.UI.Tutorial
         [SerializeField] private ScreenSpacePointer _pointer;
 
         [Header("Step 2 - Building Prompt")]
-        [SerializeField] private GameObject _gridPromptFPrefab; // Pulses in World Space
+        [SerializeField] private Transform _step2TargetSpot;
+        // Đã gỡ bỏ _gridPromptFPrefab vì sử dụng hệ thống Icon thông minh mới
 
         private IResourceService _resourceService;
         private EventBus _eventBus;
@@ -30,7 +31,7 @@ namespace Assets._Game.Scripts.UI.Tutorial
 
         private int _currentStep = 1;
         private int _startingWood = 0;
-        private List<GameObject> _activePrompts = new List<GameObject>();
+        private int _choppedTreesCount = 0;
         private HarvestableNode _targetWoodNode = null;
         private Shop _shop = null;
 
@@ -119,13 +120,13 @@ namespace Assets._Game.Scripts.UI.Tutorial
         {
             _currentStep = step;
             _pointer?.ClearTarget();
-            ClearActivePrompts();
             RestoreBlinkingNode();
 
             if (step == 1)
             {
+                _choppedTreesCount = 0;
                 if (_titleText != null) _titleText.text = "HƯỚNG DẪN CHƠI - BƯỚC 1";
-                if (_bodyText != null) _bodyText.text = "DI CHUYỂN & KHAI THÁC: Di chuyển bằng phím WASD đến mỏ gỗ gần nhất và khai thác 5 Gỗ.";
+                if (_bodyText != null) _bodyText.text = "DI CHUYỂN & KHAI THÁC: Di chuyển bằng phím WASD đến các mỏ gỗ và khai thác 10 Gỗ (chặt 2 cây).";
                 FindAndTargetNearestWoodNode();
             }
             else if (step == 2)
@@ -133,10 +134,8 @@ namespace Assets._Game.Scripts.UI.Tutorial
                 if (_titleText != null) _titleText.text = "HƯỚNG DẪN CHƠI - BƯỚC 2";
                 if (_bodyText != null) _bodyText.text = "XÂY DỰNG PHÒNG THỦ: Di chuyển đến khu vực Core và nhấn chuột trái vào các điểm đặt tháp xung quanh Core để xây 1 tháp Arrow Tower.";
                 
-                // Point specifically to the single tower spot's world coordinates: (-5.50, 30.50, 3.46)
-                _pointer?.SetTarget(new Vector3(-5.50f, 30.50f, 3.46f));
-
-                SpawnPredefinedSpotPrompts();
+                Vector3 targetPos = _step2TargetSpot != null ? _step2TargetSpot.position : new Vector3(-5.50f, 30.50f, 3.46f);
+                _pointer?.SetTarget(targetPos, true, 50f, 8f); // True to use Left Click icon when near, 50f offset, 8f distance threshold
             }
             else if (step == 3)
             {
@@ -144,7 +143,7 @@ namespace Assets._Game.Scripts.UI.Tutorial
                 if (_bodyText != null) _bodyText.text = "GIAO THƯƠNG & CỬA HÀNG: Di chuyển đến khu vực Shop, đi vào vùng kích hoạt của Shop để mở giao diện cửa hàng.";
                 
                 // Point specifically to the shop position as requested
-                _pointer?.SetTarget(new Vector3(-7.13000011f, 7.23999977f, 0f));
+                _pointer?.SetTarget(new Vector3(-7.13000011f, 7.23999977f, 0f), false); // False because no click is needed
             }
         }
 
@@ -152,25 +151,26 @@ namespace Assets._Game.Scripts.UI.Tutorial
         {
             if (_currentStep == 1)
             {
-                // Wood resource check
-                if (_resourceService != null)
-                {
-                    int currentWood = _resourceService.GetAmount(ResourceType.Wood);
-                    if (currentWood >= _startingWood + 5 || currentWood >= 5)
-                    {
-                        SetupStep(2);
-                        return;
-                    }
-                }
-
                 // Node tracking and blinking
-                if (_targetWoodNode == null || !_targetWoodNode.gameObject.activeInHierarchy)
+                if (_targetWoodNode == null || !_targetWoodNode.gameObject.activeInHierarchy || _targetWoodNode.IsDepleted)
                 {
+                    if (_targetWoodNode != null && _targetWoodNode.IsDepleted)
+                    {
+                        _choppedTreesCount++;
+                    }
+
                     RestoreBlinkingNode();
                     FindAndTargetNearestWoodNode();
                 }
 
                 BlinkTargetNode();
+
+                // Advance only when 2 trees are completely chopped
+                if (_choppedTreesCount >= 2)
+                {
+                    SetupStep(2);
+                    return;
+                }
             }
             else if (_currentStep == 2)
             {
@@ -181,7 +181,6 @@ namespace Assets._Game.Scripts.UI.Tutorial
                     if (tower != null)
                     {
                         _towerPlaced = true;
-                        ClearActivePrompts();
                         _pointer?.ClearTarget();
 
                         // Stay in Step 2 visual state but instruct the player to defend
@@ -190,8 +189,15 @@ namespace Assets._Game.Scripts.UI.Tutorial
                     }
                     else
                     {
-                        // Update active prompts: hide if a spot becomes occupied
-                        UpdatePredefinedSpotPromptsVisibility();
+                        var towerSelection = FindFirstObjectByType<DungeonBuilder.UI.TowerSelection.TowerSelectionView>();
+                        if (towerSelection != null && towerSelection.IsOpen)
+                        {
+                            _pointer?.gameObject.SetActive(false);
+                        }
+                        else
+                        {
+                            _pointer?.gameObject.SetActive(true);
+                        }
                     }
                 }
                 else
@@ -205,13 +211,21 @@ namespace Assets._Game.Scripts.UI.Tutorial
             }
             else if (_currentStep == 3)
             {
-                if (_shop == null)
+                // Thay vì lưu cache _shop, ta tìm tất cả Shop trong scene để đảm bảo không bị nhầm object
+                var shops = FindObjectsByType<Shop>(FindObjectsSortMode.None);
+                bool isAnyShopOpen = false;
+                foreach (var s in shops)
                 {
-                    _shop = FindFirstObjectByType<Shop>();
+                    if (s != null && s.IsOpen)
+                    {
+                        isAnyShopOpen = true;
+                        break;
+                    }
                 }
 
-                if (_shop != null && _shop.IsOpen)
+                if (isAnyShopOpen)
                 {
+                    DungeonBuilder.Core.Debugging.DBLog.Info("tutorial.complete", "[TutorialManager] Shop is open! Completing tutorial.", 0f, this);
                     CompleteTutorial();
                 }
             }
@@ -219,25 +233,29 @@ namespace Assets._Game.Scripts.UI.Tutorial
 
         private void FindAndTargetNearestWoodNode()
         {
-            Vector3 targetPos = new Vector3(-34f, 29f, 0f);
-            HarvestableNode targetNode = null;
+            var player = GetLocalPlayer();
+            Vector3 originPos = player != null ? player.transform.position : new Vector3(-34f, 29f, 0f);
+            HarvestableNode nearestNode = null;
+            float minDistance = float.MaxValue;
 
             foreach (var node in FindObjectsByType<HarvestableNode>(FindObjectsSortMode.None))
             {
-                if (node.NodeType == ResourceType.Wood && node.gameObject.activeInHierarchy)
+                if (node.NodeType == ResourceType.Wood && node.gameObject.activeInHierarchy && !node.IsDepleted)
                 {
-                    if (Vector3.Distance(node.transform.position, targetPos) < 1.5f)
+                    float dist = Vector3.Distance(node.transform.position, originPos);
+                    if (dist < minDistance)
                     {
-                        targetNode = node;
-                        break;
+                        minDistance = dist;
+                        nearestNode = node;
                     }
                 }
             }
 
-            _targetWoodNode = targetNode;
+            _targetWoodNode = nearestNode;
             if (_targetWoodNode != null)
             {
-                _pointer?.SetTarget(_targetWoodNode.transform.position);
+                // True to use Left Click icon when near, use default offset (-1f), but increase distance threshold to 2.5f for trees
+                _pointer?.SetTarget(_targetWoodNode.transform.position, true, -1f, 2.5f); 
                 _targetNodeRenderer = _targetWoodNode.GetComponentInChildren<SpriteRenderer>();
                 if (_targetNodeRenderer != null)
                 {
@@ -247,7 +265,7 @@ namespace Assets._Game.Scripts.UI.Tutorial
             else
             {
                 // Fallback to exact coordinate pointer if node is missing/destroyed
-                _pointer?.SetTarget(targetPos);
+                _pointer?.SetTarget(new Vector3(-34f, 29f, 0f), true);
             }
         }
 
@@ -279,86 +297,10 @@ namespace Assets._Game.Scripts.UI.Tutorial
             return players.Length > 0 ? players[0] : null;
         }
 
-        private void SpawnPredefinedSpotPrompts()
-        {
-            if (_gridPromptFPrefab == null) return;
-
-            // Find GridPosition (1) in GridPositions in scene to position perfectly
-            var spotsParent = GameObject.Find("GridPositions");
-            Transform targetSpot = null;
-            if (spotsParent != null)
-            {
-                targetSpot = spotsParent.transform.Find("GridPosition (1)");
-            }
-
-            Vector3 spawnPos;
-            if (targetSpot != null)
-            {
-                spawnPos = targetSpot.position + Vector3.up * 0.5f;
-            }
-            else
-            {
-                // Fallback to the actual world coordinates corresponding to GridPosition (1)
-                spawnPos = new Vector3(-5.50f, 30.50f, 3.46f) + Vector3.up * 0.5f;
-            }
-
-            GameObject promptObj = Instantiate(_gridPromptFPrefab, spawnPos, Quaternion.identity);
-            if (targetSpot != null)
-            {
-                promptObj.transform.SetParent(targetSpot, true);
-            }
-
-            // Customize text to English and remove "[F]" as requested
-            var textComp = promptObj.GetComponentInChildren<TextMeshProUGUI>();
-            if (textComp != null)
-            {
-                textComp.text = "CLICK TO BUILD";
-            }
-            
-            _activePrompts.Add(promptObj);
-        }
-
-        private void UpdatePredefinedSpotPromptsVisibility()
-        {
-            if (_gridManager == null) return;
-
-            for (int i = _activePrompts.Count - 1; i >= 0; i--)
-            {
-                GameObject prompt = _activePrompts[i];
-                if (prompt == null)
-                {
-                    _activePrompts.RemoveAt(i);
-                    continue;
-                }
-
-                // If grid spot is occupied, clear the prompt
-                Vector3 spotPos = new Vector3(-5.50f, 30.50f, 3.46f);
-                Vector2Int gridPos = _gridManager.WorldToGrid(spotPos);
-                if (!_gridManager.IsValidPlacement(gridPos))
-                {
-                    Destroy(prompt);
-                    _activePrompts.RemoveAt(i);
-                }
-            }
-        }
-
-        private void ClearActivePrompts()
-        {
-            foreach (var prompt in _activePrompts)
-            {
-                if (prompt != null)
-                {
-                    Destroy(prompt);
-                }
-            }
-            _activePrompts.Clear();
-        }
-
         private void CompleteTutorial()
         {
             _currentStep = 4; // Complete state
             _pointer?.ClearTarget();
-            ClearActivePrompts();
             RestoreBlinkingNode();
 
             if (_titleText != null) _titleText.text = "TUTORIAL HOÀN THÀNH!";

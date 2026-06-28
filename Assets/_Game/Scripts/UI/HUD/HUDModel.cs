@@ -11,9 +11,10 @@ namespace DungeonBuilder.UI.HUD
         {
             [ResourceType.Wood] = 0,
             [ResourceType.Stone] = 0,
-            [ResourceType.Ore] = 0,
-            [ResourceType.Crystal] = 0,
+            [ResourceType.Iron] = 0,
             [ResourceType.Copper] = 0,
+            [ResourceType.BlueGems] = 0,
+            [ResourceType.PurpleGems] = 0,
             [ResourceType.Coin] = 0,
             [ResourceType.Token] = 0,
             [ResourceType.MiningSkill] = 1,

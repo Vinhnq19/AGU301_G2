@@ -20,10 +20,8 @@ namespace DungeonBuilder.UI.GameResult
         [Header("Resources")]
         [SerializeField] private TMP_Text _woodText;
         [SerializeField] private TMP_Text _stoneText;
-        [SerializeField] private TMP_Text _oreText;
         [SerializeField] private TMP_Text _ironText;
         [SerializeField] private TMP_Text _copperText;
-        [SerializeField] private TMP_Text _crystalText;
         [SerializeField] private TMP_Text _blueGemsText;
         [SerializeField] private TMP_Text _purpleGemsText;
         [SerializeField] private TMP_Text _tokenText;
@@ -56,18 +54,16 @@ namespace DungeonBuilder.UI.GameResult
             SetText(_towersBuiltText,   $"Towers Built: {Presenter.TowersBuilt}");
 
             var res = Presenter.FinalResources;
-            SetRes(_woodText,       "Wood",         res, ResourceType.Wood);
-            SetRes(_stoneText,      "Stone",        res, ResourceType.Stone);
-            SetRes(_oreText,        "Ore",          res, ResourceType.Ore);
-            SetRes(_ironText,       "Iron",         res, ResourceType.Iron);
-            SetRes(_copperText,     "Copper",       res, ResourceType.Copper);
-            SetRes(_crystalText,    "Crystal",      res, ResourceType.Crystal);
-            SetRes(_blueGemsText,   "Blue Gems",    res, ResourceType.BlueGems);
-            SetRes(_purpleGemsText, "Purple Gems",  res, ResourceType.PurpleGems);
-            SetRes(_tokenText,      "Token",        res, ResourceType.Token);
-            SetRes(_coinText,       "Coin",         res, ResourceType.Coin);
-            SetRes(_miningSkillText, "Mining Skill Lv", res, ResourceType.MiningSkill);
-            SetRes(_forgingSkillText,"Forging Skill Lv",res, ResourceType.ForgingSkill);
+            SetRes(_woodText,        "Wood",              res, ResourceType.Wood);
+            SetRes(_stoneText,       "Stone",             res, ResourceType.Stone);
+            SetRes(_ironText,        "Iron",              res, ResourceType.Iron);
+            SetRes(_copperText,      "Copper",            res, ResourceType.Copper);
+            SetRes(_blueGemsText,    "Blue Gems",         res, ResourceType.BlueGems);
+            SetRes(_purpleGemsText,  "Purple Gems",       res, ResourceType.PurpleGems);
+            SetRes(_tokenText,       "Token",             res, ResourceType.Token);
+            SetRes(_coinText,        "Coin",              res, ResourceType.Coin);
+            SetRes(_miningSkillText, "Mining Skill Lv",   res, ResourceType.MiningSkill);
+            SetRes(_forgingSkillText,"Forging Skill Lv",  res, ResourceType.ForgingSkill);
         }
 
         private static void SetText(TMP_Text label, string value)

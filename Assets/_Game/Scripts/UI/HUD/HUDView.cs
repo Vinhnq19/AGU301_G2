@@ -11,8 +11,9 @@ namespace DungeonBuilder.UI.HUD
         [SerializeField] private TMP_Text _woodText;
         [SerializeField] private TMP_Text _stoneText;
         [SerializeField] private TMP_Text _ironText;
-        [SerializeField] private TMP_Text _blueGemsText;
         [SerializeField] private TMP_Text _copperText;
+        [SerializeField] private TMP_Text _blueGemsText;
+        [SerializeField] private TMP_Text _purpleGemsText;
         [SerializeField] private TMP_Text _coinText;
         [SerializeField] private TMP_Text _tokenText;
 
@@ -43,8 +44,9 @@ namespace DungeonBuilder.UI.HUD
             SetText(_woodText, Presenter.GetResource(ResourceType.Wood).ToString());
             SetText(_stoneText, Presenter.GetResource(ResourceType.Stone).ToString());
             SetText(_ironText, Presenter.GetResource(ResourceType.Iron).ToString());
-            SetText(_blueGemsText, Presenter.GetResource(ResourceType.BlueGems).ToString());
             SetText(_copperText, Presenter.GetResource(ResourceType.Copper).ToString());
+            SetText(_blueGemsText, Presenter.GetResource(ResourceType.BlueGems).ToString());
+            SetText(_purpleGemsText, Presenter.GetResource(ResourceType.PurpleGems).ToString());
             SetText(_coinText, Presenter.GetResource(ResourceType.Coin).ToString());
             SetText(_tokenText, Presenter.GetResource(ResourceType.Token).ToString());
             SetText(_miningSkillText, Presenter.GetResource(ResourceType.MiningSkill).ToString());

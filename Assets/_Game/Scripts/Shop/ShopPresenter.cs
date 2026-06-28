@@ -73,7 +73,7 @@ public class ShopPresenter
         int maxQty = ShopMath.MaxBuyQty(stockMax, owned, item.Price);
         if (maxQty <= 0)
         {
-            // Can't afford even one. Buy button should already be disabled; this guards races.
+            ShowFeedback(ShopTxResult.FailedAfford, item.ResourceType, 0, item.CurrencyType.ToResourceType(), 0);
             return;
         }
 
@@ -115,7 +115,7 @@ public class ShopPresenter
         int maxQty = shopNetwork != null ? shopNetwork.GetResourceAmount(item.ResourceType) : 0;
         if (maxQty <= 0)
         {
-            Debug.LogWarning($"Cannot sell — player owns 0 of {item.ResourceType}");
+            ShowFeedback(ShopTxResult.FailedNoResource, item.CurrencyType.ToResourceType(), 0, item.ResourceType, 0);
             return;
         }
 

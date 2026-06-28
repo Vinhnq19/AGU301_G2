@@ -73,6 +73,7 @@ namespace DungeonBuilder.Building
                     $"[SpikeTrapTower] AoE hit {hits} enemies. dmg={damage:0.0}, range={range:0.0}.",
                     0.1f, this);
                 PlaySpikeAnimClientRpc();
+                PlayFireEffectClientRpc();
             }
         }
 

@@ -357,6 +357,11 @@ namespace Assets._Game.Scripts.Enemy
         [ClientRpc]
         public void PlayDeathEffectClientRpc()
         {
+            if (DungeonBuilder.Audio.AudioManager.Instance != null)
+            {
+                DungeonBuilder.Audio.AudioManager.Instance.PlaySFX(DungeonBuilder.Core.Enums.SoundType.SFX_Enemy_Die, transform.position);
+            }
+
             if (_visual == null)
             {
                 return;

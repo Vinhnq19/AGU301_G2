@@ -158,6 +158,18 @@ public class ShopPresenter
             spentType.ToString(),
             spentAmt);
         view.ShowToast(feedback.Message, feedback.Success);
+        
+        if (DungeonBuilder.Audio.AudioManager.Instance != null)
+        {
+            if (result == ShopTxResult.Success)
+            {
+                DungeonBuilder.Audio.AudioManager.Instance.PlaySFX(SoundType.SFX_Get_Coins);
+            }
+            else
+            {
+                DungeonBuilder.Audio.AudioManager.Instance.PlaySFX(SoundType.SFX_Error);
+            }
+        }
     }
 
     private ShopItem FindItem(string itemId) => model.GetAllItems().Find(x => x.Id == itemId);

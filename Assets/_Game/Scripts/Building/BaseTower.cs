@@ -6,10 +6,10 @@ using Assets._Game.Scripts.Enemy;
 using Cysharp.Threading.Tasks;
 using DungeonBuilder.Core.Debugging;
 using DungeonBuilder.Core.Enums;
+using DungeonBuilder.Core.Interfaces;
 using DungeonBuilder.Networking;
 using DungeonBuilder.Networking.Pool;
 using DungeonBuilder.Projectile;
-using DungeonBuilder.Core.Interfaces;
 using Unity.Netcode;
 using UnityEngine;
 using VContainer;
@@ -45,7 +45,7 @@ namespace DungeonBuilder.Building
         [Inject] protected GridManager _grid;
 
         public int CurrentLevel => _currentLevel.Value;
-        public bool CanUpgrade  => _data != null && _currentLevel.Value < _data.maxLevel;
+        public bool CanUpgrade => _data != null && _currentLevel.Value < _data.maxLevel;
         public virtual bool IsTargetable => true;
 
         protected virtual void Awake()
@@ -55,7 +55,7 @@ namespace DungeonBuilder.Building
             _enemyFilter.useTriggers = false;
 
             _presenter = GetComponent<TowerPresenter>();
-            _view      = GetComponentInChildren<TowerView>();
+            _view = GetComponentInChildren<TowerView>();
         }
 
         public override void OnNetworkSpawn()
@@ -79,7 +79,7 @@ namespace DungeonBuilder.Building
             {
                 _model.SetLevel(_currentLevel.Value);
             }
-            
+
             _model.SetHealth(_health.Value);
 
             DBLog.Info(
@@ -103,8 +103,17 @@ namespace DungeonBuilder.Building
         {
             _gridPosition = gridPosition;
             DBLog.Info($"tower.placed.{NetworkObjectId}", $"[BaseTower] Tower placed at grid={gridPosition}.", 0f, this);
+            PlayBuildEffectClientRpc();
         }
 
+        [ClientRpc]
+        private void PlayBuildEffectClientRpc()
+        {
+            if (DungeonBuilder.Audio.AudioManager.Instance != null)
+            {
+                DungeonBuilder.Audio.AudioManager.Instance.PlaySFX(DungeonBuilder.Core.Enums.SoundType.SFX_Build_Place, transform.position);
+            }
+        }
 
         public void UpgradeLevel()
         {
@@ -113,12 +122,22 @@ namespace DungeonBuilder.Building
             _model.SetLevel(_currentLevel.Value); // Force model update before getting MaxHealth
             _health.Value = _model.MaxHealth; // Heal to full on upgrade
             DBLog.Info($"tower.upgrade.{NetworkObjectId}", $"[BaseTower] Upgraded to level {_currentLevel.Value}.", 0f, this);
+            PlayUpgradeEffectClientRpc();
+        }
+
+        [ClientRpc]
+        private void PlayUpgradeEffectClientRpc()
+        {
+            if (DungeonBuilder.Audio.AudioManager.Instance != null)
+            {
+                DungeonBuilder.Audio.AudioManager.Instance.PlaySFX(DungeonBuilder.Core.Enums.SoundType.SFX_Build_Upgrade, transform.position);
+            }
         }
 
         public void TakeDamage(float amount, ulong attackerClientId = 0)
         {
             if (!IsServer || !IsTargetable) return;
-            
+
             _health.Value -= amount;
             DBLog.Info($"tower.damage.{NetworkObjectId}", $"[BaseTower] Took {amount} damage. HP: {_health.Value}/{_model.MaxHealth}.", 0.2f, this);
 
@@ -146,6 +165,36 @@ namespace DungeonBuilder.Building
             {
                 NetworkObject.Despawn();
             }
+        }
+
+        public void TriggerRemove()
+        {
+            if (!IsServer) return;
+            PlayRemoveEffectClientRpc();
+            RemoveAsync().Forget();
+        }
+
+        [ClientRpc]
+        private void PlayRemoveEffectClientRpc()
+        {
+            if (DungeonBuilder.Audio.AudioManager.Instance != null)
+            {
+                DungeonBuilder.Audio.AudioManager.Instance.PlaySFX(DungeonBuilder.Core.Enums.SoundType.SFX_Build_Sell, transform.position);
+            }
+        }
+
+        private async UniTaskVoid RemoveAsync()
+        {
+            try
+            {
+                await UniTask.Delay(System.TimeSpan.FromMilliseconds(200), cancellationToken: destroyCancellationToken);
+                if (IsServer)
+                {
+                    if (_pool != null) _pool.Return(NetworkObject);
+                    else NetworkObject.Despawn();
+                }
+            }
+            catch (System.OperationCanceledException) { }
         }
 
         private async UniTaskVoid StartAttackLoopAsync()
@@ -186,9 +235,9 @@ namespace DungeonBuilder.Building
         protected virtual void FireAt(BaseEnemy target)
         {
             if (_bulletPrefab == null || _pool == null || target == null) return;
-            Vector3 firePos   = _firePoint != null ? _firePoint.position : transform.position;
+            Vector3 firePos = _firePoint != null ? _firePoint.position : transform.position;
             Vector3 direction = (target.transform.position - firePos).normalized;
-            Quaternion rot    = direction != Vector3.zero ? Quaternion.FromToRotation(Vector3.up, direction) : Quaternion.identity;
+            Quaternion rot = direction != Vector3.zero ? Quaternion.FromToRotation(Vector3.up, direction) : Quaternion.identity;
 
             NetworkObject bulletObj = _pool.Get(_bulletPrefab, firePos, rot);
             if (bulletObj == null) return;
@@ -201,7 +250,28 @@ namespace DungeonBuilder.Building
 
             if (!bulletObj.IsSpawned) bulletObj.Spawn();
 
+            PlayFireEffectClientRpc();
             DBLog.Info($"tower.fire.{NetworkObjectId}", $"[BaseTower] Fired. target={target.NetworkObjectId}, dmg={damage:0.0}.", 0.1f, this);
+        }
+
+        [ClientRpc]
+        protected virtual void PlayFireEffectClientRpc()
+        {
+            if (DungeonBuilder.Audio.AudioManager.Instance != null && _data != null)
+            {
+                DungeonBuilder.Core.Enums.SoundType sfxType = DungeonBuilder.Core.Enums.SoundType.None;
+                switch (_data.towerType)
+                {
+                    case DungeonBuilder.Core.Enums.TowerType.Arrow: sfxType = DungeonBuilder.Core.Enums.SoundType.SFX_Arrow_Tower; break;
+                    case DungeonBuilder.Core.Enums.TowerType.Cannon: sfxType = DungeonBuilder.Core.Enums.SoundType.SFX_Canon_Tower; break;
+                    case DungeonBuilder.Core.Enums.TowerType.Frost: sfxType = DungeonBuilder.Core.Enums.SoundType.SFX_Frost_Tower; break;
+                    case DungeonBuilder.Core.Enums.TowerType.Laser: sfxType = DungeonBuilder.Core.Enums.SoundType.SFX_Laser_Tower; break;
+                }
+                if (sfxType != DungeonBuilder.Core.Enums.SoundType.None)
+                {
+                    DungeonBuilder.Audio.AudioManager.Instance.PlaySFX(sfxType, transform.position);
+                }
+            }
         }
 
 

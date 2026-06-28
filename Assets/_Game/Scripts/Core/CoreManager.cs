@@ -57,6 +57,15 @@ namespace DungeonBuilder.Core
         private void HandleHealthChanged(int previousValue, int newValue)
         {
             _eventBus?.RaiseCoreHealthChanged(newValue);
+            
+            if (newValue < previousValue)
+            {
+                if (DungeonBuilder.Audio.AudioManager.Instance != null)
+                {
+                    DungeonBuilder.Audio.AudioManager.Instance.PlaySFX(DungeonBuilder.Core.Enums.SoundType.SFX_Core, transform.position);
+                }
+            }
+            
             if (newValue <= 0)
                 _eventBus?.RaiseGameEnded(false);
         }

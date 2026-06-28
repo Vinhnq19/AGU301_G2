@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 13252ffdbbc360d44b2eda0f2e423fe9, type: 3}
   m_Name: ShopItem_Iron
   m_EditorClassIdentifier: Assembly-CSharp::ShopItem
-  Icon: {fileID: 0}
+  Icon: {fileID: 21300000, guid: 1075e0c847a3f4c4ba021012fc6e75d0, type: 3}
   Id: 4
   Name: Iron
   Price: 15

@@ -35,6 +35,8 @@ namespace DungeonBuilder.UI.GameResult
 
         public void ReturnToLobby()
         {
+            UnityEngine.Time.timeScale = 1f;
+            
             var net = NetworkManager.Singleton;
             if (net != null && net.IsListening)
                 net.Shutdown();
@@ -57,6 +59,7 @@ namespace DungeonBuilder.UI.GameResult
 
         private void HandleGameEnded(bool isWin)
         {
+            UnityEngine.Time.timeScale = 0f;
             Model.Show(isWin, _statsTracker);
         }
     }

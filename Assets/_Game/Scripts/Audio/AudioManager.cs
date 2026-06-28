@@ -17,7 +17,8 @@ namespace DungeonBuilder.Audio
         [SerializeField, Range(0f, 1f)] private float _masterVolume = 1f;
         [SerializeField, Range(0f, 1f)] private float _bgmVolume = 1f;
         [SerializeField, Range(0f, 1f)] private float _sfxVolume = 1f;
-        
+
+
         [Header("Pooling")]
         [SerializeField, Min(1)] private int _sfxPoolSize = 15;
 
@@ -41,6 +42,8 @@ namespace DungeonBuilder.Audio
             Instance = this;
             transform.SetParent(null); // Must be at root for DontDestroyOnLoad
             DontDestroyOnLoad(gameObject);
+
+            // Không ép âm lượng nữa để Inspector và AudioCatalog có tác dụng
 
             InitializeBGMSources();
             InitializeSFXSources();
@@ -81,6 +84,9 @@ namespace DungeonBuilder.Audio
                 _sfxSources[i] = sfxObj.AddComponent<AudioSource>();
                 _sfxSources[i].playOnAwake = false;
                 _sfxSources[i].spatialBlend = 0f;
+                _sfxSources[i].rolloffMode = AudioRolloffMode.Linear;
+                _sfxSources[i].minDistance = 5f;
+                _sfxSources[i].maxDistance = 15f;
             }
         }
 
@@ -94,8 +100,9 @@ namespace DungeonBuilder.Audio
             }
 
             AudioSource activeSource = _isUsingSource1 ? _bgmSource1 : _bgmSource2;
-            
+
             // Khong phat lai neu cung bai
+
             if (activeSource.isPlaying && activeSource.clip == entry.Clip)
             {
                 Debug.Log($"[AudioManager] BGM {type} is already playing.");
@@ -104,7 +111,8 @@ namespace DungeonBuilder.Audio
 
             Debug.Log($"[AudioManager] Crossfading to BGM {type}");
             AudioSource nextSource = _isUsingSource1 ? _bgmSource2 : _bgmSource1;
-            
+
+
             nextSource.clip = entry.Clip;
             nextSource.volume = 0f;
             nextSource.Play();
@@ -116,10 +124,12 @@ namespace DungeonBuilder.Audio
             {
                 Tween fadeOutTween = _isUsingSource1 ? _bgmFadeTween1 : _bgmFadeTween2;
                 fadeOutTween?.Kill();
-                
+
+
                 var sourceToFadeOut = activeSource;
                 var tween = sourceToFadeOut.DOFade(0f, fadeDuration).OnComplete(() => sourceToFadeOut.Stop());
-                
+
+
                 if (_isUsingSource1) _bgmFadeTween1 = tween;
                 else _bgmFadeTween2 = tween;
             }
@@ -127,10 +137,12 @@ namespace DungeonBuilder.Audio
             // Fade in
             Tween fadeInTween = _isUsingSource1 ? _bgmFadeTween2 : _bgmFadeTween1;
             fadeInTween?.Kill();
-            
+
+
             var sourceToFadeIn = nextSource;
             var tweenIn = sourceToFadeIn.DOFade(targetVolume, fadeDuration);
-            
+
+
             if (_isUsingSource1) _bgmFadeTween2 = tweenIn;
             else _bgmFadeTween1 = tweenIn;
 
@@ -151,7 +163,27 @@ namespace DungeonBuilder.Audio
             if (position.HasValue)
             {
                 source.transform.position = position.Value;
-                source.spatialBlend = 1f; // 3D
+
+                // Giảm khoảng cách nghe được xuống 1/3 đối với âm thanh của tháp
+                bool isTowerSound = type == SoundType.SFX_Arrow_Tower ||
+
+                                    type == SoundType.SFX_Canon_Tower ||
+
+                                    type == SoundType.SFX_Frost_Tower ||
+
+                                    type == SoundType.SFX_Laser_Tower ||
+                                    type == SoundType.SFX_Build_Place;
+
+                if (isTowerSound)
+                {
+                    source.spatialBlend = 1f; // 3D
+                    source.minDistance = 10f;
+                    source.maxDistance = 30f;
+                }
+                else
+                {
+                    source.spatialBlend = 0f; // 2D
+                }
             }
             else
             {

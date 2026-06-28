@@ -200,6 +200,12 @@ namespace DungeonBuilder.Player
             _dashEndTime = Time.time + _dashDuration;
             _lastDashTime = Time.time;
             _rigidbody.linearVelocity = dashDirection * DashForce;
+            
+            if (DungeonBuilder.Audio.AudioManager.Instance != null)
+            {
+                DungeonBuilder.Audio.AudioManager.Instance.PlaySFX(DungeonBuilder.Core.Enums.SoundType.SFX_Hero_Dash, transform.position);
+            }
+            
             DBLog.Info($"player.dash.{NetworkObjectId}", $"Dash applied. direction={dashDirection}, speed={DashForce}, duration={_dashDuration}.", 0.25f, this);
         }
     }

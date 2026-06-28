@@ -43,6 +43,7 @@ namespace DungeonBuilder.Player
         private float _animElapsed;
         private FacingDir _lastDrivenFacing = FacingDir.Down;
         private AnimState _lastDrivenState = AnimState.Idle;
+        private int _lastFrame = -1;
 
         // Death state — local per-client, driven bởi PlayerStats.OnDeadStateChanged.
         // Khi chết: chạy _death[] từ frame 0, dừng ở frame cuối.
@@ -235,6 +236,7 @@ namespace DungeonBuilder.Player
                 _lastDrivenFacing = facing;
                 _lastDrivenState = state;
                 _animElapsed = 0f;
+                _lastFrame = -1;
             }
             else if (!immediate)
             {
@@ -250,6 +252,18 @@ namespace DungeonBuilder.Player
             int frame = PlayerAnimLogic.FrameAtTime(_animElapsed, 1f / _frameRate, arr.Length);
             _renderer.sprite = arr[frame];
             _renderer.flipX = facing == FacingDir.Left;
+
+            if (frame != _lastFrame)
+            {
+                _lastFrame = frame;
+                if (state == AnimState.Run && (frame == 1 || frame == 3))
+                {
+                    if (DungeonBuilder.Audio.AudioManager.Instance != null)
+                    {
+                        DungeonBuilder.Audio.AudioManager.Instance.PlaySFX(DungeonBuilder.Core.Enums.SoundType.SFX_Hero_Footstep, transform.position);
+                    }
+                }
+            }
         }
 
         private Sprite[] SelectArray(AnimState state, FacingDir facing)

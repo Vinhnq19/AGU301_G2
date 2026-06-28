@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using DungeonBuilder.Core.Debugging;
 using DungeonBuilder.Core.Enums;
@@ -7,6 +8,7 @@ using DungeonBuilder.Player;
 using Unity.Netcode;
 using UnityEngine;
 using VContainer;
+using System;
 
 namespace DungeonBuilder.Harvesting
 {
@@ -31,12 +33,22 @@ namespace DungeonBuilder.Harvesting
 
         [Header("Magnet")]
         [SerializeField] private float _attractSpeed = 6f;
+        [Tooltip("Delay sau khi jump xong trước khi magnet có thể hút (giây).")]
+        [SerializeField] private float _magnetDelay = 0.1f;
 
         private IResourceService _sharedResources;
         private INetworkPool _pool;
         private bool _canPickup;
         private bool _isMagnetted;
+        private bool _magnetAllowed;
         private Transform _magnetTarget;
+        private Vector3 _initialVisualScale = Vector3.one;
+
+        private void Awake()
+        {
+            if (_visual != null)
+                _initialVisualScale = _visual.localScale;
+        }
 
         [Inject]
         public void Construct(IResourceService sharedResources, INetworkPool pool)
@@ -92,18 +104,24 @@ namespace DungeonBuilder.Harvesting
             }
 
             _visual.DOKill();
-            // Vị trí ngang/ngẫu nhiên do server dịch trên root + NetworkTransform sync.
-            // Visual chỉ làm cung nhảy từ vị trí ban đầu (-_jumpOffset) về vị trí mới của root (Vector3.zero).
+            _visual.localScale = _initialVisualScale;
+            // Visual nhảy từ vị trí offset (local) về gốc; root đã được server dịch + sync qua NetworkTransform.
             _visual.localPosition = -_jumpOffset.Value;
+            float jumpDone = _jumpDuration + _magnetDelay;
             _visual.DOLocalJump(Vector3.zero, _jumpPower, 1, _jumpDuration)
                 .SetEase(Ease.OutQuad)
                 .OnComplete(() => _visual.localPosition = Vector3.zero);
             _visual.DOPunchScale(Vector3.one * 0.25f, 0.3f, 6, 0.6f);
+
+            if (IsServer)
+            {
+                DOVirtual.DelayedCall(jumpDone, () => _magnetAllowed = true);
+            }
         }
 
         public void BeginMagnetAttract(Transform target)
         {
-            if (!IsServer || _isMagnetted || !_canPickup) return;
+            if (!IsServer || _isMagnetted || !_canPickup || !_magnetAllowed) return;
             _isMagnetted = true;
             _magnetTarget = target;
         }
@@ -118,6 +136,7 @@ namespace DungeonBuilder.Harvesting
         public void OnGetFromPool()
         {
             _canPickup = true;
+            _magnetAllowed = false;
             SetCollisionActive(true);
 
             if (_visual == null)
@@ -127,12 +146,14 @@ namespace DungeonBuilder.Harvesting
 
             _visual.DOKill();
             _visual.localPosition = Vector3.zero;
+            _visual.localScale = _initialVisualScale;
         }
 
         public void OnReturnToPool()
         {
             _canPickup = false;
             _isMagnetted = false;
+            _magnetAllowed = false;
             _magnetTarget = null;
             SetCollisionActive(false);
 
@@ -143,7 +164,7 @@ namespace DungeonBuilder.Harvesting
 
             _visual.DOKill();
             _visual.localPosition = Vector3.zero;
-           // _visual.localScale = Vector3.one;
+            _visual.localScale = _initialVisualScale;
         }
 
         private void OnTriggerEnter2D(Collider2D other)
@@ -169,7 +190,38 @@ namespace DungeonBuilder.Harvesting
             SetCollisionActive(false);
             DBLog.Info($"drop.pickup.{NetworkObjectId}", $"ResourceDrop picked up. type={_resourceType.Value}, amount={_amount.Value}, by={other.name}.", 0.2f, this);
             _sharedResources.TryAdd(_resourceType.Value, _amount.Value);
-            _pool.Return(NetworkObject);
+
+            PlayPickupSoundClientRpc(transform.position);
+            
+            ReturnToPoolAsync().Forget();
+        }
+
+        [ClientRpc]
+        private void PlayPickupSoundClientRpc(Vector3 pos)
+        {
+            if (DungeonBuilder.Audio.AudioManager.Instance != null)
+            {
+                DungeonBuilder.Audio.AudioManager.Instance.PlaySFX(SoundType.SFX_Item_Pickup, pos);
+            }
+        }
+
+        private async UniTaskVoid ReturnToPoolAsync()
+        {
+            try
+            {
+                if (_visual != null)
+                {
+                    _visual.DOScale(Vector3.zero, 0.1f);
+                }
+                await UniTask.Delay(TimeSpan.FromSeconds(0.15f), cancellationToken: this.GetCancellationTokenOnDestroy());
+                if (IsServer)
+                {
+                    _pool?.Return(NetworkObject);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+            }
         }
 
         private void SetCollisionActive(bool active)

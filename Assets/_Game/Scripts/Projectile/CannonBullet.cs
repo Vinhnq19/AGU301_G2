@@ -85,6 +85,11 @@ namespace DungeonBuilder.Projectile
         [ClientRpc]
         private void PlayExplosionAnimClientRpc()
         {
+            if (DungeonBuilder.Audio.AudioManager.Instance != null)
+            {
+                DungeonBuilder.Audio.AudioManager.Instance.PlaySFX(DungeonBuilder.Core.Enums.SoundType.SFX_Canon_Boom, transform.position);
+            }
+
             if (_explosionAnimator != null)
             {
                 // Gọi trigger "Explode" để play animation vụ nổ

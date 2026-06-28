@@ -205,9 +205,19 @@ namespace DungeonBuilder.Building
                         DBLog.Info($"remove.refund.{gridPosition}", $"[BuildingController] Refunded: {sb.ToString().Trim()} (50% total cost).", 0.25f, this);
                 }
             }
-
             _grid.ClearTower(gridPosition);
-            if (netObj != null) _pool.Return(netObj);
+            if (netObj != null)
+            {
+                BaseTower tower = netObj.GetComponent<BaseTower>();
+                if (tower != null)
+                {
+                    tower.TriggerRemove();
+                }
+                else
+                {
+                    _pool.Return(netObj);
+                }
+            }
             DBLog.Info($"remove.accept.{gridPosition}", $"[BuildingController] Tower removed at {gridPosition}.", 0.25f, this);
         }
 

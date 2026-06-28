@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13252ffdbbc360d44b2eda0f2e423fe9, type: 3}
+  m_Name: ShopItem_MiningSkillUpgradeLv2
+  m_EditorClassIdentifier: Assembly-CSharp::ShopItem
+  Icon: {fileID: -5890373749626031616, guid: 236032a274092d646a2b89efa2f5bc2f, type: 3}
+  Id: 12
+  Name: Mining Skill Upgrade Lv2
+  Price: 3000
+  Sell: 120
+  isUnlimited: 0
+  isSellable: 1
+  CurrencyType: 0
+  RemainingQuantity: 1
+  ResourceType: 15

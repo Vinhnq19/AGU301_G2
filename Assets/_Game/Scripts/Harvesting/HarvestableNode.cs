@@ -12,6 +12,7 @@ using DungeonBuilder.Player.Tools;
 using Unity.Netcode;
 using UnityEngine;
 using VContainer;
+using DungeonBuilder.Audio;
 
 namespace DungeonBuilder.Harvesting
 {
@@ -47,6 +48,7 @@ namespace DungeonBuilder.Harvesting
         private Tween _flashTween;
 
         public bool IsDepletable => true;
+        public bool IsDepleted => _isDepleted.Value;
         public ResourceType NodeType => _data != null ? _data.resourceType : ResourceType.Wood;
 
         [Inject]
@@ -357,6 +359,30 @@ namespace DungeonBuilder.Harvesting
             _flashTween?.Kill();
             SetFlashAmount(1f);
             _flashTween = DOVirtual.Float(1f, 0f, _flashDuration, SetFlashAmount).SetEase(Ease.OutQuad);
+
+            if (AudioManager.Instance != null)
+            {
+                SoundType sfxType = SoundType.None;
+                switch (NodeType)
+                {
+                    case ResourceType.Stone:
+                        sfxType = SoundType.SFX_Tool_Mine_Stone;
+                        break;
+                    case ResourceType.Ore:
+                    case ResourceType.Copper:
+                    case ResourceType.Iron:
+                    case ResourceType.Crystal:
+                        sfxType = SoundType.SFX_Tool_Mine_Metal;
+                        break;
+                    case ResourceType.Wood:
+                        sfxType = SoundType.SFX_Tool_Chop;
+                        break;
+                }
+                if (sfxType != SoundType.None)
+                {
+                    AudioManager.Instance.PlaySFX(sfxType, transform.position);
+                }
+            }
         }
 
         [ClientRpc]

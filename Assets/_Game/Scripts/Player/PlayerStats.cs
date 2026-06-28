@@ -221,10 +221,21 @@ namespace DungeonBuilder.Player
         {
             OnHPChanged?.Invoke(newValue, MaxHP);
 
-            if (newValue < previousValue)
+            if (newValue < previousValue) // Took damage
             {
                 float damageAmount = previousValue - newValue;
                 OnPlayerHit?.Invoke(damageAmount, newValue, MaxHP);
+                if (DungeonBuilder.Audio.AudioManager.Instance != null)
+                {
+                    if (newValue <= 0f)
+                    {
+                        DungeonBuilder.Audio.AudioManager.Instance.PlaySFX(DungeonBuilder.Core.Enums.SoundType.SFX_Hero_Death, transform.position);
+                    }
+                    else
+                    {
+                        DungeonBuilder.Audio.AudioManager.Instance.PlaySFX(DungeonBuilder.Core.Enums.SoundType.SFX_Hero_Hurt, transform.position);
+                    }
+                }
             }
         }
 

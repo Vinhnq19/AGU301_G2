@@ -82,7 +82,7 @@ SpriteRenderer:
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: -2067898546876541913, guid: 8fb03c1bcdf9a4a44938fd51db1d3e45, type: 3}
-  m_Color: {r: 0.45, g: 0.3, b: 0.15, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -140,7 +140,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 1539026728
+  GlobalObjectIdHash: 2112365278
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -276,7 +276,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Harvesting.ResourceDrop
   ShowTopMostFoldoutHeaderGroup: 1
   _visual: {fileID: 4006386577977299495}
-  _jumpRightDistance: 0.6
+  _jumpRightDistance: 1
   _jumpPower: 0.5
   _jumpDuration: 0.4
   _jumpVerticalJitter: 0.25
+  _attractSpeed: 6
+  _magnetDelay: 0.1

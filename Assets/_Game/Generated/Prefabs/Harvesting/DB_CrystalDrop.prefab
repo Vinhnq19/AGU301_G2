@@ -81,12 +81,12 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 1
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 9179075670696065739, guid: 958c1849b0e3c2c42a7a2ea85d18fa54, type: 3}
+  m_Sprite: {fileID: 1009049853055315898, guid: 435a6138bbd19c244b9169e6837be6e3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.19, y: 0.29}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -276,7 +276,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Harvesting.ResourceDrop
   ShowTopMostFoldoutHeaderGroup: 1
   _visual: {fileID: 4006386577977299495}
-  _jumpRightDistance: 0.6
+  _jumpRightDistance: 1
   _jumpPower: 0.5
   _jumpDuration: 0.4
   _jumpVerticalJitter: 0.25
+  _attractSpeed: 6
+  _magnetDelay: 0.1

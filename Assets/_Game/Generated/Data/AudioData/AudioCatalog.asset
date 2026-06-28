@@ -15,19 +15,19 @@ MonoBehaviour:
   BgmEntries:
   - Type: 100
     Clip: {fileID: 8300000, guid: f1d377d046d4626459317b688d59a4a8, type: 3}
-    VolumeScale: 0.5
+    VolumeScale: 0.4
   - Type: 101
     Clip: {fileID: 8300000, guid: d8ef6418294b56144b3038f39f729da1, type: 3}
-    VolumeScale: 0.3
+    VolumeScale: 0.2
   - Type: 102
     Clip: {fileID: 0}
     VolumeScale: 0
   - Type: 102
     Clip: {fileID: 8300000, guid: ce86be6621a39e6408d9e603ec39004f, type: 3}
-    VolumeScale: 0.3
+    VolumeScale: 0.2
   - Type: 103
     Clip: {fileID: 8300000, guid: bed51bce1d3ca12469596d77c473f56d, type: 3}
-    VolumeScale: 0.5
+    VolumeScale: 0.3
   - Type: 104
     Clip: {fileID: 8300000, guid: 5734af00da2cdaf46b9bd3b500c2f656, type: 3}
     VolumeScale: 0.5
@@ -36,59 +36,80 @@ MonoBehaviour:
     VolumeScale: 0.5
   SfxEntries:
   - Type: 200
-    Clip: {fileID: 0}
-    VolumeScale: 0
+    Clip: {fileID: 8300000, guid: 72d38979d6baebf41b218ed49591661e, type: 3}
+    VolumeScale: 1
   - Type: 201
-    Clip: {fileID: 0}
-    VolumeScale: 0
+    Clip: {fileID: 8300000, guid: b512c30a56fa9b745b90bc6ddbd47d92, type: 3}
+    VolumeScale: 1
   - Type: 202
-    Clip: {fileID: 0}
-    VolumeScale: 0
+    Clip: {fileID: 8300000, guid: 4b5f6b0d17934f14cb610ddf20b27c10, type: 3}
+    VolumeScale: 1
   - Type: 203
-    Clip: {fileID: 0}
-    VolumeScale: 0
+    Clip: {fileID: 8300000, guid: 3dec070a68dfa464bbaf56e76a802361, type: 3}
+    VolumeScale: 0.516
   - Type: 204
-    Clip: {fileID: 0}
-    VolumeScale: 0
+    Clip: {fileID: 8300000, guid: 9a70870e7ab008445b16cfe2bed4af13, type: 3}
+    VolumeScale: 1
   - Type: 205
-    Clip: {fileID: 0}
-    VolumeScale: 0
+    Clip: {fileID: 8300000, guid: 39c9ec026998685468a6280e340d67ae, type: 3}
+    VolumeScale: 1
   - Type: 206
-    Clip: {fileID: 0}
-    VolumeScale: 0
+    Clip: {fileID: 8300000, guid: f4cbb9dc44c7d0143b0858163e34b2e1, type: 3}
+    VolumeScale: 1
   - Type: 207
-    Clip: {fileID: 0}
-    VolumeScale: 0
+    Clip: {fileID: 8300000, guid: 1bc6a5d51956bfa49b1d374920b2ff81, type: 3}
+    VolumeScale: 1
   - Type: 208
-    Clip: {fileID: 0}
-    VolumeScale: 0
+    Clip: {fileID: 8300000, guid: e354941b39d9f684c8989713e24de29b, type: 3}
+    VolumeScale: 1
   - Type: 209
-    Clip: {fileID: 0}
-    VolumeScale: 0
+    Clip: {fileID: 8300000, guid: 90fc9d86b0cdb0a4fbfe906d87b26e12, type: 3}
+    VolumeScale: 1
   - Type: 210
-    Clip: {fileID: 0}
-    VolumeScale: 0
+    Clip: {fileID: 8300000, guid: 90fc9d86b0cdb0a4fbfe906d87b26e12, type: 3}
+    VolumeScale: 1
   - Type: 211
-    Clip: {fileID: 0}
-    VolumeScale: 0
+    Clip: {fileID: 8300000, guid: e4c71ef93c4b0df41915da400f26ed9e, type: 3}
+    VolumeScale: 1
   - Type: 212
-    Clip: {fileID: 0}
-    VolumeScale: 0
+    Clip: {fileID: 8300000, guid: c183fc307469bf648bb628d7dcd015e6, type: 3}
+    VolumeScale: 1
   - Type: 213
-    Clip: {fileID: 0}
-    VolumeScale: 0
+    Clip: {fileID: 8300000, guid: d35e236a18cb7b443a2a42af5044d044, type: 3}
+    VolumeScale: 1
   - Type: 214
-    Clip: {fileID: 0}
-    VolumeScale: 0
+    Clip: {fileID: 8300000, guid: 12dde7c8263b7cc43a97c99b06ce4252, type: 3}
+    VolumeScale: 1
   - Type: 215
-    Clip: {fileID: 0}
-    VolumeScale: 0
+    Clip: {fileID: 8300000, guid: 1bc6a5d51956bfa49b1d374920b2ff81, type: 3}
+    VolumeScale: 1
   - Type: 216
-    Clip: {fileID: 0}
-    VolumeScale: 0
+    Clip: {fileID: 8300000, guid: fe192abea92821645a6d4266135e95ce, type: 3}
+    VolumeScale: 0.1
   - Type: 217
-    Clip: {fileID: 0}
-    VolumeScale: 0
+    Clip: {fileID: 8300000, guid: af0684c09a7ed3a4795f68e9713a1802, type: 3}
+    VolumeScale: 1
   - Type: 218
     Clip: {fileID: 0}
     VolumeScale: 0
+  - Type: 219
+    Clip: {fileID: 0}
+    VolumeScale: 0
+  - Type: 0
+    Clip: {fileID: 0}
+    VolumeScale: 0
+  - Type: 220
+    Clip: {fileID: 8300000, guid: 4b5f6b0d17934f14cb610ddf20b27c10, type: 3}
+    VolumeScale: 1
+  - Type: 221
+    Clip: {fileID: 8300000, guid: 01537d4650dfca04f9ad9720e8e9d49d, type: 3}
+    VolumeScale: 1
+  - Type: 222
+    Clip: {fileID: 8300000, guid: 52ca4a3449a75e04cba8d00f4faf77dc, type: 3}
+    VolumeScale: 0.5
+  - Type: 224
+    Clip: {fileID: 8300000, guid: af0684c09a7ed3a4795f68e9713a1802, type: 3}
+    VolumeScale: 1
+  - Type: 223
+    Clip: {fileID: 8300000, guid: 6473547b926a4974f89608645053a481, type: 3}
+    VolumeScale: 0.1

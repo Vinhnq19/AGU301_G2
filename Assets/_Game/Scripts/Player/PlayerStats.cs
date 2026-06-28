@@ -70,6 +70,21 @@ namespace DungeonBuilder.Player
         private void HandleHPChanged(float previousValue, float newValue)
         {
             OnHPChanged?.Invoke(newValue, MaxHP);
+
+            if (newValue < previousValue) // Took damage
+            {
+                if (DungeonBuilder.Audio.AudioManager.Instance != null)
+                {
+                    if (newValue <= 0f)
+                    {
+                        DungeonBuilder.Audio.AudioManager.Instance.PlaySFX(DungeonBuilder.Core.Enums.SoundType.SFX_Hero_Death, transform.position);
+                    }
+                    else
+                    {
+                        DungeonBuilder.Audio.AudioManager.Instance.PlaySFX(DungeonBuilder.Core.Enums.SoundType.SFX_Hero_Hurt, transform.position);
+                    }
+                }
+            }
         }
 
         private void HandleManaChanged(float previousValue, float newValue)

@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using DungeonBuilder.Core.Debugging;
 using DungeonBuilder.Core.Enums;
@@ -7,6 +8,7 @@ using DungeonBuilder.Player;
 using Unity.Netcode;
 using UnityEngine;
 using VContainer;
+using System;
 
 namespace DungeonBuilder.Harvesting
 {
@@ -169,7 +171,38 @@ namespace DungeonBuilder.Harvesting
             SetCollisionActive(false);
             DBLog.Info($"drop.pickup.{NetworkObjectId}", $"ResourceDrop picked up. type={_resourceType.Value}, amount={_amount.Value}, by={other.name}.", 0.2f, this);
             _sharedResources.TryAdd(_resourceType.Value, _amount.Value);
-            _pool.Return(NetworkObject);
+
+            PlayPickupSoundClientRpc(transform.position);
+            
+            ReturnToPoolAsync().Forget();
+        }
+
+        [ClientRpc]
+        private void PlayPickupSoundClientRpc(Vector3 pos)
+        {
+            if (DungeonBuilder.Audio.AudioManager.Instance != null)
+            {
+                DungeonBuilder.Audio.AudioManager.Instance.PlaySFX(SoundType.SFX_Item_Pickup, pos);
+            }
+        }
+
+        private async UniTaskVoid ReturnToPoolAsync()
+        {
+            try
+            {
+                if (_visual != null)
+                {
+                    _visual.DOScale(Vector3.zero, 0.1f);
+                }
+                await UniTask.Delay(TimeSpan.FromSeconds(0.15f), cancellationToken: this.GetCancellationTokenOnDestroy());
+                if (IsServer)
+                {
+                    _pool?.Return(NetworkObject);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+            }
         }
 
         private void SetCollisionActive(bool active)

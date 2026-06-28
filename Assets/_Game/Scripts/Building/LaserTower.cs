@@ -83,6 +83,7 @@ namespace DungeonBuilder.Building
 
             // Broadcast visual tia laser xuống tất cả Client
             ShowLaserClientRpc(firePos, endPos);
+            PlayFireEffectClientRpc();
         }
 
         /// <summary>

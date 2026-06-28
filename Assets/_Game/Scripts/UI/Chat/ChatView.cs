@@ -5,6 +5,7 @@ using DungeonBuilder.UI.Base;
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace DungeonBuilder.UI.Chat
@@ -36,21 +37,11 @@ namespace DungeonBuilder.UI.Chat
         private void Start()
         {
             HidePanelImmediate();
-
-            if (_inputField != null)
-            {
-                _inputField.onSubmit.AddListener(OnInputSubmit);
-            }
         }
 
         private void OnDestroy()
         {
             Presenter?.Dispose();
-
-            if (_inputField != null)
-            {
-                _inputField.onSubmit.RemoveListener(OnInputSubmit);
-            }
         }
 
         private void Update()
@@ -158,6 +149,8 @@ namespace DungeonBuilder.UI.Chat
                 _inputField.text = string.Empty;
             }
 
+            EventSystem.current?.SetSelectedGameObject(null);
+
             if (_panelCanvasGroup != null)
             {
                 _panelCanvasGroup.DOKill();
@@ -199,17 +192,6 @@ namespace DungeonBuilder.UI.Chat
             Presenter?.SubmitMessage(text);
             ResetAutoCloseTimer();
             _inputField.ActivateInputField();
-        }
-
-        private void OnInputSubmit(string text)
-        {
-            if (!string.IsNullOrWhiteSpace(text))
-            {
-                _inputField.text = string.Empty;
-                Presenter?.SubmitMessage(text);
-                ResetAutoCloseTimer();
-                _inputField.ActivateInputField();
-            }
         }
 
         private void ScrollToBottom()

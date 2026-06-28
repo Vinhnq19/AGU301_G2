@@ -19,6 +19,8 @@ namespace DungeonBuilder.UI.TowerSelection
         private TowerSelectionPresenter _presenter;
         private bool _ignoreNextClick;
 
+        public bool IsOpen => _panelRoot != null && _panelRoot.activeInHierarchy;
+
         private void Awake()
         {
             // Dam bao panel va backdrop bat dau o trang thai tat

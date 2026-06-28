@@ -10,9 +10,18 @@ namespace Assets._Game.Scripts.UI.Tutorial
         [SerializeField] private float _screenPadding = 50f;
         [SerializeField] private float _onScreenOffset = 100f; // float above target on screen
 
+        [Header("Icons")]
+        [SerializeField] private Sprite _arrowSprite;
+        [SerializeField] private Sprite _leftClickSprite;
+        [SerializeField] private float _distanceThreshold = 1.5f;
+
         private Vector3 _targetPosition;
         private bool _hasTarget;
+        private bool _useClickIconOnApproach;
+        private float _currentOffsetOverride = -1f;
+        private float _currentDistanceThresholdOverride = -1f;
         private Camera _mainCamera;
+        private DungeonBuilder.Player.PlayerController _localPlayer;
 
         private void Awake()
         {
@@ -38,20 +47,29 @@ namespace Assets._Game.Scripts.UI.Tutorial
             {
                 _pointerRect.sizeDelta = new Vector2(65f, 65f);
             }
+            
+            // Disable raycast target so it doesn't block player clicks
+            if (_pointerImage != null)
+            {
+                _pointerImage.raycastTarget = false;
+            }
         }
 
-        public void SetTarget(Vector3 targetPos)
+        public void SetTarget(Vector3 targetPos, bool useClickIconOnApproach = false, float offsetOverride = -1f, float distanceThresholdOverride = -1f)
         {
             _targetPosition = targetPos;
             _hasTarget = true;
+            _useClickIconOnApproach = useClickIconOnApproach;
+            _currentOffsetOverride = offsetOverride;
+            _currentDistanceThresholdOverride = distanceThresholdOverride;
             gameObject.SetActive(true);
         }
 
-        public void SetTarget(Transform target)
+        public void SetTarget(Transform target, bool useClickIconOnApproach = false, float offsetOverride = -1f, float distanceThresholdOverride = -1f)
         {
             if (target != null)
             {
-                SetTarget(target.position);
+                SetTarget(target.position, useClickIconOnApproach, offsetOverride, distanceThresholdOverride);
             }
             else
             {
@@ -78,12 +96,56 @@ namespace Assets._Game.Scripts.UI.Tutorial
                 if (_mainCamera == null) return;
             }
 
+            // Find local player if not cached
+            if (_localPlayer == null)
+            {
+                var players = FindObjectsByType<DungeonBuilder.Player.PlayerController>(FindObjectsSortMode.None);
+                foreach (var p in players)
+                {
+                    if (p.IsOwner)
+                    {
+                        _localPlayer = p;
+                        break;
+                    }
+                }
+            }
+
+            bool showClickIcon = false;
+            if (_useClickIconOnApproach && _localPlayer != null)
+            {
+                Vector2 playerPos2D = new Vector2(_localPlayer.transform.position.x, _localPlayer.transform.position.y);
+                Vector2 targetPos2D = new Vector2(_targetPosition.x, _targetPosition.y);
+                float distance = Vector2.Distance(playerPos2D, targetPos2D);
+                float actualThreshold = _currentDistanceThresholdOverride >= 0f ? _currentDistanceThresholdOverride : _distanceThreshold;
+                if (distance <= actualThreshold)
+                {
+                    showClickIcon = true;
+                }
+            }
+
+            if (showClickIcon)
+            {
+                if (_pointerImage != null && _leftClickSprite != null)
+                {
+                    _pointerImage.sprite = _leftClickSprite;
+                    _pointerImage.color = Color.white;
+                }
+            }
+            else
+            {
+                if (_pointerImage != null && _arrowSprite != null)
+                {
+                    _pointerImage.sprite = _arrowSprite;
+                    _pointerImage.color = Color.yellow;
+                }
+            }
+
             Vector3 screenPosition = _mainCamera.WorldToScreenPoint(_targetPosition);
-            
+
             // Check if target is behind camera or off-screen
-            bool isOffScreen = screenPosition.x < _screenPadding || 
-                               screenPosition.x > Screen.width - _screenPadding || 
-                               screenPosition.y < _screenPadding || 
+            bool isOffScreen = screenPosition.x < _screenPadding ||
+                               screenPosition.x > Screen.width - _screenPadding ||
+                               screenPosition.y < _screenPadding ||
                                screenPosition.y > Screen.height - _screenPadding ||
                                screenPosition.z < 0;
 
@@ -112,14 +174,22 @@ namespace Assets._Game.Scripts.UI.Tutorial
 
                 _pointerRect.position = clampPosition;
 
-                // Rotate to point towards the target (flipped by 180 degrees as requested)
-                float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-                _pointerRect.rotation = Quaternion.Euler(0, 0, angle + 90f); 
+                if (showClickIcon)
+                {
+                    _pointerRect.rotation = Quaternion.Euler(0, 0, 0f);
+                }
+                else
+                {
+                    // Rotate to point towards the target (flipped by 180 degrees as requested)
+                    float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+                    _pointerRect.rotation = Quaternion.Euler(0, 0, angle + 90f);
+                }
             }
             else
             {
                 // On-screen: position directly above the target
-                Vector3 screenPosWithOffset = screenPosition + Vector3.up * _onScreenOffset;
+                float offsetToUse = _currentOffsetOverride >= 0f ? _currentOffsetOverride : _onScreenOffset;
+                Vector3 screenPosWithOffset = screenPosition + Vector3.up * offsetToUse;
                 _pointerRect.position = screenPosWithOffset;
                 
                 // Point straight down (flipped by 180 degrees from 180f to 0f as requested)

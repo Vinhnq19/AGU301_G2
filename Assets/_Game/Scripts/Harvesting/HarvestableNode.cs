@@ -48,6 +48,7 @@ namespace DungeonBuilder.Harvesting
         private Tween _flashTween;
 
         public bool IsDepletable => true;
+        public bool IsDepleted => _isDepleted.Value;
         public ResourceType NodeType => _data != null ? _data.resourceType : ResourceType.Wood;
 
         [Inject]

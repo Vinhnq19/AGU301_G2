@@ -33,12 +33,22 @@ namespace DungeonBuilder.Harvesting
 
         [Header("Magnet")]
         [SerializeField] private float _attractSpeed = 6f;
+        [Tooltip("Delay sau khi jump xong trước khi magnet có thể hút (giây).")]
+        [SerializeField] private float _magnetDelay = 0.1f;
 
         private IResourceService _sharedResources;
         private INetworkPool _pool;
         private bool _canPickup;
         private bool _isMagnetted;
+        private bool _magnetAllowed;
         private Transform _magnetTarget;
+        private Vector3 _initialVisualScale = Vector3.one;
+
+        private void Awake()
+        {
+            if (_visual != null)
+                _initialVisualScale = _visual.localScale;
+        }
 
         [Inject]
         public void Construct(IResourceService sharedResources, INetworkPool pool)
@@ -94,18 +104,24 @@ namespace DungeonBuilder.Harvesting
             }
 
             _visual.DOKill();
-            // Vị trí ngang/ngẫu nhiên do server dịch trên root + NetworkTransform sync.
-            // Visual chỉ làm cung nhảy từ vị trí ban đầu (-_jumpOffset) về vị trí mới của root (Vector3.zero).
+            _visual.localScale = _initialVisualScale;
+            // Visual nhảy từ vị trí offset (local) về gốc; root đã được server dịch + sync qua NetworkTransform.
             _visual.localPosition = -_jumpOffset.Value;
+            float jumpDone = _jumpDuration + _magnetDelay;
             _visual.DOLocalJump(Vector3.zero, _jumpPower, 1, _jumpDuration)
                 .SetEase(Ease.OutQuad)
                 .OnComplete(() => _visual.localPosition = Vector3.zero);
             _visual.DOPunchScale(Vector3.one * 0.25f, 0.3f, 6, 0.6f);
+
+            if (IsServer)
+            {
+                DOVirtual.DelayedCall(jumpDone, () => _magnetAllowed = true);
+            }
         }
 
         public void BeginMagnetAttract(Transform target)
         {
-            if (!IsServer || _isMagnetted || !_canPickup) return;
+            if (!IsServer || _isMagnetted || !_canPickup || !_magnetAllowed) return;
             _isMagnetted = true;
             _magnetTarget = target;
         }
@@ -120,6 +136,7 @@ namespace DungeonBuilder.Harvesting
         public void OnGetFromPool()
         {
             _canPickup = true;
+            _magnetAllowed = false;
             SetCollisionActive(true);
 
             if (_visual == null)
@@ -129,12 +146,14 @@ namespace DungeonBuilder.Harvesting
 
             _visual.DOKill();
             _visual.localPosition = Vector3.zero;
+            _visual.localScale = _initialVisualScale;
         }
 
         public void OnReturnToPool()
         {
             _canPickup = false;
             _isMagnetted = false;
+            _magnetAllowed = false;
             _magnetTarget = null;
             SetCollisionActive(false);
 
@@ -145,7 +164,7 @@ namespace DungeonBuilder.Harvesting
 
             _visual.DOKill();
             _visual.localPosition = Vector3.zero;
-           // _visual.localScale = Vector3.one;
+            _visual.localScale = _initialVisualScale;
         }
 
         private void OnTriggerEnter2D(Collider2D other)

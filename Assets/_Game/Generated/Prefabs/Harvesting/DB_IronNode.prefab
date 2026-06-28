@@ -123,7 +123,7 @@ MonoBehaviour:
   _resourceDropPrefab: {fileID: 19318099078005837, guid: 78fa92f7d4bce9a46a16161374202f2f, type: 3}
   _serverInteractionRange: 2
   _visual: {fileID: 7277408921386337561}
-  _visualRenderer: {fileID: 0}
+  _visualRenderer: {fileID: 2445225713643519517}
   _colliders:
   - {fileID: 6297531969374887795}
   _flashDuration: 0.15

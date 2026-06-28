@@ -27,16 +27,16 @@ MonoBehaviour:
     baseWeight: 8
     weightGainPerWave: 0
     maxWeight: 8
-  - resourceType: 2
-    nodePrefab: {fileID: 5324271297793162456, guid: 354323fe59b0fff40a60d5d0cc2e0390, type: 3}
+  - resourceType: 5
+    nodePrefab: {fileID: 3139807191569848532, guid: d1b6fa9044441fd478c8d32a33e1e9c4, type: 3}
     nodeData: {fileID: 11400000, guid: 8bfde4780b29082418dba712b5448564, type: 2}
     minWaveToAppear: 2
     baseWeight: 4
     weightGainPerWave: 0.3
     maxWeight: 8
-  - resourceType: 3
-    nodePrefab: {fileID: 7771601021486431538, guid: ecd421d4132d861409a1a18f6c0d3329, type: 3}
-    nodeData: {fileID: 11400000, guid: 70d4bd88c471a0b47abd2354b8ebcb0c, type: 2}
+  - resourceType: 4
+    nodePrefab: {fileID: 7103796545349103722, guid: bf910a7b544fc624581d44381f08ab42, type: 3}
+    nodeData: {fileID: 11400000, guid: 7c047491c3d858948bee23703d6eb234, type: 2}
     minWaveToAppear: 3
     baseWeight: 2
     weightGainPerWave: 0.4
@@ -44,6 +44,13 @@ MonoBehaviour:
   - resourceType: 6
     nodePrefab: {fileID: 8474278793681442142, guid: b7c3d9aaadce2904a90a1c11b7343266, type: 3}
     nodeData: {fileID: 11400000, guid: 8c5aadd5c672683409d6ea7380df96e1, type: 2}
+    minWaveToAppear: 5
+    baseWeight: 1
+    weightGainPerWave: 0.6
+    maxWeight: 6
+  - resourceType: 7
+    nodePrefab: {fileID: 7103796545349103722, guid: d511bb88c469475459373b912989e6ee, type: 3}
+    nodeData: {fileID: 11400000, guid: a7f3d8fa4e5190afe2bcddef0708192a, type: 2}
     minWaveToAppear: 5
     baseWeight: 1
     weightGainPerWave: 0.6

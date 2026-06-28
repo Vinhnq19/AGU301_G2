@@ -82,7 +82,7 @@ SpriteRenderer:
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: -2281458042351831758, guid: 1075e0c847a3f4c4ba021012fc6e75d0, type: 3}
-  m_Color: {r: 0.75, g: 0.78, b: 0.82, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -276,8 +276,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Harvesting.ResourceDrop
   ShowTopMostFoldoutHeaderGroup: 1
   _visual: {fileID: 4006386577977299495}
-  _jumpRightDistance: 0.6
+  _jumpRightDistance: 1
   _jumpPower: 0.5
   _jumpDuration: 0.4
   _jumpVerticalJitter: 0.25
   _attractSpeed: 6
+  _magnetDelay: 0.1

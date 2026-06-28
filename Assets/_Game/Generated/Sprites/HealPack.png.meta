@@ -1,16 +1,10 @@
 fileFormatVersion: 2
-guid: 236032a274092d646a2b89efa2f5bc2f
+guid: 1ce09e1478e1304429f7c659d1fcb2a6
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5890373749626031616
-    second: Pickaxe_Wood_Side_0
-  - first:
-      213: -588218757367104066
-    second: Pickaxe_Wood_Side_1
-  - first:
-      213: -4664908591150296163
-    second: Pickaxe_Wood_Side_2
+      213: 1198123382625401566
+    second: HealPack_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -52,12 +46,12 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 32
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -103,19 +97,6 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
-    buildTarget: Android
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
     buildTarget: WebGL
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -145,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Pickaxe_Wood_Side_0
+      name: HealPack_0
       rect:
         serializedVersion: 2
-        x: 39
-        y: 37
-        width: 14
-        height: 13
+        x: 4
+        y: 6
+        width: 24
+        height: 22
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -160,52 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 00231438840314ea0800000000000000
-      internalID: -5890373749626031616
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Pickaxe_Wood_Side_1
-      rect:
-        serializedVersion: 2
-        x: 80
-        y: 14
-        width: 25
-        height: 37
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: ebd79ec182a36d7f0800000000000000
-      internalID: -588218757367104066
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Pickaxe_Wood_Side_2
-      rect:
-        serializedVersion: 2
-        x: 144
-        y: 15
-        width: 17
-        height: 23
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: d9391d22a5ae24fb0800000000000000
-      internalID: -4664908591150296163
+      spriteID: edaf97a5ed690a010800000000000000
+      internalID: 1198123382625401566
       vertices: []
       indices: 
       edges: []
@@ -214,7 +151,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
     indices: 
@@ -224,9 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Pickaxe_Wood_Side_0: -5890373749626031616
-      Pickaxe_Wood_Side_1: -588218757367104066
-      Pickaxe_Wood_Side_2: -4664908591150296163
+      HealPack_0: 1198123382625401566
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

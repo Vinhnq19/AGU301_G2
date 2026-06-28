@@ -6,9 +6,14 @@ using TMPro;
 public class ShopItemPanel : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI nameText;
+    [SerializeField] private TextMeshProUGUI costText;
     [SerializeField] private Button buyButton;
     [SerializeField] private Button sellButton;
     [SerializeField] private GameObject soldOutLabel;
+
+    [Header("Layouts")]
+    [SerializeField] private GameObject buyButtonLayout;
+    [SerializeField] private GameObject sellButtonLayout;
 
     [SerializeField] private Image iconImage;
 
@@ -46,14 +51,34 @@ public class ShopItemPanel : MonoBehaviour
 
 
         nameText.text = item.Name;
+        if (costText != null)
+        {
+            costText.text = $"{item.Price} {item.CurrencyType}";
+        }
 
-        // Buy enabled only if in stock AND the player can afford at least one.
+        // Buy button logic
         buyButton.interactable = !item.IsSoldOut && ownedCurrency >= item.Price;
+        
+        if (buyButtonLayout != null)
+        {
+            buyButtonLayout.SetActive(!item.IsSoldOut);
+        }
+        
+        if (soldOutLabel != null)
+        {
+            soldOutLabel.SetActive(item.IsSoldOut);
+        }
 
-        // Sell button: disable + auto-dim (Unity ColorBlock.disabledColor) khi item không sellable
+        // Sell button logic
         if (sellButton != null)
         {
+            sellButton.gameObject.SetActive(item.isSellable);
             sellButton.interactable = item.isSellable;
+            
+            if (sellButtonLayout != null)
+            {
+                sellButtonLayout.SetActive(item.isSellable);
+            }
 
             sellButton.onClick.RemoveAllListeners();
             if (item.isSellable)

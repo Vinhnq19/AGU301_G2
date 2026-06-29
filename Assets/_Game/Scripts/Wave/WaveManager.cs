@@ -35,6 +35,7 @@ namespace DungeonBuilder.Wave
         private readonly NetworkVariable<bool> _allWavesCompleted = new(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
         private bool _isGameEnded = false;
+        private bool _skipBuildPhase = false;
 
         private EventBus _eventBus;
         private INetworkPool _pool;
@@ -60,6 +61,7 @@ namespace DungeonBuilder.Wave
             {
                 _eventBus.OnGameEnded += HandleGameEndedEvent;
                 _eventBus.OnEnemyKilled += HandleEnemyKilled;
+                _eventBus.OnSkipBuildPhase += HandleSkipBuildPhase;
                 InitializePrefabLookup();
                 RunWaveLoopAsync().Forget();
             }
@@ -75,6 +77,7 @@ namespace DungeonBuilder.Wave
             {
                 _eventBus.OnGameEnded -= HandleGameEndedEvent;
                 _eventBus.OnEnemyKilled -= HandleEnemyKilled;
+                _eventBus.OnSkipBuildPhase -= HandleSkipBuildPhase;
             }
         }
 
@@ -182,8 +185,9 @@ namespace DungeonBuilder.Wave
 
         private async UniTask CountdownAsync(float duration)
         {
+            _skipBuildPhase = false;
             float remaining = duration;
-            while (remaining > 0f && !_isGameEnded)
+            while (remaining > 0f && !_isGameEnded && !_skipBuildPhase)
             {
                 if (!IsNetworkReady())
                 {
@@ -199,6 +203,13 @@ namespace DungeonBuilder.Wave
             {
                 _phaseCountdown.Value = 0f;
             }
+        }
+
+        private void HandleSkipBuildPhase()
+        {
+            if (!IsServer) return;
+            _skipBuildPhase = true;
+            Debug.Log("[WaveManager] Build phase skipped (F4).");
         }
 
         private async UniTask SpawnWaveAsync(int waveNumber)

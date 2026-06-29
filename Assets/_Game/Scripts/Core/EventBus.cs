@@ -55,5 +55,12 @@ namespace DungeonBuilder.Core
         {
             OnTowerPlaced?.Invoke();
         }
+
+        public event Action OnSkipBuildPhase;
+
+        public void RaiseSkipBuildPhase()
+        {
+            OnSkipBuildPhase?.Invoke();
+        }
     }
 }

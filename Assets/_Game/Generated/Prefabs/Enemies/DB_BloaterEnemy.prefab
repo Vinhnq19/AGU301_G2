@@ -648,3 +648,6 @@ MonoBehaviour:
   _gasCooldown: 5
   _gasTickInterval: 1
   _gasFillVisual: {fileID: 812270852729799820}
+  _beaconPrefab: {fileID: 3416630568162321295, guid: 4bdf8da27b874c146bfb25b10e50370e, type: 3}
+  _beaconRunnerPrefab: {fileID: 1860617485065313912, guid: 39a5f7e9b5755bd478ebe7d2ea518059, type: 3}
+  _beaconCooldown: 25

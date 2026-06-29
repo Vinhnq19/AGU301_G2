@@ -36,10 +36,14 @@ namespace Assets._Game.Scripts.Enemy
         private Rigidbody2D[] _rigidbodies;
         protected bool _isDying;
         protected float _lastAttackTime;
+        private float _lastPlayerAttackTime;
         protected float _slowMultiplier = 1f;
         private Transform[] _currentPathWaypoints;
         private int _currentWaypointIndex;
+        protected Transform[] CurrentPathWaypoints => _currentPathWaypoints;
         protected DungeonBuilder.Building.BaseTower _currentBlocker;
+
+        private readonly Collider2D[] _playerScanResults = new Collider2D[4];
 
         private Tween _knockbackTween;
         private Tween _stunTween;
@@ -132,6 +136,28 @@ namespace Assets._Game.Scripts.Enemy
             }
 
             _stateMachine.Update();
+            AttackNearbyPlayers();
+        }
+
+        private void AttackNearbyPlayers()
+        {
+            if (Time.time - _lastPlayerAttackTime < _attackInterval) return;
+
+            ContactFilter2D filter = new ContactFilter2D();
+            filter.SetLayerMask(LayerMask.GetMask("Player"));
+            filter.useLayerMask = true;
+
+            int count = Physics2D.OverlapCircle(transform.position, _attackRange, filter, _playerScanResults);
+            for (int i = 0; i < count; i++)
+            {
+                if (_playerScanResults[i] == null) continue;
+                var player = _playerScanResults[i].GetComponentInParent<DungeonBuilder.Player.PlayerStats>();
+                if (player == null || player.IsDead) continue;
+
+                _lastPlayerAttackTime = Time.time;
+                player.TakeDamage(_attackDamage, 0);
+                return;
+            }
         }
 
         private void UpdateAnimator()
@@ -424,6 +450,7 @@ namespace Assets._Game.Scripts.Enemy
             _isDying = false;
             _slowMultiplier = 1f;
             _lastAttackTime = -999f;
+            _lastPlayerAttackTime = -999f;
             _stateMachine.ChangeState(new MoveToCoreState());
         }
 
@@ -525,9 +552,6 @@ namespace Assets._Game.Scripts.Enemy
 
             // Quái không bắn mỏ tài nguyên
             if (damageable is DungeonBuilder.Harvesting.HarvestableNode) return false;
-
-            // Quái không bắn người chơi
-            if (damageable is DungeonBuilder.Player.PlayerStats) return false;
 
             return true;
         }

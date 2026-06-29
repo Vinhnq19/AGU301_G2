@@ -30,8 +30,8 @@ namespace DungeonBuilder.Core.Debugging
             }
             if (Input.GetKeyDown(KeyCode.F4))
             {
-                _debugWave = Mathf.Max(1, _debugWave - 1);
-                Debug.Log($"[Debug] Debug wave reset to {_debugWave}");
+                _eventBus.RaiseSkipBuildPhase();
+                Debug.Log("[Debug] Skip build phase triggered.");
             }
         }
     }

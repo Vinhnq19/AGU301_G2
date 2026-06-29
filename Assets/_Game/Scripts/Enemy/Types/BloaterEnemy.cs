@@ -9,7 +9,8 @@ namespace DungeonBuilder.Enemy.Types
 {
     /// <summary>
     /// Bloater: Quái vật trâu bò, cận chiến.
-    /// Có kĩ năng bị động xả khí độc xung quanh gây sát thương cho người chơi trong phạm vi.
+    /// Kỹ năng 1: Xả khí độc xung quanh theo chu kỳ.
+    /// Kỹ năng 2: Đặt điểm triệu hồi triệu hồi 10 Runner, người chơi có thể click phá huỷ.
     /// </summary>
     public sealed class BloaterEnemy : BaseEnemy
     {
@@ -21,11 +22,18 @@ namespace DungeonBuilder.Enemy.Types
         [SerializeField, Min(0.1f)] private float _gasTickInterval = 1f;
         [SerializeField] private SpriteRenderer _gasFillVisual;
 
+        [Header("Summon Beacon")]
+        [SerializeField] private NetworkObject _beaconPrefab;
+        [SerializeField] private NetworkObject _beaconRunnerPrefab;
+        [SerializeField, Min(5f)] private float _beaconCooldown = 25f;
+
         private float _gasActiveTimer;
         private float _gasCooldownTimer;
         private bool _isGasActive;
         private float _damageTickTimer;
         private readonly Collider2D[] _gasScanResults = new Collider2D[32];
+
+        private float _beaconCooldownTimer = 15f;
 
         private LineRenderer _gasIndicator;
         private Tween _pulseTween;
@@ -62,10 +70,31 @@ namespace DungeonBuilder.Enemy.Types
                 {
                     _isGasActive = true;
                     _gasActiveTimer = _gasDuration;
-                    _damageTickTimer = 0f; // Gây sát thương ngay lập tức khi kích hoạt
+                    _damageTickTimer = 0f;
                     StartGasVisualClientRpc();
                 }
             }
+
+            _beaconCooldownTimer -= Time.deltaTime;
+            if (_beaconCooldownTimer <= 0f)
+            {
+                _beaconCooldownTimer = _beaconCooldown;
+                PlaceBeacon();
+            }
+        }
+
+        private void PlaceBeacon()
+        {
+            if (_pool == null || _beaconPrefab == null || _beaconRunnerPrefab == null) return;
+
+            NetworkObject beaconObj = _pool.Get(_beaconPrefab, transform.position, Quaternion.identity);
+            if (beaconObj == null) return;
+
+            SummonBeacon beacon = beaconObj.GetComponent<SummonBeacon>();
+            beacon?.Initialize(_pool, _beaconRunnerPrefab, _coreTarget, CurrentPathWaypoints);
+
+            if (!beaconObj.IsSpawned)
+                beaconObj.Spawn();
         }
 
         private void ApplyGasDamage()
@@ -97,6 +126,7 @@ namespace DungeonBuilder.Enemy.Types
         public override void OnReturnToPool()
         {
             base.OnReturnToPool();
+            _beaconCooldownTimer = 15f;
             _pulseTween?.Kill();
             _fadeTween?.Kill();
             _gasFillTween?.Kill();

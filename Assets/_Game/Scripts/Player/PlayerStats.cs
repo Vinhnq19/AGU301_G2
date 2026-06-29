@@ -1,6 +1,7 @@
 using System;
 using DungeonBuilder.Data;
 using Unity.Netcode;
+using Unity.Netcode.Components;
 using UnityEngine;
 
 namespace DungeonBuilder.Player
@@ -15,6 +16,9 @@ namespace DungeonBuilder.Player
         [SerializeField, Range(0.05f, 1f)] private float _reviveHealFraction = 0.5f;
         [SerializeField, Min(0.1f)] private float _reviveMaxDistance = 2.5f;
 
+        [Header("Auto Respawn")]
+        [SerializeField, Min(0f)] private float _autoRespawnDuration = 20f;
+
         private readonly NetworkVariable<float> _hp = new(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         private readonly NetworkVariable<float> _mana = new(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         private readonly NetworkVariable<float> _shield = new(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
@@ -22,6 +26,11 @@ namespace DungeonBuilder.Player
         private readonly NetworkVariable<bool> _isDead = new(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         private readonly NetworkVariable<float> _reviveProgress = new(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         private readonly NetworkVariable<ulong> _reviverClientId = new(ulong.MaxValue, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        /// <summary>Seconds còn lại trước khi auto-respawn tại điểm spawn ban đầu. 0 = không đếm (đang sống / vừa respawn / bị disable).</summary>
+        private readonly NetworkVariable<float> _autoRespawnCountdown = new(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+        /// <summary>Vị trí spawn ban đầu của player (capture tại OnNetworkSpawn phía server). Dùng cho auto-respawn.</summary>
+        private Vector3 _initialSpawnPosition;
 
         public event Action<float, float> OnHPChanged;
         public event Action<float, float> OnManaChanged;
@@ -40,6 +49,12 @@ namespace DungeonBuilder.Player
         /// </summary>
         public event Action<float, ulong> OnReviveStateChanged;
 
+        /// <summary>
+        /// Bắn local khi auto-respawn countdown thay đổi. Arg: seconds còn lại (>0 = đang đếm, 0 = không đếm).
+        /// UI countdown subscribe event này để hiện "20", "19", ... trước mặt player đang chết.
+        /// </summary>
+        public event Action<float> OnAutoRespawnCountdownChanged;
+
         public float MaxHP => _data != null ? _data.maxHP : 100f;
         public float MaxMana => _data != null ? _data.maxMana : 100f;
 
@@ -53,6 +68,10 @@ namespace DungeonBuilder.Player
         public float ReviveHealFraction => _reviveHealFraction;
         public float ReviveMaxDistance => _reviveMaxDistance;
 
+        public float AutoRespawnDuration => _autoRespawnDuration;
+        public float AutoRespawnCountdown => _autoRespawnCountdown.Value;
+        public Vector3 InitialSpawnPosition => _initialSpawnPosition;
+
         public override void OnNetworkSpawn()
         {
             _hp.OnValueChanged += HandleHPChanged;
@@ -60,9 +79,13 @@ namespace DungeonBuilder.Player
             _isDead.OnValueChanged += HandleDeadStateChangedNetworked;
             _reviveProgress.OnValueChanged += HandleAnyReviveChange;
             _reviverClientId.OnValueChanged += HandleAnyReviveChange;
+            _autoRespawnCountdown.OnValueChanged += HandleAutoRespawnCountdownChanged;
 
             if (IsServer)
             {
+                // Capture vị trí spawn ban đầu (sau khi InstantiateAndSpawn set transform.position) để auto-respawn về đây.
+                _initialSpawnPosition = transform.position;
+
                 _hp.Value = MaxHP;
                 _mana.Value = MaxMana;
                 _shield.Value = 0f;
@@ -73,6 +96,7 @@ namespace DungeonBuilder.Player
             OnManaChanged?.Invoke(_mana.Value, MaxMana);
             OnDeadStateChanged?.Invoke(_isDead.Value);
             OnReviveStateChanged?.Invoke(_reviveProgress.Value, _reviverClientId.Value);
+            OnAutoRespawnCountdownChanged?.Invoke(_autoRespawnCountdown.Value);
         }
 
         public override void OnNetworkDespawn()
@@ -82,16 +106,36 @@ namespace DungeonBuilder.Player
             _isDead.OnValueChanged -= HandleDeadStateChangedNetworked;
             _reviveProgress.OnValueChanged -= HandleAnyReviveChange;
             _reviverClientId.OnValueChanged -= HandleAnyReviveChange;
+            _autoRespawnCountdown.OnValueChanged -= HandleAutoRespawnCountdownChanged;
         }
 
         private void Update()
         {
-            // Server tick revive: chỉ chạy khi player này đang chết và có người cứu.
+            // Server tick revive + auto-respawn: chỉ chạy khi player này đang chết.
             if (!IsServer) return;
             if (!_isDead.Value) return;
+
+            // Auto-respawn countdown: nếu đếm về 0 và không có ai cứu (hoặc duration=0 thì tắt) → respawn.
+            // Lưu ý: countdown chạy SONG SONG với revive. Nếu có ai cứu xong trước khi countdown hết,
+            // CompleteRevive() sẽ set countdown = 0 → UI ẩn, player hồi sinh ở chỗ chết với HP = _reviveHealFraction.
+            if (_autoRespawnDuration > 0f && _autoRespawnCountdown.Value > 0f)
+            {
+                float newCountdown = _autoRespawnCountdown.Value - Time.deltaTime;
+                if (newCountdown <= 0f)
+                {
+                    _autoRespawnCountdown.Value = 0f;
+                    ServerAutoRespawn();
+                    return;
+                }
+
+                _autoRespawnCountdown.Value = newCountdown;
+                // Không return: nếu vẫn đang có reviver thì vẫn tick progress bên dưới.
+            }
+
+            // Không có ai đang cứu → chỉ chạy auto-respawn, không tick revive.
             if (_reviverClientId.Value == ulong.MaxValue) return;
 
-            // Reviver ra khỏi vùng → cancel (reset về 0, player vẫn chết).
+            // Reviver ra khỏi vùng → cancel (reset về 0, player vẫn chết, auto-respawn vẫn đếm tiếp).
             if (!IsReviverInRange(_reviverClientId.Value))
             {
                 CancelReviveState();
@@ -169,6 +213,8 @@ namespace DungeonBuilder.Player
             _isDead.Value = true;
             _reviveProgress.Value = 0f;
             _reviverClientId.Value = ulong.MaxValue;
+            // Bắt đầu đếm auto-respawn (nếu enabled). UI sẽ hiện số giây còn lại.
+            _autoRespawnCountdown.Value = _autoRespawnDuration > 0f ? _autoRespawnDuration : 0f;
         }
 
         private void CancelReviveState()
@@ -182,6 +228,42 @@ namespace DungeonBuilder.Player
             _hp.Value = Mathf.Min(MaxHP, MaxHP * _reviveHealFraction);
             _isDead.Value = false;
             CancelReviveState();
+            // Revive xong (chưa hết countdown): hủy auto-respawn, ở lại chỗ chết với HP = _reviveHealFraction.
+            _autoRespawnCountdown.Value = 0f;
+        }
+
+        /// <summary>
+        /// Server: auto-respawn tại điểm spawn ban đầu khi countdown về 0. Teleport qua owner client
+        /// (vì ClientNetworkTransform là owner-authoritative, server không gọi Teleport trực tiếp được).
+        /// </summary>
+        private void ServerAutoRespawn()
+        {
+            // Set state TRƯỚC khi teleport để UI/health bar/movement lock cập nhật ngay frame này.
+            _hp.Value = MaxHP;
+            _isDead.Value = false;
+            _autoRespawnCountdown.Value = 0f;
+            CancelReviveState();
+
+            // Teleport về điểm spawn ban đầu. Gửi RPC cho owner để authority side gọi Teleport
+            // (ClientNetworkTransform chỉ cho phép authority = owner thay đổi transform).
+            RequestOwnerTeleportRpc(_initialSpawnPosition);
+        }
+
+        [Rpc(SendTo.Owner)]
+        private void RequestOwnerTeleportRpc(Vector3 targetPosition)
+        {
+            // Owner client là authority của ClientNetworkTransform → gọi Teleport ở đây để bypass interpolation
+            // và replicate vị trí mới cho mọi client khác.
+            var netTransform = GetComponent<NetworkTransform>();
+            if (netTransform != null)
+            {
+                netTransform.Teleport(targetPosition, transform.rotation, transform.localScale);
+            }
+            else
+            {
+                // Fallback nếu thiếu NetworkTransform (không nên xảy ra): set trực tiếp.
+                transform.position = targetPosition;
+            }
         }
 
         private bool IsReviverInRange(ulong clientId)
@@ -252,6 +334,11 @@ namespace DungeonBuilder.Player
         private void HandleAnyReviveChange<T>(T previousValue, T newValue)
         {
             OnReviveStateChanged?.Invoke(_reviveProgress.Value, _reviverClientId.Value);
+        }
+
+        private void HandleAutoRespawnCountdownChanged(float previousValue, float newValue)
+        {
+            OnAutoRespawnCountdownChanged?.Invoke(newValue);
         }
 
         public void TakeDamage(float amount, ulong attackerClientId = 0)

@@ -1305,7 +1305,7 @@ MonoBehaviour:
   _fillImage: {fileID: 8000000000000000009}
   _backgroundImage: {fileID: 8000000000000000004}
   _fillTransitionDuration: 0.15
-  _hideWhenFull: 1
+  _hideWhenFull: 0
   _hpFillColor: {r: 0.85, g: 0.18, b: 0.18, a: 1}
   _reviveFillColor: {r: 1, g: 0.82, b: 0.2, a: 1}
 --- !u!1 &8000000000000000006

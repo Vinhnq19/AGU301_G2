@@ -57,11 +57,12 @@ public class ShopItemPanel : MonoBehaviour
         }
 
         // Buy button logic
-        buyButton.interactable = !item.IsSoldOut && ownedCurrency >= item.Price;
+        bool canBuy = !item.IsSoldOut && ownedCurrency >= item.Price;
+        buyButton.interactable = canBuy;
         
         if (buyButtonLayout != null)
         {
-            buyButtonLayout.SetActive(!item.IsSoldOut);
+            buyButtonLayout.SetActive(!canBuy); // Hiện overlay (layout) khi không mua được
         }
         
         if (soldOutLabel != null)
@@ -77,7 +78,7 @@ public class ShopItemPanel : MonoBehaviour
             
             if (sellButtonLayout != null)
             {
-                sellButtonLayout.SetActive(item.isSellable);
+                sellButtonLayout.SetActive(!item.isSellable); // Hiện overlay khi không bán được
             }
 
             sellButton.onClick.RemoveAllListeners();

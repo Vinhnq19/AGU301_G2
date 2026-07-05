@@ -526,9 +526,6 @@ namespace Assets._Game.Scripts.Enemy
             // Quái không bắn mỏ tài nguyên
             if (damageable is DungeonBuilder.Harvesting.HarvestableNode) return false;
 
-            // Quái không bắn người chơi
-            if (damageable is DungeonBuilder.Player.PlayerStats) return false;
-
             return true;
         }
 

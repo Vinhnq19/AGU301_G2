@@ -23,8 +23,8 @@ namespace DungeonBuilder.EditorTools
         private const long WoodIconFileId = -5297615220031758764;   // Icons_82: wood plank
         private const long PanelSpriteFileId = -733218593125905604; // Main_menu_1: blank parchment panel (82x170)
 
-        // 260 x 539 = dung ti le 82:170 cua Main_menu_1 (khong meo)
-        private static readonly Vector2 PanelSize = new(260f, 539f);
+        // 232 x 480 = dung ti le 82:170 cua Main_menu_1 (khong meo)
+        private static readonly Vector2 PanelSize = new(232f, 480f);
 
         [MenuItem("Tools/Setup HUD Kit Skin")]
         public static void Setup()
@@ -69,27 +69,39 @@ namespace DungeonBuilder.EditorTools
                     Debug.LogWarning("[HUDKitSetup] Khong tim thay WoodTitle.");
                 }
 
-                // Them panel nen phia sau HUDContainer (khong doi cac icon khac)
+                // Them panel nen phia sau HUDContainer (khong doi cac icon khac).
+                // HUDContainer dung GridLayoutGroup (2 cot, cell 50x50, spacing.x=23.2, 10 hang)
+                // nen noi dung THAT SU tran ra ngoai RectTransform khai bao (100x100) cua no,
+                // bat dau tu MEP TREN cua rect (khong phai tam) va keo dai xuong duoi.
                 RectTransform hudRect = hudContainerGO.GetComponent<RectTransform>();
-                Transform canvasParent = hudRect.parent;
-                if (canvasParent.Find("HUDPanelBG") == null)
-                {
-                    var panelGO = new GameObject("HUDPanelBG", typeof(RectTransform));
-                    var panelRect = panelGO.GetComponent<RectTransform>();
-                    panelRect.SetParent(canvasParent, false);
-                    panelRect.anchorMin = hudRect.anchorMin;
-                    panelRect.anchorMax = hudRect.anchorMax;
-                    panelRect.pivot = hudRect.pivot;
-                    panelRect.sizeDelta = PanelSize;
-                    // Can giua theo truc x quanh vung noi dung thuc te cua grid (~123 wide),
-                    // giu nguyen truc y (163) de can giua theo chieu doc.
-                    panelRect.anchoredPosition = new Vector2(hudRect.anchoredPosition.x - 68f, hudRect.anchoredPosition.y);
-                    panelGO.transform.SetAsFirstSibling();
+                const float contentWidth = 123.2f;  // 2*50 + 23.2
+                const float contentHeight = 500f;   // 10 hang * 50
+                float contentTop = hudRect.anchoredPosition.y + hudRect.sizeDelta.y * (1f - hudRect.pivot.y);
+                float contentBottom = contentTop - contentHeight;
+                float contentCenterY = (contentTop + contentBottom) / 2f;
+                float contentCenterX = hudRect.anchoredPosition.x + contentWidth / 2f;
 
-                    var panelImage = panelGO.AddComponent<Image>();
-                    panelImage.sprite = panelSprite;
-                    panelImage.type = Image.Type.Simple;
+                Transform canvasParent = hudRect.parent;
+                Transform existingPanel = canvasParent.Find("HUDPanelBG");
+                GameObject panelGO = existingPanel != null ? existingPanel.gameObject : null;
+                if (panelGO == null)
+                {
+                    panelGO = new GameObject("HUDPanelBG", typeof(RectTransform));
+                    panelGO.transform.SetParent(canvasParent, false);
+                    panelGO.transform.SetAsFirstSibling();
                 }
+
+                var panelRect = panelGO.GetComponent<RectTransform>();
+                panelRect.anchorMin = hudRect.anchorMin;
+                panelRect.anchorMax = hudRect.anchorMax;
+                panelRect.pivot = new Vector2(0.5f, 0.5f);
+                panelRect.sizeDelta = PanelSize;
+                panelRect.anchoredPosition = new Vector2(contentCenterX, contentCenterY);
+
+                var panelImage = panelGO.GetComponent<Image>();
+                if (panelImage == null) panelImage = panelGO.AddComponent<Image>();
+                panelImage.sprite = panelSprite;
+                panelImage.type = Image.Type.Simple;
 
                 EditorSceneManager.MarkSceneDirty(scene);
                 EditorSceneManager.SaveScene(scene);

@@ -99,6 +99,13 @@ namespace DungeonBuilder.Networking.Lobby
             Model.SetSlots(System.Array.Empty<LobbySlot>());
         }
 
+        /// <summary>Nguoi choi bam Back to Menu -> ngat ket noi (neu co) roi ve MenuScene.</summary>
+        public void OnBackToMenuClicked()
+        {
+            OnDisconnectClicked();
+            UnityEngine.SceneManagement.SceneManager.LoadScene("MenuScene");
+        }
+
         protected override void OnModelChanged()
         {
             View.Render();

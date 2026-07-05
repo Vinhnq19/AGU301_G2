@@ -297,6 +297,11 @@ namespace Assets._Game.Scripts.Enemy
 
         public virtual bool IsCoreInAttackRange()
         {
+            if (IsPlayerInAttackRange())
+            {
+                return true;
+            }
+
             return _coreTarget != null && Vector3.Distance(transform.position, _coreTarget.position) <= _attackRange;
         }
 

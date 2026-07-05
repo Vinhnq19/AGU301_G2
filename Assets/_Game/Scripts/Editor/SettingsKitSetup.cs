@@ -7,9 +7,12 @@ namespace DungeonBuilder.EditorTools
 {
     /// <summary>
     /// Reskin SettingPanel.prefab bang bo sprite pixel-art moi:
-    /// - Nen panel: Settings_0 (panel trong co header xanh, 100x150) resize dung ti le -> khong meo.
-    /// - Nut Resume/Return: thanh trong tu Main_menu.png (dong bo voi MainMenu/Lobby).
-    /// - Slider: giu cau truc Unity, tint mau nau/xanh theo tong cua kit.
+    /// - Nen panel: Settings_2 (panel da ve san header "SETTINGS", icon loa/not nhac, khung SAVE/DECLINE,
+    ///   100x150) resize dung ti le -> khong meo.
+    /// - Nut Resume/Return: thanh trong tu Main_menu.png, dat de len dung vi tri khung SAVE/DECLINE da ve
+    ///   san tren sprite (nut opaque nen che het chu SAVE/DECLINE ve san, chi con chu that cua minh).
+    /// - 2/3 slider (Master, BGM) dat de len dung vi tri 2 thanh truot da ve san (icon loa/not nhac);
+    ///   slider con lai (SFX) dat vao vi tri hang "Full Screen" (khong dung den vi game khong co tinh nang do).
     /// Bo cuc doi tu landscape 600x500 sang portrait 500x750 cho khop panel.
     /// </summary>
     public static class SettingsKitSetup
@@ -19,13 +22,13 @@ namespace DungeonBuilder.EditorTools
         private const string SettingsSpriteGuid = "fc68b7a8f6188f2479d45c4968cb8ff7";
         private const string MainMenuSpriteGuid = "dab728ac2dc04654984b5f75e8c3f726";
 
-        private const long PanelSpriteFileId = 7886631795410796208;   // Settings_0: panel + header xanh (100x150)
+        private const long PanelSpriteFileId = -5339635570483323969;  // Settings_2: panel day du (header/icon/SAVE/DECLINE), 100x150
         private const long ResumeBarFileId = -3581412217481141546;    // Main_menu_2
         private const long ReturnBarFileId = -46564867914866660;      // Main_menu_5
 
-        // 500 x 750 = dung ti le 100:150 cua Settings_0
+        // 500 x 750 = dung ti le 100:150 cua Settings_2
         private static readonly Vector2 PanelSize = new(500f, 750f);
-        private static readonly Vector2 ButtonSize = new(340f, 76f);
+        private static readonly Vector2 ButtonSize = new(320f, 70f);
 
         private static readonly Color TrackColor = new(0.77f, 0.60f, 0.42f, 1f); // nau nhat (tan)
         private static readonly Color FillColor = new(0.30f, 0.69f, 0.31f, 1f);  // xanh la cua kit
@@ -62,30 +65,27 @@ namespace DungeonBuilder.EditorTools
                 }
                 panel.GetComponent<RectTransform>().sizeDelta = PanelSize;
 
-                // Title vao vung header xanh tren cung
+                // Settings_2 da co san chu "SETTINGS" ve trong header -> an title rieng cua minh de
+                // khong bi chong chu.
                 Transform title = FindDeep(panel, "SettingTitle");
                 if (title != null)
                 {
-                    var titleRect = title.GetComponent<RectTransform>();
-                    titleRect.anchorMin = new Vector2(0.5f, 1f);
-                    titleRect.anchorMax = new Vector2(0.5f, 1f);
-                    titleRect.pivot = new Vector2(0.5f, 1f);
-                    titleRect.sizeDelta = new Vector2(300f, 50f);
-                    titleRect.anchoredPosition = new Vector2(0f, -8f);
+                    title.gameObject.SetActive(false);
                 }
 
-                // 3 hang slider o giua panel
-                MoveRow(panel, "MasterVolumeSlider", new Vector2(0f, 150f));
-                MoveRow(panel, "BGMVolumeSlider", new Vector2(0f, 60f));
-                MoveRow(panel, "SFXVolumeSlider", new Vector2(0f, -30f));
+                // Can slider vao dung vi tri da ve san tren sprite (icon loa/not nhac).
+                // SFX khong co hang ve san rieng -> dat vao vi tri hang "Full Screen" (khong dung den).
+                MoveRow(panel, "MasterVolumeSlider", new Vector2(20f, 275f), 380f);
+                MoveRow(panel, "BGMVolumeSlider", new Vector2(20f, 187f), 380f);
+                MoveRow(panel, "SFXVolumeSlider", new Vector2(20f, 112f), 380f);
 
                 TintSlider(panel, "MasterVolumeSlider");
                 TintSlider(panel, "BGMVolumeSlider");
                 TintSlider(panel, "SFXVolumeSlider");
 
-                // 2 nut xuong duoi
-                ReskinButton(panel, "ResumeBtn", resumeSprite, new Vector2(0f, -150f));
-                ReskinButton(panel, "ReturnToLobbyBtn", returnSprite, new Vector2(0f, -250f));
+                // Can nut de len dung khung SAVE/DECLINE da ve san (nut opaque che het chu ve san).
+                ReskinButton(panel, "ResumeBtn", resumeSprite, new Vector2(0f, -206f));
+                ReskinButton(panel, "ReturnToLobbyBtn", returnSprite, new Vector2(0f, -275f));
 
                 PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
                 Debug.Log("[SettingsKitSetup] Da reskin SettingPanel bang bo sprite pixel-art moi.");
@@ -96,7 +96,7 @@ namespace DungeonBuilder.EditorTools
             }
         }
 
-        private static void MoveRow(Transform panel, string rowName, Vector2 position)
+        private static void MoveRow(Transform panel, string rowName, Vector2 position, float width = 400f)
         {
             Transform row = FindDeep(panel, rowName);
             if (row == null)
@@ -107,7 +107,7 @@ namespace DungeonBuilder.EditorTools
 
             var rect = row.GetComponent<RectTransform>();
             rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
-            rect.sizeDelta = new Vector2(400f, 40f);
+            rect.sizeDelta = new Vector2(width, 40f);
             rect.anchoredPosition = position;
         }
 

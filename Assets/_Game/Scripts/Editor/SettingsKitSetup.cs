@@ -6,14 +6,22 @@ using UnityEngine.UI;
 namespace DungeonBuilder.EditorTools
 {
     /// <summary>
-    /// Reskin SettingPanel.prefab bang bo sprite pixel-art moi:
+    /// Reskin SettingPanel.prefab bang bo sprite pixel-art moi.
+    ///
+    /// QUAN TRONG ve cau truc prefab (de tranh lap lai loi cu):
+    /// - "SettingPanel" la ROOT THAT cua prefab (m_Father: 0), full-screen (anchor 0,0-1,1,
+    ///   sizeDelta {0,0}), la LOP PHU MO DEN (Color {0,0,0,0.392}) dung de dim man hinh phia sau
+    ///   popup. KHONG duoc doi sprite/size/color cua node nay -> neu doi se bien lop phu mo thanh
+    ///   1 tam anh day dac, meo hinh, trong nhu "loi" full-screen (day chinh la bug ban dau).
+    /// - "Setting Popup" la CON cua root, center-anchor, 600x500 -> day moi la CAI CARD THAT SU
+    ///   hien thi Title/Slider/Nut. Day la node can doi sprite nen + resize.
+    ///
     /// - Nen panel: Settings_2 (panel da ve san header "SETTINGS", icon loa/not nhac, khung SAVE/DECLINE,
     ///   100x150) resize dung ti le -> khong meo.
     /// - Nut Resume/Return: thanh trong tu Main_menu.png, dat de len dung vi tri khung SAVE/DECLINE da ve
     ///   san tren sprite (nut opaque nen che het chu SAVE/DECLINE ve san, chi con chu that cua minh).
     /// - 2/3 slider (Master, BGM) dat de len dung vi tri 2 thanh truot da ve san (icon loa/not nhac);
     ///   slider con lai (SFX) dat vao vi tri hang "Full Screen" (khong dung den vi game khong co tinh nang do).
-    /// Bo cuc doi tu landscape 600x500 sang portrait 500x750 cho khop panel.
     /// </summary>
     public static class SettingsKitSetup
     {
@@ -33,16 +41,29 @@ namespace DungeonBuilder.EditorTools
         private static readonly Color TrackColor = new(0.77f, 0.60f, 0.42f, 1f); // nau nhat (tan)
         private static readonly Color FillColor = new(0.30f, 0.69f, 0.31f, 1f);  // xanh la cua kit
 
+        // Gia tri goc cua lop phu mo den (root "SettingPanel"), de phuc hoi neu bi doi nham truoc do.
+        private static readonly Color DimmerColor = new(0f, 0f, 0f, 0.392f);
+
         [MenuItem("Tools/Setup Settings Kit Skin")]
         public static void Setup()
         {
             GameObject root = PrefabUtility.LoadPrefabContents(PrefabPath);
             try
             {
-                Transform panel = FindDeep(root.transform, "SettingPanel");
+                // Phuc hoi root ve dung vai tro lop phu mo den full-screen (khong phai card).
+                var rootImage = root.GetComponent<Image>();
+                if (rootImage != null)
+                {
+                    rootImage.color = DimmerColor;
+                    rootImage.type = Image.Type.Sliced;
+                }
+                var rootRect = root.GetComponent<RectTransform>();
+                rootRect.sizeDelta = Vector2.zero;
+
+                Transform panel = FindDeep(root.transform, "Setting Popup");
                 if (panel == null)
                 {
-                    Debug.LogError("[SettingsKitSetup] Khong tim thay node SettingPanel.");
+                    Debug.LogError("[SettingsKitSetup] Khong tim thay node Setting Popup.");
                     return;
                 }
 

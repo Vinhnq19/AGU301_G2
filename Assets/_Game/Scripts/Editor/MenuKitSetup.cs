@@ -59,8 +59,8 @@ namespace DungeonBuilder.EditorTools
                     panelRect.anchorMin = new Vector2(0f, 0.5f);
                     panelRect.anchorMax = new Vector2(0f, 0.5f);
                     panelRect.pivot = new Vector2(0f, 0.5f);
-                    panelRect.sizeDelta = new Vector2(300f, 622f);
-                    panelRect.anchoredPosition = new Vector2(290f, -75f);
+                    panelRect.sizeDelta = new Vector2(400f, 829f);
+                    panelRect.anchoredPosition = new Vector2(280f, -75f);
                     panelGO.transform.SetAsFirstSibling();
 
                     var panelImage = panelGO.AddComponent<Image>();
@@ -68,8 +68,8 @@ namespace DungeonBuilder.EditorTools
                     panelImage.type = Image.Type.Simple;
                 }
 
-                ResizeButton(startButton, startSprite, new Vector2(232f, 56f));
-                ResizeButton(quitButton, quitSprite, new Vector2(232f, 56f));
+                ResizeButton(startButton, startSprite, new Vector2(348f, 84f));
+                ResizeButton(quitButton, quitSprite, new Vector2(348f, 84f));
 
                 EditorSceneManager.MarkSceneDirty(scene);
                 EditorSceneManager.SaveScene(scene);
@@ -96,7 +96,7 @@ namespace DungeonBuilder.EditorTools
             var label = button.GetComponentInChildren<TextMeshProUGUI>(true);
             if (label != null)
             {
-                label.fontSize = 26f;
+                label.fontSize = 36f;
             }
         }
 

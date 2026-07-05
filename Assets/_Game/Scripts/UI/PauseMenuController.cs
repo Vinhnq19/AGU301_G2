@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Unity.Netcode;
+using UnityEngine.UI;
 
 namespace DungeonBuilder.UI
 {
@@ -14,6 +15,8 @@ namespace DungeonBuilder.UI
 
         private void Awake()
         {
+            BindSettingsPanelButtons();
+
             // Đảm bảo lúc mới vào game thì panel này tắt
             if (settingsPanel != null)
             {
@@ -74,6 +77,27 @@ namespace DungeonBuilder.UI
 
             // Chuyển về sảnh chờ
             SceneManager.LoadScene("LobbyScene");
+        }
+
+        private void BindSettingsPanelButtons()
+        {
+            if (settingsPanel == null)
+                return;
+
+            Button[] buttons = settingsPanel.GetComponentsInChildren<Button>(true);
+            foreach (Button button in buttons)
+            {
+                if (button.name == "ResumeBtn")
+                {
+                    button.onClick.RemoveListener(ResumeGame);
+                    button.onClick.AddListener(ResumeGame);
+                }
+                else if (button.name == "ReturnToLobbyBtn")
+                {
+                    button.onClick.RemoveListener(ReturnToLobby);
+                    button.onClick.AddListener(ReturnToLobby);
+                }
+            }
         }
     }
 }

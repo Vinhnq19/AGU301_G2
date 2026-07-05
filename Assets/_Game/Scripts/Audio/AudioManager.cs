@@ -10,6 +10,10 @@ namespace DungeonBuilder.Audio
     {
         public static AudioManager Instance { get; private set; }
 
+        public float MasterVolume => _masterVolume;
+        public float BGMVolume => _bgmVolume;
+        public float SFXVolume => _sfxVolume;
+
         [Header("Data")]
         [SerializeField] private AudioCatalogSO _catalog;
 
@@ -21,6 +25,10 @@ namespace DungeonBuilder.Audio
 
         [Header("Pooling")]
         [SerializeField, Min(1)] private int _sfxPoolSize = 15;
+
+        private const string PrefMasterVolume = "Audio_MasterVolume";
+        private const string PrefBGMVolume = "Audio_BGMVolume";
+        private const string PrefSFXVolume = "Audio_SFXVolume";
 
         private AudioSource _bgmSource1;
         private AudioSource _bgmSource2;
@@ -44,6 +52,7 @@ namespace DungeonBuilder.Audio
             DontDestroyOnLoad(gameObject);
 
             // Không ép âm lượng nữa để Inspector và AudioCatalog có tác dụng
+            LoadVolumeSettings();
 
             InitializeBGMSources();
             InitializeSFXSources();
@@ -55,8 +64,16 @@ namespace DungeonBuilder.Audio
             {
                 _bgmFadeTween1?.Kill();
                 _bgmFadeTween2?.Kill();
+                PlayerPrefs.Save();
                 Instance = null;
             }
+        }
+
+        private void LoadVolumeSettings()
+        {
+            _masterVolume = PlayerPrefs.GetFloat(PrefMasterVolume, _masterVolume);
+            _bgmVolume = PlayerPrefs.GetFloat(PrefBGMVolume, _bgmVolume);
+            _sfxVolume = PlayerPrefs.GetFloat(PrefSFXVolume, _sfxVolume);
         }
 
         private void InitializeBGMSources()
@@ -222,18 +239,21 @@ namespace DungeonBuilder.Audio
         public void SetMasterVolume(float volume)
         {
             _masterVolume = Mathf.Clamp01(volume);
+            PlayerPrefs.SetFloat(PrefMasterVolume, _masterVolume);
             UpdateBGMVolume();
         }
 
         public void SetBGMVolume(float volume)
         {
             _bgmVolume = Mathf.Clamp01(volume);
+            PlayerPrefs.SetFloat(PrefBGMVolume, _bgmVolume);
             UpdateBGMVolume();
         }
 
         public void SetSFXVolume(float volume)
         {
             _sfxVolume = Mathf.Clamp01(volume);
+            PlayerPrefs.SetFloat(PrefSFXVolume, _sfxVolume);
         }
 
         private void UpdateBGMVolume()

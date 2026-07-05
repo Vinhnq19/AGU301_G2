@@ -2,6 +2,8 @@ using DungeonBuilder.Core;
 using DungeonBuilder.Core.Enums;
 using DungeonBuilder.Core.Interfaces;
 using DungeonBuilder.UI.Base;
+using DungeonBuilder.Wave;
+using UnityEngine;
 using VContainer.Unity;
 
 namespace DungeonBuilder.UI.HUD
@@ -19,6 +21,7 @@ namespace DungeonBuilder.UI.HUD
             _eventBus.OnWaveStarted += HandleWaveStarted;
             _eventBus.OnCoreHealthChanged += HandleCoreHealthChanged;
             _eventBus.OnPhaseCountdownChanged += HandlePhaseCountdownChanged;
+            _eventBus.OnGamePhaseChanged += HandleGamePhaseChanged;
         }
 
         public override void Initialize()
@@ -52,12 +55,24 @@ namespace DungeonBuilder.UI.HUD
             return Model.Countdown;
         }
 
+        public bool CanSkipBuildPhase()
+        {
+            return Model.Phase == GamePhase.Build;
+        }
+
+        public void SkipBuildPhase()
+        {
+            WaveManager waveManager = Object.FindFirstObjectByType<WaveManager>();
+            waveManager?.RequestSkipBuildPhaseServerRpc();
+        }
+
         public override void Dispose()
         {
             _resources.ResourceChanged -= HandleResourceChanged;
             _eventBus.OnWaveStarted -= HandleWaveStarted;
             _eventBus.OnCoreHealthChanged -= HandleCoreHealthChanged;
             _eventBus.OnPhaseCountdownChanged -= HandlePhaseCountdownChanged;
+            _eventBus.OnGamePhaseChanged -= HandleGamePhaseChanged;
             base.Dispose();
         }
 
@@ -84,6 +99,11 @@ namespace DungeonBuilder.UI.HUD
         private void HandlePhaseCountdownChanged(float secondsRemaining)
         {
             Model.SetCountdown(secondsRemaining);
+        }
+
+        private void HandleGamePhaseChanged(GamePhase phase)
+        {
+            Model.SetPhase(phase);
         }
     }
 }

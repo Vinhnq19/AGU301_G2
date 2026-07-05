@@ -34,5 +34,20 @@ namespace DungeonBuilder.Core.Interfaces
         /// Thay đổi âm lượng SFX. Giá trị từ 0f đến 1f.
         /// </summary>
         void SetSFXVolume(float volume);
+
+        /// <summary>
+        /// Âm lượng tổng hiện tại. Giá trị từ 0f đến 1f.
+        /// </summary>
+        float MasterVolume { get; }
+
+        /// <summary>
+        /// Âm lượng BGM hiện tại. Giá trị từ 0f đến 1f.
+        /// </summary>
+        float BGMVolume { get; }
+
+        /// <summary>
+        /// Âm lượng SFX hiện tại. Giá trị từ 0f đến 1f.
+        /// </summary>
+        float SFXVolume { get; }
     }
 }

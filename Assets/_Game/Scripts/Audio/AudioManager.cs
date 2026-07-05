@@ -10,6 +10,10 @@ namespace DungeonBuilder.Audio
     {
         public static AudioManager Instance { get; private set; }
 
+        public float MasterVolume => _masterVolume;
+        public float BGMVolume => _bgmVolume;
+        public float SFXVolume => _sfxVolume;
+
         [Header("Data")]
         [SerializeField] private AudioCatalogSO _catalog;
 

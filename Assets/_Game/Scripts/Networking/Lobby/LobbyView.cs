@@ -18,6 +18,7 @@ namespace DungeonBuilder.Networking.Lobby
         [SerializeField] private Button _joinButton;
         [SerializeField] private Button _startButton;
         [SerializeField] private Button _disconnectButton;
+        [SerializeField] private Button _backToMenuButton;
 
         [Header("Texts")]
         [SerializeField] private TMP_Text _roomIdText;
@@ -35,6 +36,7 @@ namespace DungeonBuilder.Networking.Lobby
             _joinButton?.onClick.AddListener(OnJoinClicked);
             _startButton?.onClick.AddListener(OnStartClicked);
             _disconnectButton?.onClick.AddListener(OnDisconnectClicked);
+            _backToMenuButton?.onClick.AddListener(OnBackToMenuClicked);
             _playerNameInput?.onEndEdit.AddListener(OnPlayerNameChanged);
         }
 
@@ -44,6 +46,7 @@ namespace DungeonBuilder.Networking.Lobby
             _joinButton?.onClick.RemoveListener(OnJoinClicked);
             _startButton?.onClick.RemoveListener(OnStartClicked);
             _disconnectButton?.onClick.RemoveListener(OnDisconnectClicked);
+            _backToMenuButton?.onClick.RemoveListener(OnBackToMenuClicked);
             _playerNameInput?.onEndEdit.RemoveListener(OnPlayerNameChanged);
             Presenter?.Dispose();
         }
@@ -156,6 +159,11 @@ namespace DungeonBuilder.Networking.Lobby
         private void OnDisconnectClicked()
         {
             Presenter?.OnDisconnectClicked();
+        }
+
+        private void OnBackToMenuClicked()
+        {
+            Presenter?.OnBackToMenuClicked();
         }
 
         private void OnPlayerNameChanged(string newName)

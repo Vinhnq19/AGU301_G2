@@ -45,6 +45,11 @@ namespace DungeonBuilder.UI.HUD
             return Model.Wave;
         }
 
+        public int GetTotalWaves()
+        {
+            return Model.TotalWaves;
+        }
+
         public int GetCoreHealth()
         {
             return Model.CoreHealth;
@@ -89,6 +94,12 @@ namespace DungeonBuilder.UI.HUD
         private void HandleWaveStarted(int currentWave, bool isBossWave)
         {
             Model.SetWave(currentWave);
+
+            WaveManager waveManager = Object.FindFirstObjectByType<WaveManager>();
+            if (waveManager != null)
+            {
+                Model.SetTotalWaves(waveManager.TotalWavesNetVar.Value);
+            }
         }
 
         private void HandleCoreHealthChanged(int coreHealth)

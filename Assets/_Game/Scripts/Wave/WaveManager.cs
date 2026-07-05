@@ -30,6 +30,9 @@ namespace DungeonBuilder.Wave
         [SerializeField] private Transform[] _spawnPoints;
 
         private readonly NetworkVariable<int> _currentWave = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        private readonly NetworkVariable<int> _totalWaves = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+        public NetworkVariable<int> TotalWavesNetVar => _totalWaves;
         private readonly NetworkVariable<float> _phaseCountdown = new(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         private readonly NetworkVariable<GamePhase> _gamePhase = new(GamePhase.Build, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         private readonly NetworkVariable<bool> _allWavesCompleted = new(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
@@ -62,6 +65,7 @@ namespace DungeonBuilder.Wave
                 _eventBus.OnGameEnded += HandleGameEndedEvent;
                 _eventBus.OnEnemyKilled += HandleEnemyKilled;
                 InitializePrefabLookup();
+                _totalWaves.Value = _waveCatalog != null && _waveCatalog.waves != null ? _waveCatalog.waves.Count : 0;
                 RunWaveLoopAsync().Forget();
             }
         }

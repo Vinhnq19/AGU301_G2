@@ -352,6 +352,13 @@ namespace Assets._Game.Scripts.Enemy
             }
 
             _lastAttackTime = Time.time;
+
+            if (_playerTarget != null)
+            {
+                _playerTarget.ApplyDamage(_attackDamage);
+                return;
+            }
+
             _coreManager?.TakeDamage(_attackDamage);
         }
 

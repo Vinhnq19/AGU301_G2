@@ -284,8 +284,24 @@ namespace Assets._Game.Scripts.Enemy
             return _coreTarget != null ? _coreTarget.position : transform.position;
         }
 
+        private DungeonBuilder.Player.PlayerStats _playerTarget;
+
+        /// <summary>Quet xem co Player nao dung trong tam danh khong (melee). Cache ket qua vao _playerTarget.</summary>
+        protected virtual bool IsPlayerInAttackRange()
+        {
+            int playerMask = LayerMask.GetMask("Player");
+            Collider2D hit = Physics2D.OverlapCircle(transform.position, _attackRange, playerMask);
+            _playerTarget = hit != null ? hit.GetComponentInParent<DungeonBuilder.Player.PlayerStats>() : null;
+            return _playerTarget != null;
+        }
+
         public virtual bool IsCoreInAttackRange()
         {
+            if (IsPlayerInAttackRange())
+            {
+                return true;
+            }
+
             return _coreTarget != null && Vector3.Distance(transform.position, _coreTarget.position) <= _attackRange;
         }
 
@@ -336,6 +352,13 @@ namespace Assets._Game.Scripts.Enemy
             }
 
             _lastAttackTime = Time.time;
+
+            if (_playerTarget != null)
+            {
+                _playerTarget.ApplyDamage(_attackDamage);
+                return;
+            }
+
             _coreManager?.TakeDamage(_attackDamage);
         }
 
@@ -525,9 +548,6 @@ namespace Assets._Game.Scripts.Enemy
 
             // Quái không bắn mỏ tài nguyên
             if (damageable is DungeonBuilder.Harvesting.HarvestableNode) return false;
-
-            // Quái không bắn người chơi
-            if (damageable is DungeonBuilder.Player.PlayerStats) return false;
 
             return true;
         }

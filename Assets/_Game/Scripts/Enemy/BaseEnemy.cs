@@ -284,6 +284,17 @@ namespace Assets._Game.Scripts.Enemy
             return _coreTarget != null ? _coreTarget.position : transform.position;
         }
 
+        private DungeonBuilder.Player.PlayerStats _playerTarget;
+
+        /// <summary>Quet xem co Player nao dung trong tam danh khong (melee). Cache ket qua vao _playerTarget.</summary>
+        protected virtual bool IsPlayerInAttackRange()
+        {
+            int playerMask = LayerMask.GetMask("Player");
+            Collider2D hit = Physics2D.OverlapCircle(transform.position, _attackRange, playerMask);
+            _playerTarget = hit != null ? hit.GetComponentInParent<DungeonBuilder.Player.PlayerStats>() : null;
+            return _playerTarget != null;
+        }
+
         public virtual bool IsCoreInAttackRange()
         {
             return _coreTarget != null && Vector3.Distance(transform.position, _coreTarget.position) <= _attackRange;

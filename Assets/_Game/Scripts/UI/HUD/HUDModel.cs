@@ -24,6 +24,7 @@ namespace DungeonBuilder.UI.HUD
         public event Action OnChanged;
 
         public int Wave { get; private set; }
+        public int TotalWaves { get; private set; }
         public float Countdown { get; private set; }
         public int CoreHealth { get; private set; } = 100;
         public GamePhase Phase { get; private set; } = GamePhase.Build;
@@ -42,6 +43,12 @@ namespace DungeonBuilder.UI.HUD
         public void SetWave(int wave)
         {
             Wave = wave;
+            OnChanged?.Invoke();
+        }
+
+        public void SetTotalWaves(int totalWaves)
+        {
+            TotalWaves = totalWaves;
             OnChanged?.Invoke();
         }
 

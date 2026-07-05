@@ -26,6 +26,7 @@ namespace DungeonBuilder.UI.HUD
         public int Wave { get; private set; }
         public float Countdown { get; private set; }
         public int CoreHealth { get; private set; } = 100;
+        public GamePhase Phase { get; private set; } = GamePhase.Build;
 
         public void SetResource(ResourceType type, int value)
         {
@@ -53,6 +54,12 @@ namespace DungeonBuilder.UI.HUD
         public void SetCountdown(float countdown)
         {
             Countdown = countdown;
+            OnChanged?.Invoke();
+        }
+
+        public void SetPhase(GamePhase phase)
+        {
+            Phase = phase;
             OnChanged?.Invoke();
         }
     }

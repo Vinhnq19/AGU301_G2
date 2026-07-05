@@ -2,6 +2,7 @@ using DungeonBuilder.Core.Enums;
 using DungeonBuilder.UI.Base;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace DungeonBuilder.UI.HUD
 {
@@ -24,14 +25,26 @@ namespace DungeonBuilder.UI.HUD
         [Header("Wave")]
         [SerializeField] private TMP_Text _waveText;
         [SerializeField] private TMP_Text _countdownText;
-        [SerializeField] private TMP_Text _coreHealthText;  
+        [SerializeField] private TMP_Text _coreHealthText;
+        [SerializeField] private Button _skipButton;
 
         [Header("Minimap")]
         [SerializeField] private UnityEngine.UI.RawImage _minimapRawImage;
 
+        private void Awake()
+        {
+            _skipButton?.onClick.AddListener(OnSkipClicked);
+        }
+
         private void OnDestroy()
         {
+            _skipButton?.onClick.RemoveListener(OnSkipClicked);
             Presenter?.Dispose();
+        }
+
+        private void OnSkipClicked()
+        {
+            Presenter?.SkipBuildPhase();
         }
 
         public override void Render()
@@ -54,6 +67,11 @@ namespace DungeonBuilder.UI.HUD
             SetText(_waveText, Presenter.GetWave().ToString());
             SetText(_countdownText, Mathf.CeilToInt(Presenter.GetCountdown()).ToString());
             SetText(_coreHealthText, Presenter.GetCoreHealth().ToString());
+
+            if (_skipButton != null)
+            {
+                _skipButton.gameObject.SetActive(Presenter.CanSkipBuildPhase());
+            }
         }
 
         private static void SetText(TMP_Text text, string value)

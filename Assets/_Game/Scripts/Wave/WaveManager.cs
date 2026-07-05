@@ -41,6 +41,7 @@ namespace DungeonBuilder.Wave
         private readonly HashSet<ulong> _activeEnemyIds = new();
         private readonly Dictionary<EnemyType, NetworkObject> _prefabLookup = new();
         private bool _isSpawningWave = false;
+        private bool _skipBuildPhaseRequested = false;
 
         [Inject]
         public void Construct(EventBus eventBus, INetworkPool pool)
@@ -183,7 +184,7 @@ namespace DungeonBuilder.Wave
         private async UniTask CountdownAsync(float duration)
         {
             float remaining = duration;
-            while (remaining > 0f && !_isGameEnded)
+            while (remaining > 0f && !_isGameEnded && !_skipBuildPhaseRequested)
             {
                 if (!IsNetworkReady())
                 {
@@ -195,10 +196,24 @@ namespace DungeonBuilder.Wave
                 remaining -= 1f;
             }
 
+            _skipBuildPhaseRequested = false;
+
             if (IsNetworkReady())
             {
                 _phaseCountdown.Value = 0f;
             }
+        }
+
+        /// <summary>Bat ky client nao cung co the yeu cau bo qua thoi gian chuan bi (Build phase). Server xac thuc va xu ly.</summary>
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+        public void RequestSkipBuildPhaseServerRpc()
+        {
+            if (_gamePhase.Value != GamePhase.Build)
+            {
+                return;
+            }
+
+            _skipBuildPhaseRequested = true;
         }
 
         private async UniTask SpawnWaveAsync(int waveNumber)

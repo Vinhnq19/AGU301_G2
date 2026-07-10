@@ -213,7 +213,7 @@ namespace DungeonBuilder.Player
                             _deathElapsed += Time.deltaTime;
                         }
 
-                        int deathFrame = PlayerAnimLogic.FrameAtTime(_deathElapsed, 1f / _deathFrameRate, deathArr.Length);
+                        int deathFrame = Mathf.FloorToInt(_deathElapsed / (1f / _deathFrameRate));
                         if (deathFrame >= deathArr.Length - 1)
                         {
                             _deathSequenceFinished = true;

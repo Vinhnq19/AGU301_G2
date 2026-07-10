@@ -64,7 +64,7 @@ namespace DungeonBuilder.UI.HUD
             SetText(_tokenText, Presenter.GetResource(ResourceType.Token).ToString());
             SetText(_miningSkillText, Presenter.GetResource(ResourceType.MiningSkill).ToString());
             SetText(_forgingSkillText, Presenter.GetResource(ResourceType.ForgingSkill).ToString());
-            SetText(_waveText, Presenter.GetWave().ToString());
+            SetText(_waveText, Presenter.GetWave().ToString() + "/10");
             SetText(_countdownText, Mathf.CeilToInt(Presenter.GetCountdown()).ToString());
             SetText(_coreHealthText, Presenter.GetCoreHealth().ToString());
 

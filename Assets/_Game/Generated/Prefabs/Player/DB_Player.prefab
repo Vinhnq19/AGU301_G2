@@ -299,7 +299,7 @@ GameObject:
   - component: {fileID: 4994840476412711148}
   - component: {fileID: 4216717674923572752}
   - component: {fileID: 1724936005885918450}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: DB_Player
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -428,6 +428,7 @@ MonoBehaviour:
   _reviveDuration: 3
   _reviveHealFraction: 0.5
   _reviveMaxDistance: 2.5
+  _autoRespawnDuration: 20
 --- !u!114 &5002381239887548320
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -45,21 +45,26 @@ public static class PlayerAnimationSpriteSetup
 
         SerializedObject so = new SerializedObject(anim);
 
-        // Idle: 5 frames/row, row order top->bottom = side-right, side-left, down, up.
-        Assign(so, "_idle.up", Range(idle, "Bunny_Idle_", 15, 19));
-        Assign(so, "_idle.down", Range(idle, "Bunny_Idle_", 10, 14));
-        Assign(so, "_idle.side", Range(idle, "Bunny_Idle_", 0, 4));
+        // Thứ tự hàng của các sheet Bunny (theo số sprite): hàng 0 = UP, hàng 1 = SIDE-right,
+        // hàng 2 = side-left (không dùng, side trái flipX từ side phải), hàng 3 = DOWN.
+        // Mapping này lấy từ prefab đã được chỉnh tay đúng (commit trước 1032d82) — ĐỪNG đổi
+        // nếu chưa kiểm tra lại bằng cách chạy game.
 
-        // Run: 8 frames/row, same row order.
-        Assign(so, "_run.up", Range(run, "Bunny_Run_", 24, 31));
-        Assign(so, "_run.down", Range(run, "Bunny_Run_", 16, 23));
-        Assign(so, "_run.side", Range(run, "Bunny_Run_", 0, 7));
+        // Idle: 5 frames/row.
+        Assign(so, "_idle.up", Range(idle, "Bunny_Idle_", 0, 4));
+        Assign(so, "_idle.side", Range(idle, "Bunny_Idle_", 5, 9));
+        Assign(so, "_idle.down", Range(idle, "Bunny_Idle_", 15, 19));
 
-        // Death: 12 frames/row, same row order. Mỗi hướng chỉ lấy đúng 1 hàng —
+        // Run: 8 frames/row.
+        Assign(so, "_run.up", Range(run, "Bunny_Run_", 0, 7));
+        Assign(so, "_run.side", Range(run, "Bunny_Run_", 8, 15));
+        Assign(so, "_run.down", Range(run, "Bunny_Run_", 24, 31));
+
+        // Death: 12 frames/row. Mỗi hướng chỉ lấy đúng 1 hàng —
         // gán cả 48 frame sẽ làm animation chết chạy 4 lượt liên tiếp (mỗi hướng 1 lượt).
-        Assign(so, "_death.up", Range(death, "Bunny_Death_", 36, 47));
-        Assign(so, "_death.down", Range(death, "Bunny_Death_", 24, 35));
-        Assign(so, "_death.side", Range(death, "Bunny_Death_", 0, 11));
+        Assign(so, "_death.up", Range(death, "Bunny_Death_", 0, 11));
+        Assign(so, "_death.side", Range(death, "Bunny_Death_", 12, 23));
+        Assign(so, "_death.down", Range(death, "Bunny_Death_", 36, 47));
 
         // Ensure _renderer points at the Visual child's SpriteRenderer (only if unset).
         SerializedProperty rendererProp = so.FindProperty("_renderer");

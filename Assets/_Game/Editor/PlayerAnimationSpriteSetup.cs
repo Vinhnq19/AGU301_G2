@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine;
 
 /// <summary>
-/// Fixes the IDLE and RUN directional sprite arrays on DB_Player's PlayerAnimation.
+/// Fixes the IDLE, RUN and DEATH directional sprite arrays on DB_Player's PlayerAnimation.
 /// Hand-writing nested Sprite[] references in prefab YAML gets scrambled by Unity on
 /// import, so this sets them through the SerializedObject API, matching by name.
 ///
@@ -20,6 +20,7 @@ public static class PlayerAnimationSpriteSetup
     private const string PrefabPath = "Assets/_Game/Generated/Prefabs/Player/DB_Player.prefab";
     private const string IdleTexture = "Assets/Sprite/Bunny/IDLE/Bunny_Idle.png";
     private const string RunTexture = "Assets/Sprite/Bunny/RUN/Bunny_Run.png";
+    private const string DeathTexture = "Assets/Sprite/Bunny/DEATH/Bunny_Death.png";
 
     [MenuItem("Tools/Player Animation/Fix Idle/Run Sprites")]
     public static void Setup()
@@ -40,6 +41,7 @@ public static class PlayerAnimationSpriteSetup
 
         Dictionary<string, Sprite> idle = LoadSprites(IdleTexture);
         Dictionary<string, Sprite> run = LoadSprites(RunTexture);
+        Dictionary<string, Sprite> death = LoadSprites(DeathTexture);
 
         SerializedObject so = new SerializedObject(anim);
 
@@ -52,6 +54,12 @@ public static class PlayerAnimationSpriteSetup
         Assign(so, "_run.up", Range(run, "Bunny_Run_", 24, 31));
         Assign(so, "_run.down", Range(run, "Bunny_Run_", 16, 23));
         Assign(so, "_run.side", Range(run, "Bunny_Run_", 0, 7));
+
+        // Death: 12 frames/row, same row order. Mỗi hướng chỉ lấy đúng 1 hàng —
+        // gán cả 48 frame sẽ làm animation chết chạy 4 lượt liên tiếp (mỗi hướng 1 lượt).
+        Assign(so, "_death.up", Range(death, "Bunny_Death_", 36, 47));
+        Assign(so, "_death.down", Range(death, "Bunny_Death_", 24, 35));
+        Assign(so, "_death.side", Range(death, "Bunny_Death_", 0, 11));
 
         // Ensure _renderer points at the Visual child's SpriteRenderer (only if unset).
         SerializedProperty rendererProp = so.FindProperty("_renderer");
@@ -67,7 +75,7 @@ public static class PlayerAnimationSpriteSetup
         so.ApplyModifiedPropertiesWithoutUndo();
         AssetDatabase.SaveAssets();
 
-        Debug.Log("[PlayerAnimationSpriteSetup] Done. IDLE/RUN directional sprite arrays fixed (foraging left untouched).");
+        Debug.Log("[PlayerAnimationSpriteSetup] Done. IDLE/RUN/DEATH directional sprite arrays fixed (foraging left untouched).");
     }
 
     private static Dictionary<string, Sprite> LoadSprites(string texturePath)

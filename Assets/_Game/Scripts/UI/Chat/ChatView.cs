@@ -19,14 +19,13 @@ namespace DungeonBuilder.UI.Chat
         [SerializeField] private CanvasGroup _panelCanvasGroup;
         [SerializeField] private RectTransform _panelRectTransform;
         [SerializeField] private ChatMessageItem _messageItemPrefab;
+        [SerializeField] private Button _closeButton;
 
         [Header("Settings")]
-        [SerializeField] private float _autoCloseDuration = 5f;
         [SerializeField] private float _fadeDuration = 0.2f;
 
         private bool _isPanelVisible;
         private bool _isInputActive;
-        private Coroutine _autoCloseCoroutine;
 
         private static bool IsNetworkConnected =>
             NetworkManager.Singleton != null &&
@@ -36,6 +35,11 @@ namespace DungeonBuilder.UI.Chat
 
         private void Start()
         {
+            if (_closeButton != null)
+            {
+                _closeButton.onClick.AddListener(HidePanel);
+            }
+
             HidePanelImmediate();
         }
 
@@ -60,6 +64,20 @@ namespace DungeonBuilder.UI.Chat
                 else if (_inputField != null && !string.IsNullOrWhiteSpace(_inputField.text))
                 {
                     SendCurrentInput();
+                }
+            }
+
+            // Phím ` (BackQuote): bật/tắt chat panel. Dùng ` vì ký tự này không gõ trong
+            // tin nhắn nên toggle được cả khi input field đang focus. Mở là focus input luôn.
+            if (Input.GetKeyDown(KeyCode.BackQuote))
+            {
+                if (_isPanelVisible)
+                {
+                    HidePanel();
+                }
+                else
+                {
+                    ShowPanelWithInput();
                 }
             }
 
@@ -100,7 +118,8 @@ namespace DungeonBuilder.UI.Chat
 
         /// <summary>
         /// Goi boi ChatPresenter khi co tin nhan moi den.
-        /// Hien panel (khong focus input) va reset timer.
+        /// Hien panel (khong focus input). Panel giu nguyen cho den khi nguoi choi tu dong
+        /// (nut X, phim M/Esc hoac click ra ngoai).
         /// </summary>
         public void OnNewMessageArrived()
         {
@@ -119,8 +138,17 @@ namespace DungeonBuilder.UI.Chat
             _isInputActive = true;
             if (_inputField != null)
             {
-                _inputField.ActivateInputField();
+                StartCoroutine(FocusInputNextFrame());
             }
+        }
+
+        private IEnumerator FocusInputNextFrame()
+        {
+            // Đợi 1 frame rồi mới focus + xóa text để ký tự của phím toggle (`)
+            // không bị TMP_InputField nhận vào làm ký tự đầu tin nhắn.
+            yield return null;
+            _inputField.text = string.Empty;
+            _inputField.ActivateInputField();
         }
 
         private void ShowPanel()
@@ -134,8 +162,6 @@ namespace DungeonBuilder.UI.Chat
                 _panelCanvasGroup.interactable = true;
                 _panelCanvasGroup.blocksRaycasts = true;
             }
-
-            ResetAutoCloseTimer();
         }
 
         private void HidePanel()
@@ -163,8 +189,6 @@ namespace DungeonBuilder.UI.Chat
                     }
                 });
             }
-
-            StopAutoCloseTimer();
         }
 
         private void HidePanelImmediate()
@@ -190,7 +214,6 @@ namespace DungeonBuilder.UI.Chat
             string text = _inputField.text;
             _inputField.text = string.Empty;
             Presenter?.SubmitMessage(text);
-            ResetAutoCloseTimer();
             _inputField.ActivateInputField();
         }
 
@@ -201,27 +224,6 @@ namespace DungeonBuilder.UI.Chat
                 Canvas.ForceUpdateCanvases();
                 _scrollRect.normalizedPosition = new Vector2(0f, 0f);
             }
-        }
-
-        private void ResetAutoCloseTimer()
-        {
-            StopAutoCloseTimer();
-            _autoCloseCoroutine = StartCoroutine(AutoCloseRoutine());
-        }
-
-        private void StopAutoCloseTimer()
-        {
-            if (_autoCloseCoroutine != null)
-            {
-                StopCoroutine(_autoCloseCoroutine);
-                _autoCloseCoroutine = null;
-            }
-        }
-
-        private IEnumerator AutoCloseRoutine()
-        {
-            yield return new WaitForSeconds(_autoCloseDuration);
-            HidePanel();
         }
     }
 }

@@ -189,6 +189,9 @@ namespace DungeonBuilder.Editor
             tmpInput.placeholder = placeholderTMP;
             tmpInput.textViewport = textAreaRect;
 
+            // --- Close (X) button: goc tren phai cua panel ---
+            var closeButton = CreateCloseButton(root.transform);
+
             // Wire ChatView SerializedFields
             var chatViewSO = new SerializedObject(chatView);
             chatViewSO.FindProperty("_scrollRect").objectReferenceValue = scrollRect;
@@ -200,9 +203,48 @@ namespace DungeonBuilder.Editor
             {
                 chatViewSO.FindProperty("_messageItemPrefab").objectReferenceValue = itemPrefab;
             }
+            chatViewSO.FindProperty("_closeButton").objectReferenceValue = closeButton;
             chatViewSO.ApplyModifiedPropertiesWithoutUndo();
 
             SavePrefab(root, PrefabOutputPath + "ChatPanel.prefab");
+        }
+
+        /// <summary>Tao nut X dong chat o goc tren phai cua panel. Dung chung cho generator va tool them vao prefab co san.</summary>
+        public static Button CreateCloseButton(Transform panelRoot)
+        {
+            var closeGO = new GameObject("CloseButton");
+            closeGO.transform.SetParent(panelRoot, false);
+            var closeRect = closeGO.AddComponent<RectTransform>();
+            closeRect.anchorMin = new Vector2(1f, 1f);
+            closeRect.anchorMax = new Vector2(1f, 1f);
+            closeRect.pivot = new Vector2(1f, 1f);
+            closeRect.anchoredPosition = new Vector2(-2f, -2f);
+            closeRect.sizeDelta = new Vector2(22f, 22f);
+
+            var closeImage = closeGO.AddComponent<Image>();
+            closeImage.color = new Color(0f, 0f, 0f, 0.6f);
+
+            var button = closeGO.AddComponent<Button>();
+            var colors = button.colors;
+            colors.highlightedColor = new Color(0.8f, 0.2f, 0.2f, 1f);
+            colors.pressedColor = new Color(0.6f, 0.1f, 0.1f, 1f);
+            button.colors = colors;
+
+            var labelGO = new GameObject("Text");
+            labelGO.transform.SetParent(closeGO.transform, false);
+            var labelRect = labelGO.AddComponent<RectTransform>();
+            labelRect.anchorMin = Vector2.zero;
+            labelRect.anchorMax = Vector2.one;
+            labelRect.sizeDelta = Vector2.zero;
+            var labelTMP = labelGO.AddComponent<TextMeshProUGUI>();
+            labelTMP.text = "X";
+            labelTMP.fontSize = 14f;
+            labelTMP.fontStyle = FontStyles.Bold;
+            labelTMP.color = Color.white;
+            labelTMP.alignment = TextAlignmentOptions.Center;
+            labelTMP.raycastTarget = false;
+
+            return button;
         }
 
         private static void SavePrefab(GameObject go, string path)

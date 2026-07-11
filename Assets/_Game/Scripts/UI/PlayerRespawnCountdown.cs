@@ -60,13 +60,19 @@ namespace DungeonBuilder.UI
 
         private void HandleCountdownChanged(float secondsRemaining)
         {
-            if (_visualRoot != null)
+            bool show = secondsRemaining > 0f;
+
+            // _visualRoot có thể trỏ vào chính GameObject chứa script này. SetActive(false) lên
+            // chính nó sẽ gọi OnDisable → unsubscribe → không bao giờ nhận event để hiện lại.
+            // Vì vậy chỉ SetActive khi _visualRoot là object KHÁC; còn lại toggle text renderer.
+            if (_visualRoot != null && _visualRoot != gameObject)
             {
-                _visualRoot.SetActive(secondsRemaining > 0f);
+                _visualRoot.SetActive(show);
             }
 
             if (_countdownText != null)
             {
+                _countdownText.enabled = show;
                 // Làm tròn lên để hiển thị "20" đầy đủ lúc mới chết, "1" ngay trước khi respawn.
                 int display = Mathf.Max(0, Mathf.CeilToInt(secondsRemaining));
                 _countdownText.text = display.ToString();

@@ -21,7 +21,9 @@ namespace DungeonBuilder.Gameplay.Camera
                 return;
             }
 
-            _panel = FindFirstObjectByType<RespawnPanelView>();
+            // RespawnPanelView tự ẩn root của nó trong Awake — nếu root cũng là GameObject chứa
+            // component thì panel đã inactive tại thời điểm này, nên phải Include inactive khi tìm.
+            _panel = FindFirstObjectByType<RespawnPanelView>(FindObjectsInactive.Include);
             if (_panel == null)
             {
                 Debug.LogWarning(

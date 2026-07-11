@@ -65,6 +65,11 @@ namespace DungeonBuilder.UI.HUD
             return Model.Phase == GamePhase.Build;
         }
 
+        public GamePhase GetPhase()
+        {
+            return Model.Phase;
+        }
+
         public void SkipBuildPhase()
         {
             WaveManager waveManager = Object.FindFirstObjectByType<WaveManager>();

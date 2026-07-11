@@ -45,9 +45,14 @@ namespace DungeonBuilder.UI
             _isPaused = true;
             if (settingsPanel != null)
                 settingsPanel.SetActive(true);
-                
-            // Đóng băng thời gian và âm thanh
-            Time.timeScale = 0f;
+
+            // Chỉ đóng băng thời gian khi KHÔNG trong phiên mạng: server dùng Time.deltaTime
+            // để đếm ngược wave/auto-respawn cho MỌI người chơi, nên host bấm ESC không được
+            // phép làm Time.timeScale = 0 (sẽ treo cả trận cho tất cả client, không chỉ local).
+            if (!IsNetworked())
+            {
+                Time.timeScale = 0f;
+            }
             AudioListener.pause = true;
         }
 
@@ -56,10 +61,16 @@ namespace DungeonBuilder.UI
             _isPaused = false;
             if (settingsPanel != null)
                 settingsPanel.SetActive(false);
-                
+
             // Trả lại thời gian và âm thanh bình thường
             Time.timeScale = 1f;
             AudioListener.pause = false;
+        }
+
+        private static bool IsNetworked()
+        {
+            var net = NetworkManager.Singleton;
+            return net != null && net.IsListening;
         }
 
         public void ReturnToLobby()

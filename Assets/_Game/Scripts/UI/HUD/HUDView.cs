@@ -25,8 +25,12 @@ namespace DungeonBuilder.UI.HUD
         [Header("Wave")]
         [SerializeField] private TMP_Text _waveText;
         [SerializeField] private TMP_Text _countdownText;
+        [SerializeField] private TMP_Text _phaseLabelText;
         [SerializeField] private TMP_Text _coreHealthText;
         [SerializeField] private Button _skipButton;
+
+        private static readonly Color BuildPhaseColor = new Color(1f, 0.8f, 0.2f);
+        private static readonly Color CombatPhaseColor = new Color(1f, 0.35f, 0.35f);
 
         [Header("Minimap")]
         [SerializeField] private UnityEngine.UI.RawImage _minimapRawImage;
@@ -65,8 +69,16 @@ namespace DungeonBuilder.UI.HUD
             SetText(_miningSkillText, Presenter.GetResource(ResourceType.MiningSkill).ToString());
             SetText(_forgingSkillText, Presenter.GetResource(ResourceType.ForgingSkill).ToString());
             SetText(_waveText, Presenter.GetWave().ToString() + "/10");
-            SetText(_countdownText, Mathf.CeilToInt(Presenter.GetCountdown()).ToString());
+            int countdownSeconds = Mathf.Max(0, Mathf.CeilToInt(Presenter.GetCountdown()));
+            SetText(_countdownText, $"{countdownSeconds / 60:00}:{countdownSeconds % 60:00}");
             SetText(_coreHealthText, Presenter.GetCoreHealth().ToString());
+
+            if (_phaseLabelText != null)
+            {
+                bool isBuildPhase = Presenter.GetPhase() == GamePhase.Build;
+                _phaseLabelText.text = isBuildPhase ? "PREPARING" : "COMBAT";
+                _phaseLabelText.color = isBuildPhase ? BuildPhaseColor : CombatPhaseColor;
+            }
 
             if (_skipButton != null)
             {

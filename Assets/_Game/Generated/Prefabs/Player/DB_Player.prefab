@@ -299,6 +299,7 @@ GameObject:
   - component: {fileID: 4994840476412711148}
   - component: {fileID: 4216717674923572752}
   - component: {fileID: 1724936005885918450}
+  - component: {fileID: 669483235270685833}
   m_Layer: 3
   m_Name: DB_Player
   m_TagString: Player
@@ -341,7 +342,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 942224123
+  GlobalObjectIdHash: 2412152181
   InScenePlacedSourceGlobalObjectIdHash: 942224123
   DeferredDespawnTick: 0
   Ownership: 1
@@ -1003,6 +1004,19 @@ MonoBehaviour:
   _playerMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &669483235270685833
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2463603221317342654}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ee46f02e96338c4c85652668a2d1a2b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Gameplay.Camera.LocalPlayerRespawnPanelBinder
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!1 &5145249577385531695
 GameObject:
   m_ObjectHideFlags: 0

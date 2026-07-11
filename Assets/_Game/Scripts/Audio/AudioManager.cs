@@ -144,8 +144,7 @@ namespace DungeonBuilder.Audio
 
 
                 var sourceToFadeOut = activeSource;
-                var tween = sourceToFadeOut.DOFade(0f, fadeDuration).OnComplete(() => sourceToFadeOut.Stop());
-
+                var tween = sourceToFadeOut.DOFade(0f, fadeDuration).SetUpdate(true).OnComplete(() => sourceToFadeOut.Stop());
 
                 if (_isUsingSource1) _bgmFadeTween1 = tween;
                 else _bgmFadeTween2 = tween;
@@ -155,10 +154,8 @@ namespace DungeonBuilder.Audio
             Tween fadeInTween = _isUsingSource1 ? _bgmFadeTween2 : _bgmFadeTween1;
             fadeInTween?.Kill();
 
-
             var sourceToFadeIn = nextSource;
-            var tweenIn = sourceToFadeIn.DOFade(targetVolume, fadeDuration);
-
+            var tweenIn = sourceToFadeIn.DOFade(targetVolume, fadeDuration).SetUpdate(true);
 
             if (_isUsingSource1) _bgmFadeTween2 = tweenIn;
             else _bgmFadeTween1 = tweenIn;
@@ -226,13 +223,13 @@ namespace DungeonBuilder.Audio
             if (_bgmSource1.isPlaying)
             {
                 _bgmFadeTween1?.Kill();
-                _bgmFadeTween1 = _bgmSource1.DOFade(0f, fadeOutDuration).OnComplete(() => _bgmSource1.Stop());
+                _bgmFadeTween1 = _bgmSource1.DOFade(0f, fadeOutDuration).SetUpdate(true).OnComplete(() => _bgmSource1.Stop());
             }
 
             if (_bgmSource2.isPlaying)
             {
                 _bgmFadeTween2?.Kill();
-                _bgmFadeTween2 = _bgmSource2.DOFade(0f, fadeOutDuration).OnComplete(() => _bgmSource2.Stop());
+                _bgmFadeTween2 = _bgmSource2.DOFade(0f, fadeOutDuration).SetUpdate(true).OnComplete(() => _bgmSource2.Stop());
             }
         }
 

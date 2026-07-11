@@ -60,6 +60,20 @@ namespace DungeonBuilder.UI.GameResult
         private void HandleGameEnded(bool isWin)
         {
             UnityEngine.Time.timeScale = 0f;
+            
+            var audioService = DungeonBuilder.Audio.AudioManager.Instance;
+            if (audioService != null)
+            {
+                if (isWin)
+                {
+                    audioService.PlayBGM(SoundType.BGM_Victory);
+                }
+                else
+                {
+                    audioService.PlayBGM(SoundType.BGM_Defeat);
+                }
+            }
+
             Model.Show(isWin, _statsTracker);
         }
     }

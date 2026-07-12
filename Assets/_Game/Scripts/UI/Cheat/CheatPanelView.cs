@@ -26,6 +26,8 @@ namespace DungeonBuilder.UI.Cheat
         [SerializeField] private Button _fullHealButton;
         [SerializeField] private Button _killPlayerButton;
         [SerializeField] private Button _reloadWavesButton;
+        [SerializeField] private TMPro.TMP_InputField _jumpWaveInput;
+        [SerializeField] private Button _jumpWaveButton;
 
         [Header("Settings")]
         [SerializeField, Min(1)] private int _resourceAmount = 500;
@@ -51,6 +53,7 @@ namespace DungeonBuilder.UI.Cheat
             if (_fullHealButton != null) _fullHealButton.onClick.AddListener(FullHealLocalPlayer);
             if (_killPlayerButton != null) _killPlayerButton.onClick.AddListener(KillLocalPlayer);
             if (_reloadWavesButton != null) _reloadWavesButton.onClick.AddListener(ReloadWaves);
+            if (_jumpWaveButton != null) _jumpWaveButton.onClick.AddListener(JumpToWave);
 
             Hide();
         }
@@ -135,6 +138,34 @@ namespace DungeonBuilder.UI.Cheat
             }
 
             waveManager.ReloadWaveData();
+        }
+
+        /// <summary>
+        /// Cheat host-only: nhay toi wave X (nhap so vao input). Chi trong Build phase —
+        /// wave X spawn khi build ket thuc (bam SKIP tren HUD de vao ngay).
+        /// </summary>
+        private void JumpToWave()
+        {
+            if (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsServer)
+            {
+                Debug.LogWarning("[CheatPanel] Jump to wave chi dung duoc khi la HOST.");
+                return;
+            }
+
+            if (_jumpWaveInput == null || !int.TryParse(_jumpWaveInput.text, out int targetWave) || targetWave < 1)
+            {
+                Debug.LogWarning("[CheatPanel] Nhap so wave hop le (>= 1) truoc khi bam Jump.");
+                return;
+            }
+
+            var waveManager = FindFirstObjectByType<WaveManager>();
+            if (waveManager == null)
+            {
+                Debug.LogWarning("[CheatPanel] Khong tim thay WaveManager.");
+                return;
+            }
+
+            waveManager.ServerJumpToWave(targetWave);
         }
 
         private void KillLocalPlayer()

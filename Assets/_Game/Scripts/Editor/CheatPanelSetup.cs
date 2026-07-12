@@ -61,7 +61,7 @@ namespace DungeonBuilder.Editor
             panelRect.anchorMax = new Vector2(1f, 0.5f);
             panelRect.pivot = new Vector2(1f, 0.5f);
             panelRect.anchoredPosition = new Vector2(-20f, 0f);
-            panelRect.sizeDelta = new Vector2(430f, 590f);
+            panelRect.sizeDelta = new Vector2(430f, 660f);
             var panelImage = panel.AddComponent<Image>();
             panelImage.sprite = rounded;
             panelImage.type = Image.Type.Sliced;
@@ -138,6 +138,7 @@ namespace DungeonBuilder.Editor
 
             CreateSectionLabel(list.transform, "WAVE");
             var reloadWaves = CreateCheatButton(list.transform, rounded, "ReloadWavesButton", "Reload Waves (JSON)");
+            var (jumpInput, jumpButton) = CreateJumpWaveRow(list.transform, rounded);
 
             // Wire serialized fields
             var so = new SerializedObject(view);
@@ -148,6 +149,8 @@ namespace DungeonBuilder.Editor
             so.FindProperty("_fullHealButton").objectReferenceValue = fullHeal;
             so.FindProperty("_killPlayerButton").objectReferenceValue = kill;
             so.FindProperty("_reloadWavesButton").objectReferenceValue = reloadWaves;
+            so.FindProperty("_jumpWaveInput").objectReferenceValue = jumpInput;
+            so.FindProperty("_jumpWaveButton").objectReferenceValue = jumpButton;
             so.ApplyModifiedPropertiesWithoutUndo();
 
             PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
@@ -235,6 +238,78 @@ namespace DungeonBuilder.Editor
             textRect.sizeDelta = Vector2.zero;
 
             return button;
+        }
+
+        /// <summary>
+        /// Hàng "Jump to wave": input số bên trái + nút "Jump" bên phải, cùng 1 dòng 56px.
+        /// </summary>
+        private static (TMP_InputField input, Button button) CreateJumpWaveRow(Transform parent, Sprite rounded)
+        {
+            var row = new GameObject("JumpWaveRow");
+            row.transform.SetParent(parent, false);
+            var rowRect = row.AddComponent<RectTransform>();
+            rowRect.sizeDelta = new Vector2(0f, 56f);
+            var rowLayoutElem = row.AddComponent<LayoutElement>();
+            rowLayoutElem.minHeight = 56f;
+
+            var rowLayout = row.AddComponent<HorizontalLayoutGroup>();
+            rowLayout.childControlWidth = true;
+            rowLayout.childControlHeight = true;
+            rowLayout.childForceExpandWidth = false;
+            rowLayout.childForceExpandHeight = true;
+            rowLayout.spacing = 10f;
+
+            // --- Input field (TMP) ---
+            var inputGo = new GameObject("JumpWaveInput");
+            inputGo.transform.SetParent(row.transform, false);
+            inputGo.AddComponent<RectTransform>();
+            var inputLayoutElem = inputGo.AddComponent<LayoutElement>();
+            inputLayoutElem.preferredWidth = 150f;
+            inputLayoutElem.minHeight = 56f;
+
+            var inputImage = inputGo.AddComponent<Image>();
+            inputImage.sprite = rounded;
+            inputImage.type = Image.Type.Sliced;
+            inputImage.pixelsPerUnitMultiplier = 1.6f;
+            inputImage.color = ButtonBg;
+
+            var inputField = inputGo.AddComponent<TMP_InputField>();
+            inputField.contentType = TMP_InputField.ContentType.IntegerNumber;
+
+            // Viewport + text con theo cấu trúc chuẩn của TMP_InputField.
+            var textArea = new GameObject("TextArea");
+            textArea.transform.SetParent(inputGo.transform, false);
+            var textAreaRect = textArea.AddComponent<RectTransform>();
+            textAreaRect.anchorMin = Vector2.zero;
+            textAreaRect.anchorMax = Vector2.one;
+            textAreaRect.offsetMin = new Vector2(12f, 6f);
+            textAreaRect.offsetMax = new Vector2(-12f, -6f);
+            textArea.AddComponent<RectMask2D>();
+
+            var placeholder = CreateLabel(textArea.transform, "Placeholder", "wave...", 17f, FontStyles.Italic, TextMuted);
+            placeholder.alignment = TextAlignmentOptions.MidlineLeft;
+            var placeholderRect = placeholder.GetComponent<RectTransform>();
+            placeholderRect.anchorMin = Vector2.zero;
+            placeholderRect.anchorMax = Vector2.one;
+            placeholderRect.sizeDelta = Vector2.zero;
+
+            var inputText = CreateLabel(textArea.transform, "Text", "", 18f, FontStyles.Normal, TextMain);
+            inputText.alignment = TextAlignmentOptions.MidlineLeft;
+            var inputTextRect = inputText.GetComponent<RectTransform>();
+            inputTextRect.anchorMin = Vector2.zero;
+            inputTextRect.anchorMax = Vector2.one;
+            inputTextRect.sizeDelta = Vector2.zero;
+
+            inputField.textViewport = textAreaRect;
+            inputField.textComponent = inputText;
+            inputField.placeholder = placeholder;
+
+            // --- Nút Jump ---
+            var jumpButton = CreateCheatButton(row.transform, rounded, "JumpWaveButton", "Jump to wave");
+            var jumpLayoutElem = jumpButton.GetComponent<LayoutElement>();
+            jumpLayoutElem.flexibleWidth = 1f;
+
+            return (inputField, jumpButton);
         }
 
         private static TextMeshProUGUI CreateLabel(Transform parent, string name, string content, float size, FontStyles style, Color color)

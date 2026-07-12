@@ -23,6 +23,9 @@ public static class WaveSheetImporter
     private const string WaveDataFolder = "Assets/_Game/Generated/Data/WaveData";
     private const string CatalogPath = WaveDataFolder + "/DB_WaveCatalog.asset";
     private const string CsvHeader = "wave,buildTime,combatTime,isBoss,enemyType,count,interval,spawnPoint,path";
+    // Cột growth (tùy chọn, cột 10): hệ số nhân count mỗi wave khi cột wave là range "A-B".
+    // Ví dụ: wave=1-9, count=10, growth=1.2 → wave 1: 10, wave 2: 12, wave 3: 14 (round), ...
+    private const string CsvHeaderWithGrowth = CsvHeader + ",growth";
 
     private static string CsvPath =>
         Path.GetFullPath(Path.Combine(Application.dataPath, "..", "Docs", "WaveSheet.csv"));
@@ -40,7 +43,7 @@ public static class WaveSheetImporter
         }
 
         var sb = new StringBuilder();
-        sb.AppendLine(CsvHeader);
+        sb.AppendLine(CsvHeaderWithGrowth);
 
         for (int i = 0; i < catalog.waves.Count; i++)
         {
@@ -69,7 +72,8 @@ public static class WaveSheetImporter
                     g.count.ToString(CultureInfo.InvariantCulture),
                     g.spawnInterval.ToString(CultureInfo.InvariantCulture),
                     g.spawnPointIndex.ToString(CultureInfo.InvariantCulture),
-                    g.pathIndex.ToString(CultureInfo.InvariantCulture)));
+                    g.pathIndex.ToString(CultureInfo.InvariantCulture),
+                    "")); // growth: export luôn ra dữ liệu phẳng, để trống = 1
             }
         }
 
@@ -148,9 +152,10 @@ public static class WaveSheetImporter
             if (!headerSeen)
             {
                 string normalized = line.Replace(" ", "").ToLowerInvariant();
-                if (normalized != CsvHeader.ToLowerInvariant())
+                if (normalized != CsvHeader.ToLowerInvariant()
+                    && normalized != CsvHeaderWithGrowth.ToLowerInvariant())
                 {
-                    errors.Add($"line {lineNumber}: header mismatch. Expected '{CsvHeader}', got '{line}'.");
+                    errors.Add($"line {lineNumber}: header mismatch. Expected '{CsvHeader}' (cột growth tùy chọn), got '{line}'.");
                     return rows;
                 }
                 headerSeen = true;
@@ -158,9 +163,9 @@ public static class WaveSheetImporter
             }
 
             string[] cols = line.Split(',');
-            if (cols.Length != 9)
+            if (cols.Length != 9 && cols.Length != 10)
             {
-                errors.Add($"line {lineNumber}: expected 9 columns, got {cols.Length}. (Nếu dùng dấu phẩy thập phân kiểu vi-VN thì đổi sang dấu chấm '.')");
+                errors.Add($"line {lineNumber}: expected 9-10 columns, got {cols.Length}. (Nếu dùng dấu phẩy thập phân kiểu vi-VN thì đổi sang dấu chấm '.')");
                 continue;
             }
 
@@ -171,7 +176,7 @@ public static class WaveSheetImporter
 
             var row = new Row { Line = lineNumber };
             bool ok = true;
-            ok &= ParseInt(cols[0], "wave", lineNumber, errors, out row.Wave);
+            ok &= ParseWaveRange(cols[0], lineNumber, errors, out int waveStart, out int waveEnd);
             ok &= ParseFloat(cols[1], "buildTime", lineNumber, errors, out row.BuildTime);
             ok &= ParseFloat(cols[2], "combatTime", lineNumber, errors, out row.CombatTime);
             ok &= ParseBool(cols[3], "isBoss", lineNumber, errors, out row.IsBoss);
@@ -181,9 +186,46 @@ public static class WaveSheetImporter
             ok &= ParseInt(cols[7], "spawnPoint", lineNumber, errors, out row.SpawnPoint);
             ok &= ParseInt(cols[8], "path", lineNumber, errors, out row.Path);
 
-            if (ok)
+            float growth = 1f;
+            if (cols.Length == 10 && cols[9].Length > 0)
             {
-                rows.Add(row);
+                ok &= ParseFloat(cols[9], "growth", lineNumber, errors, out growth);
+                if (growth <= 0f)
+                {
+                    errors.Add($"line {lineNumber}: growth must be > 0 (got {growth.ToString(CultureInfo.InvariantCulture)}).");
+                    ok = false;
+                }
+            }
+
+            if (!ok)
+            {
+                continue;
+            }
+
+            if (row.Count <= 0)
+            {
+                // Check trước khi expand — expand clamp min 1 nên phải bắt count gốc <= 0 tại đây.
+                errors.Add($"line {lineNumber}: count must be > 0 (got {row.Count}).");
+                continue;
+            }
+
+            // Expand range: mỗi wave trong [start, end] một Row, count nhân growth^(w - start).
+            for (int w = waveStart; w <= waveEnd; w++)
+            {
+                var expanded = new Row
+                {
+                    Line = lineNumber,
+                    Wave = w,
+                    BuildTime = row.BuildTime,
+                    CombatTime = row.CombatTime,
+                    IsBoss = row.IsBoss,
+                    EnemyType = row.EnemyType,
+                    Count = Mathf.Max(1, Mathf.RoundToInt(row.Count * Mathf.Pow(growth, w - waveStart))),
+                    Interval = row.Interval,
+                    SpawnPoint = row.SpawnPoint,
+                    Path = row.Path
+                };
+                rows.Add(expanded);
             }
         }
 
@@ -426,6 +468,41 @@ public static class WaveSheetImporter
     }
 
     // ---------------- Parse helpers ----------------
+
+    /// <summary>Cột wave nhận "N" hoặc range "A-B" (vd "5-9" = sinh spawn group cho wave 5..9).</summary>
+    private static bool ParseWaveRange(string s, int line, List<string> errors, out int start, out int end)
+    {
+        start = 0;
+        end = 0;
+
+        int dash = s.IndexOf('-');
+        if (dash < 0)
+        {
+            if (!ParseInt(s, "wave", line, errors, out start))
+            {
+                return false;
+            }
+            end = start;
+            return true;
+        }
+
+        string left = s.Substring(0, dash).Trim();
+        string right = s.Substring(dash + 1).Trim();
+        if (!int.TryParse(left, NumberStyles.Integer, CultureInfo.InvariantCulture, out start)
+            || !int.TryParse(right, NumberStyles.Integer, CultureInfo.InvariantCulture, out end))
+        {
+            errors.Add($"line {line}: wave range '{s}' is not valid. Use 'N' or 'A-B' (e.g. 5-9).");
+            return false;
+        }
+
+        if (start < 1 || end < start)
+        {
+            errors.Add($"line {line}: wave range '{s}' is not valid — need 1 <= A <= B.");
+            return false;
+        }
+
+        return true;
+    }
 
     private static bool ParseInt(string s, string column, int line, List<string> errors, out int value)
     {

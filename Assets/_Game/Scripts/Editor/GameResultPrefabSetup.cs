@@ -1,4 +1,4 @@
-using DungeonBuilder.UI.GameResult;
+﻿using DungeonBuilder.UI.GameResult;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
@@ -194,7 +194,7 @@ namespace DungeonBuilder.Editor
             tmp.fontStyle = style;
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.raycastTarget = false;
-            tmp.enableWordWrapping = false;
+            tmp.textWrappingMode = TextWrappingModes.NoWrap;
             return tmp;
         }
 

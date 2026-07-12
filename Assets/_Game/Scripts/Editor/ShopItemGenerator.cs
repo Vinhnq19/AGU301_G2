@@ -16,6 +16,7 @@ namespace DungeonBuilder.Editor
             public bool isUnlimited;
             public CurrencyType currencyType;
             public ResourceType resourceType;
+            public int upgradeLevel; // 0 = không phải item nâng cấp theo level
         }
 
         [MenuItem("Dungeon Builder/Generate Shop Items")]
@@ -37,19 +38,23 @@ namespace DungeonBuilder.Editor
                 new ItemConfig { id = "6", name = "Purple Gem", price = 50, sell = 10, isUnlimited = true, currencyType = CurrencyType.Coin, resourceType = ResourceType.PurpleGems },
 
 
-                new ItemConfig { id = "7", name = "Unlock Canon Tower", price = 100, sell = 0, isUnlimited = false, currencyType = CurrencyType.Token, resourceType = ResourceType.CannonTowerUnlock },
+                // Id 15 (KHÔNG dùng 7 — đã bị ShopItem_SpikeTrap chiếm; Id trùng làm giao dịch chạy sai item)
+                new ItemConfig { id = "15", name = "Unlock Canon Tower", price = 100, sell = 0, isUnlimited = false, currencyType = CurrencyType.Token, resourceType = ResourceType.CannonTowerUnlock },
                 new ItemConfig { id = "8", name = "Unlock Frost Tower", price = 120, sell = 0, isUnlimited = false, currencyType = CurrencyType.Token, resourceType = ResourceType.FrostTowerUnlock },
                 new ItemConfig { id = "9", name = "Unlock Laze Tower", price = 200, sell = 0, isUnlimited = false, currencyType = CurrencyType.Token, resourceType = ResourceType.LaserTowerUnlock },
 
 
-                new ItemConfig { id = "10", name = "Heal Pack", price = 500, sell = 100, isUnlimited = true, currencyType = CurrencyType.Coin, resourceType = ResourceType.Coin }, // Assuming Heal Pack might be added to ResourceType or just a generic item
-                
-                new ItemConfig { id = "11", name = "Foraging Skill Upgrade Lv2", price = 3000, sell = 120, isUnlimited = false, currencyType = CurrencyType.Coin, resourceType = ResourceType.ForgingSkill },
-                new ItemConfig { id = "12", name = "Mining Skill Upgrade Lv2", price = 3000, sell = 120, isUnlimited = false, currencyType = CurrencyType.Coin, resourceType = ResourceType.MiningSkill },
+                // CẢNH BÁO: ResourceType = Coin nghĩa là "mua/bán tiền bằng tiền" — sell > 0 từng tạo
+                // exploit in tiền (bán 1 Coin nhận 100 Coin). Giữ sell = 0 cho tới khi có ResourceType
+                // HealPack thật; Shop.cs cũng đã chặn giao dịch với item có ResourceType là tiền tệ.
+                new ItemConfig { id = "10", name = "Heal Pack", price = 500, sell = 0, isUnlimited = true, currencyType = CurrencyType.Coin, resourceType = ResourceType.Coin },
+
+                new ItemConfig { id = "11", name = "Foraging Skill Upgrade Lv2", price = 3000, sell = 120, isUnlimited = false, currencyType = CurrencyType.Coin, resourceType = ResourceType.ForgingSkill, upgradeLevel = 2 },
+                new ItemConfig { id = "12", name = "Mining Skill Upgrade Lv2", price = 3000, sell = 120, isUnlimited = false, currencyType = CurrencyType.Coin, resourceType = ResourceType.MiningSkill, upgradeLevel = 2 },
 
 
-                new ItemConfig { id = "13", name = "Foraging Skill Upgrade Lv3", price = 6000, sell = 400, isUnlimited = false, currencyType = CurrencyType.Coin, resourceType = ResourceType.ForgingSkill },
-                new ItemConfig { id = "14", name = "Mining Skill Upgrade Lv3", price = 6000, sell = 400, isUnlimited = false, currencyType = CurrencyType.Coin, resourceType = ResourceType.MiningSkill },
+                new ItemConfig { id = "13", name = "Foraging Skill Upgrade Lv3", price = 6000, sell = 400, isUnlimited = false, currencyType = CurrencyType.Coin, resourceType = ResourceType.ForgingSkill, upgradeLevel = 3 },
+                new ItemConfig { id = "14", name = "Mining Skill Upgrade Lv3", price = 6000, sell = 400, isUnlimited = false, currencyType = CurrencyType.Coin, resourceType = ResourceType.MiningSkill, upgradeLevel = 3 },
             };
 
             foreach (var config in itemsToGenerate)
@@ -64,6 +69,7 @@ namespace DungeonBuilder.Editor
                 item.CurrencyType = config.currencyType;
                 item.RemainingQuantity = config.isUnlimited ? 0 : 1;
                 item.ResourceType = config.resourceType;
+                item.upgradeLevel = config.upgradeLevel;
 
                 string fileName = $"ShopItem_{config.name.Replace(" ", "")}.asset";
                 string fullPath = Path.Combine(savePath, fileName);

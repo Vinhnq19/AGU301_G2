@@ -102,7 +102,6 @@ Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Unlit"
 			sampler2D _MainTex;
 			CBUFFER_START( UnityPerMaterial )
 			float4 _Tint;
-			float4 _MainTex_ST;
 			CBUFFER_END
 
 
@@ -178,7 +177,7 @@ Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Unlit"
 				float4 positionCS = IN.positionCS;
 				float3 positionWS = IN.positionWS;
 
-				float2 uv_MainTex = IN.texCoord0.xy * _MainTex_ST.xy + _MainTex_ST.zw;
+				float2 uv_MainTex = IN.texCoord0.xy;
 				float4 tex2DNode11 = tex2D( _MainTex, uv_MainTex );
 				clip( tex2DNode11.a - 0.01);
 				
@@ -280,7 +279,6 @@ Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Unlit"
 			sampler2D _MainTex;
 			CBUFFER_START( UnityPerMaterial )
 			float4 _Tint;
-			float4 _MainTex_ST;
 			CBUFFER_END
 
 
@@ -356,7 +354,7 @@ Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Unlit"
 				float4 positionCS = IN.positionCS;
 				float3 positionWS = IN.positionWS;
 
-				float2 uv_MainTex = IN.texCoord0.xy * _MainTex_ST.xy + _MainTex_ST.zw;
+				float2 uv_MainTex = IN.texCoord0.xy;
 				float4 tex2DNode11 = tex2D( _MainTex, uv_MainTex );
 				clip( tex2DNode11.a - 0.01);
 				
@@ -441,7 +439,6 @@ Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Unlit"
 			sampler2D _MainTex;
 			CBUFFER_START( UnityPerMaterial )
 			float4 _Tint;
-			float4 _MainTex_ST;
 			CBUFFER_END
 
 
@@ -502,7 +499,7 @@ Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Unlit"
 
 			half4 frag(VertexOutput IN) : SV_TARGET
 			{
-				float2 uv_MainTex = IN.ase_texcoord.xy * _MainTex_ST.xy + _MainTex_ST.zw;
+				float2 uv_MainTex = IN.ase_texcoord.xy;
 				float4 tex2DNode11 = tex2D( _MainTex, uv_MainTex );
 				clip( tex2DNode11.a - 0.01);
 				
@@ -567,7 +564,6 @@ Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Unlit"
 			sampler2D _MainTex;
 			CBUFFER_START( UnityPerMaterial )
 			float4 _Tint;
-			float4 _MainTex_ST;
 			CBUFFER_END
 
 
@@ -627,7 +623,7 @@ Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Unlit"
 
 			half4 frag(VertexOutput IN ) : SV_TARGET
 			{
-				float2 uv_MainTex = IN.ase_texcoord.xy * _MainTex_ST.xy + _MainTex_ST.zw;
+				float2 uv_MainTex = IN.ase_texcoord.xy;
 				float4 tex2DNode11 = tex2D( _MainTex, uv_MainTex );
 				clip( tex2DNode11.a - 0.01);
 				

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: ShopItem_UnlockCanonTower
   m_EditorClassIdentifier: Assembly-CSharp::ShopItem
   Icon: {fileID: 4235198970154997810, guid: 220d184522419f14c9c24d4b67eccc97, type: 3}
-  Id: 7
+  Id: 15
   Name: Canon Tower
   Price: 100
   Sell: 0

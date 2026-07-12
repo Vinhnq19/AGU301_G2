@@ -18,7 +18,7 @@ MonoBehaviour:
   Price: 500
   Sell: 100
   isUnlimited: 1
-  isSellable: 1
+  isSellable: 0
   CurrencyType: 0
   RemainingQuantity: 0
   ResourceType: 9

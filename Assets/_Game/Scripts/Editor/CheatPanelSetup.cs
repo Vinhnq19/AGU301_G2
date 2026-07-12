@@ -11,7 +11,10 @@ namespace DungeonBuilder.Editor
     /// Tao prefab CheatPanel (mo bang mat ma trong chat, xem ChatView._cheatCode)
     /// voi style hien dai: nen toi bo goc, accent tim, nut hover doi mau, drop shadow.
     /// Sprite bo goc duoc generate tu dong (9-slice) vao Assets/_Game/Generated/UI/.
-    /// Cau truc: root "CheatPanel" (CheatPanelView, luon active) -> child "Panel" (visual, tat/bat).
+    /// Cau truc: root "CheatPanel" (CheatPanelView, luon active) -> child "VisualRoot" (tat/bat).
+    ///
+    /// Layout: header (status pill HOST/CLIENT + title + close) -> amount chips ->
+    /// cac section (TAI NGUYEN / KY NANG / NGUOI CHOI / WAVE) -> footer feedback label.
     /// Run via menu: Tools > Cheat > Create Cheat Panel Prefab
     /// </summary>
     public static class CheatPanelSetup
@@ -19,15 +22,24 @@ namespace DungeonBuilder.Editor
         private const string PrefabPath = "Assets/_Game/Generated/Prefabs/UI/CheatPanel.prefab";
         private const string RoundedSpritePath = "Assets/_Game/Generated/UI/RoundedRect16.png";
 
-        // Palette (dark modern)
-        private static readonly Color PanelBg = new Color32(23, 26, 36, 250);      // #171A24
-        private static readonly Color PanelOutline = new Color32(58, 64, 92, 255); // #3A405C
+        // Palette (dark, do tuong phan cao — nen sang hon va chu to hon de doc ro
+        // o game view nho; truoc day panel bi che "mo va be").
+        private static readonly Color PanelBg = new Color32(30, 34, 49, 255);      // #1E2231
+        private static readonly Color PanelOutline = new Color32(90, 99, 140, 255); // #5A638C
         private static readonly Color Accent = new Color32(124, 108, 255, 255);    // #7C6CFF
         private static readonly Color AccentPressed = new Color32(88, 74, 200, 255);
-        private static readonly Color ButtonBg = new Color32(35, 40, 56, 255);     // #232838
-        private static readonly Color TextMain = new Color32(232, 234, 246, 255);  // #E8EAF6
-        private static readonly Color TextMuted = new Color32(139, 144, 168, 255); // #8B90A8
+        private static readonly Color ButtonBg = new Color32(48, 57, 80, 255);     // #303950
+        private static readonly Color TextMain = new Color32(240, 242, 252, 255);  // #F0F2FC
+        private static readonly Color TextMuted = new Color32(169, 176, 204, 255); // #A9B0CC
+        private static readonly Color TextDark = new Color32(23, 26, 36, 255);     // chu tren pill
         private static readonly Color DangerHover = new Color32(255, 92, 92, 255); // #FF5C5C
+        private static readonly Color HostGreen = new Color32(74, 222, 128, 255);
+
+        private const float ButtonHeight = 58f;
+        private const float SectionHeight = 30f;
+        private const float ChipHeight = 44f;
+        private const float ButtonFontSize = 21f;
+        private const float SectionFontSize = 16f;
 
         [MenuItem("Tools/Cheat/Create Cheat Panel Prefab")]
         public static void CreateCheatPanelPrefab()
@@ -35,7 +47,6 @@ namespace DungeonBuilder.Editor
             Sprite rounded = GetOrCreateRoundedSprite();
 
             // Root: khong co visual, giu CheatPanelView luon active de nhan lenh Show() tu ChatView.
-            // Stretch full man hinh de con dat duoc cac phan tu neo theo canh/goc man hinh.
             var root = new GameObject("CheatPanel");
             var rootRect = root.AddComponent<RectTransform>();
             rootRect.anchorMin = Vector2.zero;
@@ -61,7 +72,7 @@ namespace DungeonBuilder.Editor
             panelRect.anchorMax = new Vector2(1f, 0.5f);
             panelRect.pivot = new Vector2(1f, 0.5f);
             panelRect.anchoredPosition = new Vector2(-20f, 0f);
-            panelRect.sizeDelta = new Vector2(430f, 660f);
+            panelRect.sizeDelta = new Vector2(560f, 930f);
             var panelImage = panel.AddComponent<Image>();
             panelImage.sprite = rounded;
             panelImage.type = Image.Type.Sliced;
@@ -73,8 +84,8 @@ namespace DungeonBuilder.Editor
             shadow.effectDistance = new Vector2(0f, -5f);
 
             var outline = panel.AddComponent<Outline>();
-            outline.effectColor = new Color(PanelOutline.r, PanelOutline.g, PanelOutline.b, 0.35f);
-            outline.effectDistance = new Vector2(1f, -1f);
+            outline.effectColor = new Color(PanelOutline.r, PanelOutline.g, PanelOutline.b, 0.6f);
+            outline.effectDistance = new Vector2(1.5f, -1.5f);
 
             // Thanh accent mong tren dinh panel.
             var accentBar = new GameObject("AccentBar");
@@ -92,35 +103,38 @@ namespace DungeonBuilder.Editor
             accentImage.color = Accent;
             accentImage.raycastTarget = false;
 
-            // Title
-            var title = CreateLabel(panel.transform, "Title", "CHEAT MENU", 30f, FontStyles.Bold, TextMain);
+            // Status pill HOST/CLIENT o goc trai tren (runtime doi mau + text).
+            var (statusPill, statusText) = CreateStatusPill(panel.transform, rounded);
+
+            // Title + subtitle.
+            var title = CreateLabel(panel.transform, "Title", "CHEAT MENU", 34f, FontStyles.Bold, TextMain);
             title.characterSpacing = 6f;
             var titleRect = title.GetComponent<RectTransform>();
             titleRect.anchorMin = new Vector2(0f, 1f);
             titleRect.anchorMax = new Vector2(1f, 1f);
             titleRect.pivot = new Vector2(0.5f, 1f);
-            titleRect.anchoredPosition = new Vector2(0f, -24f);
-            titleRect.sizeDelta = new Vector2(0f, 40f);
+            titleRect.anchoredPosition = new Vector2(0f, -22f);
+            titleRect.sizeDelta = new Vector2(0f, 44f);
 
-            var subtitle = CreateLabel(panel.transform, "Subtitle", "developer tools", 15f, FontStyles.Italic, TextMuted);
+            var subtitle = CreateLabel(panel.transform, "Subtitle", "developer tools — ESC de dong", 16f, FontStyles.Italic, TextMuted);
             var subtitleRect = subtitle.GetComponent<RectTransform>();
             subtitleRect.anchorMin = new Vector2(0f, 1f);
             subtitleRect.anchorMax = new Vector2(1f, 1f);
             subtitleRect.pivot = new Vector2(0.5f, 1f);
-            subtitleRect.anchoredPosition = new Vector2(0f, -64f);
+            subtitleRect.anchoredPosition = new Vector2(0f, -66f);
             subtitleRect.sizeDelta = new Vector2(0f, 22f);
 
             // Close (x) tron o goc.
             var closeButton = CreateCloseButton(panel.transform, rounded);
 
-            // Button list container.
-            var list = new GameObject("Buttons");
+            // Content list.
+            var list = new GameObject("Content");
             list.transform.SetParent(panel.transform, false);
             var listRect = list.AddComponent<RectTransform>();
             listRect.anchorMin = new Vector2(0f, 0f);
             listRect.anchorMax = new Vector2(1f, 1f);
-            listRect.offsetMin = new Vector2(26f, 26f);
-            listRect.offsetMax = new Vector2(-26f, -100f);
+            listRect.offsetMin = new Vector2(26f, 56f);    // chua cho footer feedback
+            listRect.offsetMax = new Vector2(-26f, -102f); // chua cho header
             var layout = list.AddComponent<VerticalLayoutGroup>();
             layout.childControlWidth = true;
             layout.childControlHeight = false;
@@ -128,17 +142,39 @@ namespace DungeonBuilder.Editor
             layout.childForceExpandHeight = false;
             layout.spacing = 10f;
 
+            // --- TAI NGUYEN ---
             CreateSectionLabel(list.transform, "TAI NGUYEN");
-            var addBasic = CreateCheatButton(list.transform, rounded, "AddBasicButton", "+500 Wood / Stone / Ore / Crystal");
-            var addRare = CreateCheatButton(list.transform, rounded, "AddRareButton", "+500 Copper / Iron / Gems / Coin");
+            var amountChips = CreateAmountChipsRow(list.transform, rounded);
+            var addBasic = CreateCheatButton(list.transform, rounded, "AddBasicButton", "+ Co ban   (Wood / Stone / Ore / Crystal)");
+            var addRare = CreateCheatButton(list.transform, rounded, "AddRareButton", "+ Hiem   (Copper / Iron / Gems)");
+            var addCurrency = CreateCheatButton(list.transform, rounded, "AddCurrencyButton", "+ Tien te   (Coin / Token)");
 
+            // --- KY NANG ---
+            CreateSectionLabel(list.transform, "KY NANG");
+            var (miningSkill, forgingSkill) = CreatePairRow(list.transform, rounded,
+                ("MiningSkillButton", "+1 Mining Skill", false),
+                ("ForgingSkillButton", "+1 Forging Skill", false));
+
+            // --- NGUOI CHOI ---
             CreateSectionLabel(list.transform, "NGUOI CHOI");
-            var fullHeal = CreateCheatButton(list.transform, rounded, "FullHealButton", "Hoi day mau");
+            var (fullHeal, revive) = CreatePairRow(list.transform, rounded,
+                ("FullHealButton", "Hoi day mau", false),
+                ("ReviveButton", "Hoi sinh ngay", false));
             var kill = CreateCheatButton(list.transform, rounded, "KillButton", "Tu sat (test respawn)", danger: true);
 
-            CreateSectionLabel(list.transform, "WAVE");
+            // --- WAVE ---
+            var waveInfo = CreateSectionLabelWithInfo(list.transform, "WAVE", "Wave hien tai: --");
             var reloadWaves = CreateCheatButton(list.transform, rounded, "ReloadWavesButton", "Reload Waves (JSON)");
             var (jumpInput, jumpButton) = CreateJumpWaveRow(list.transform, rounded);
+
+            // Footer: feedback label (runtime set text + mau).
+            var feedback = CreateLabel(panel.transform, "FeedbackText", "", 18f, FontStyles.Normal, TextMuted);
+            var feedbackRect = feedback.GetComponent<RectTransform>();
+            feedbackRect.anchorMin = new Vector2(0f, 0f);
+            feedbackRect.anchorMax = new Vector2(1f, 0f);
+            feedbackRect.pivot = new Vector2(0.5f, 0f);
+            feedbackRect.anchoredPosition = new Vector2(0f, 16f);
+            feedbackRect.sizeDelta = new Vector2(-40f, 30f);
 
             // Wire serialized fields
             var so = new SerializedObject(view);
@@ -146,11 +182,27 @@ namespace DungeonBuilder.Editor
             so.FindProperty("_closeButton").objectReferenceValue = closeButton;
             so.FindProperty("_addBasicResourcesButton").objectReferenceValue = addBasic;
             so.FindProperty("_addRareResourcesButton").objectReferenceValue = addRare;
+            so.FindProperty("_addCurrencyButton").objectReferenceValue = addCurrency;
+            so.FindProperty("_miningSkillButton").objectReferenceValue = miningSkill;
+            so.FindProperty("_forgingSkillButton").objectReferenceValue = forgingSkill;
             so.FindProperty("_fullHealButton").objectReferenceValue = fullHeal;
+            so.FindProperty("_reviveButton").objectReferenceValue = revive;
             so.FindProperty("_killPlayerButton").objectReferenceValue = kill;
             so.FindProperty("_reloadWavesButton").objectReferenceValue = reloadWaves;
             so.FindProperty("_jumpWaveInput").objectReferenceValue = jumpInput;
             so.FindProperty("_jumpWaveButton").objectReferenceValue = jumpButton;
+            so.FindProperty("_statusPill").objectReferenceValue = statusPill;
+            so.FindProperty("_statusText").objectReferenceValue = statusText;
+            so.FindProperty("_waveInfoText").objectReferenceValue = waveInfo;
+            so.FindProperty("_feedbackText").objectReferenceValue = feedback;
+
+            var chipsProp = so.FindProperty("_amountButtons");
+            chipsProp.arraySize = amountChips.Length;
+            for (int i = 0; i < amountChips.Length; i++)
+            {
+                chipsProp.GetArrayElementAtIndex(i).objectReferenceValue = amountChips[i];
+            }
+
             so.ApplyModifiedPropertiesWithoutUndo();
 
             PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
@@ -158,6 +210,34 @@ namespace DungeonBuilder.Editor
 
             AssetDatabase.SaveAssets();
             Debug.Log("[CheatPanelSetup] CheatPanel prefab created at " + PrefabPath);
+        }
+
+        private static (Image pill, TextMeshProUGUI text) CreateStatusPill(Transform parent, Sprite rounded)
+        {
+            var go = new GameObject("StatusPill");
+            go.transform.SetParent(parent, false);
+            var rect = go.AddComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0f, 1f);
+            rect.anchorMax = new Vector2(0f, 1f);
+            rect.pivot = new Vector2(0f, 1f);
+            rect.anchoredPosition = new Vector2(16f, -16f);
+            rect.sizeDelta = new Vector2(98f, 34f);
+
+            var image = go.AddComponent<Image>();
+            image.sprite = rounded;
+            image.type = Image.Type.Sliced;
+            image.pixelsPerUnitMultiplier = 2.2f;
+            image.color = HostGreen; // runtime doi theo host/client
+            image.raycastTarget = false;
+
+            var label = CreateLabel(go.transform, "Text", "HOST", 17f, FontStyles.Bold, TextDark);
+            label.characterSpacing = 2f;
+            var labelRect = label.GetComponent<RectTransform>();
+            labelRect.anchorMin = Vector2.zero;
+            labelRect.anchorMax = Vector2.one;
+            labelRect.sizeDelta = Vector2.zero;
+
+            return (image, label);
         }
 
         private static Button CreateCloseButton(Transform parent, Sprite rounded)
@@ -169,7 +249,7 @@ namespace DungeonBuilder.Editor
             rect.anchorMax = new Vector2(1f, 1f);
             rect.pivot = new Vector2(1f, 1f);
             rect.anchoredPosition = new Vector2(-14f, -14f);
-            rect.sizeDelta = new Vector2(38f, 38f);
+            rect.sizeDelta = new Vector2(44f, 44f);
 
             var image = go.AddComponent<Image>();
             image.sprite = rounded;
@@ -185,7 +265,7 @@ namespace DungeonBuilder.Editor
             colors.fadeDuration = 0.12f;
             button.colors = colors;
 
-            var label = CreateLabel(go.transform, "Text", "×", 26f, FontStyles.Bold, TextMuted); // ×
+            var label = CreateLabel(go.transform, "Text", "×", 30f, FontStyles.Bold, TextMuted);
             var labelRect = label.GetComponent<RectTransform>();
             labelRect.anchorMin = Vector2.zero;
             labelRect.anchorMax = Vector2.one;
@@ -196,23 +276,125 @@ namespace DungeonBuilder.Editor
 
         private static void CreateSectionLabel(Transform parent, string text)
         {
-            var label = CreateLabel(parent, "Section_" + text, text, 14f, FontStyles.Bold, TextMuted);
+            var label = CreateLabel(parent, "Section_" + text, text, SectionFontSize, FontStyles.Bold, TextMuted);
             label.characterSpacing = 10f;
             label.alignment = TextAlignmentOptions.MidlineLeft;
             var rect = label.GetComponent<RectTransform>();
-            rect.sizeDelta = new Vector2(0f, 30f);
+            rect.sizeDelta = new Vector2(0f, SectionHeight);
             var layoutElem = label.gameObject.AddComponent<LayoutElement>();
-            layoutElem.minHeight = 30f;
+            layoutElem.minHeight = SectionHeight;
         }
 
-        private static Button CreateCheatButton(Transform parent, Sprite rounded, string name, string label, bool danger = false)
+        /// <summary>Section header 2 cot: ten section ben trai + info label ben phai (vd wave hien tai).</summary>
+        private static TextMeshProUGUI CreateSectionLabelWithInfo(Transform parent, string text, string info)
+        {
+            var row = new GameObject("Section_" + text);
+            row.transform.SetParent(parent, false);
+            var rect = row.AddComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(0f, SectionHeight);
+            var layoutElem = row.AddComponent<LayoutElement>();
+            layoutElem.minHeight = SectionHeight;
+
+            var left = CreateLabel(row.transform, "Name", text, SectionFontSize, FontStyles.Bold, TextMuted);
+            left.characterSpacing = 10f;
+            left.alignment = TextAlignmentOptions.MidlineLeft;
+            var leftRect = left.GetComponent<RectTransform>();
+            leftRect.anchorMin = Vector2.zero;
+            leftRect.anchorMax = new Vector2(0.4f, 1f);
+            leftRect.sizeDelta = Vector2.zero;
+
+            var right = CreateLabel(row.transform, "Info", info, 18f, FontStyles.Normal, TextMain);
+            right.alignment = TextAlignmentOptions.MidlineRight;
+            var rightRect = right.GetComponent<RectTransform>();
+            rightRect.anchorMin = new Vector2(0.4f, 0f);
+            rightRect.anchorMax = Vector2.one;
+            rightRect.sizeDelta = Vector2.zero;
+
+            return right;
+        }
+
+        /// <summary>Hang chip chon so luong resource: [100][500][1K][5K]. Chip dang chon accent (runtime).</summary>
+        private static Button[] CreateAmountChipsRow(Transform parent, Sprite rounded)
+        {
+            var row = new GameObject("AmountChips");
+            row.transform.SetParent(parent, false);
+            var rect = row.AddComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(0f, ChipHeight);
+            var layoutElem = row.AddComponent<LayoutElement>();
+            layoutElem.minHeight = ChipHeight;
+
+            var layout = row.AddComponent<HorizontalLayoutGroup>();
+            layout.childControlWidth = true;
+            layout.childControlHeight = true;
+            layout.childForceExpandWidth = true;
+            layout.childForceExpandHeight = true;
+            layout.spacing = 8f;
+
+            string[] labels = { "100", "500", "1K", "5K" };
+            var buttons = new Button[labels.Length];
+            for (int i = 0; i < labels.Length; i++)
+            {
+                var go = new GameObject("Chip_" + labels[i]);
+                go.transform.SetParent(row.transform, false);
+                go.AddComponent<RectTransform>();
+
+                var image = go.AddComponent<Image>();
+                image.sprite = rounded;
+                image.type = Image.Type.Sliced;
+                image.pixelsPerUnitMultiplier = 2.2f;
+                image.color = ButtonBg; // runtime: chip dang chon doi sang accent
+
+                var button = go.AddComponent<Button>();
+                // Chip doi mau NEN (Image.color) bang code -> khong dung ColorTint de khoi de mau runtime.
+                button.transition = Selectable.Transition.None;
+
+                var label = CreateLabel(go.transform, "Text", labels[i], 19f, FontStyles.Bold, TextMain);
+                var labelRect = label.GetComponent<RectTransform>();
+                labelRect.anchorMin = Vector2.zero;
+                labelRect.anchorMax = Vector2.one;
+                labelRect.sizeDelta = Vector2.zero;
+
+                buttons[i] = button;
+            }
+
+            return buttons;
+        }
+
+        /// <summary>Hang 2 nut chia doi chieu ngang (vd Hoi mau | Tu sat).</summary>
+        private static (Button left, Button right) CreatePairRow(Transform parent, Sprite rounded,
+            (string name, string label, bool danger) a, (string name, string label, bool danger) b)
+        {
+            var row = new GameObject("Row_" + a.name);
+            row.transform.SetParent(parent, false);
+            var rect = row.AddComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(0f, ButtonHeight);
+            var layoutElem = row.AddComponent<LayoutElement>();
+            layoutElem.minHeight = ButtonHeight;
+
+            var layout = row.AddComponent<HorizontalLayoutGroup>();
+            layout.childControlWidth = true;
+            layout.childControlHeight = true;
+            layout.childForceExpandWidth = true;
+            layout.childForceExpandHeight = true;
+            layout.spacing = 9f;
+
+            var left = CreateCheatButton(row.transform, rounded, a.name, a.label, a.danger, inRow: true);
+            var right = CreateCheatButton(row.transform, rounded, b.name, b.label, b.danger, inRow: true);
+            return (left, right);
+        }
+
+        private static Button CreateCheatButton(Transform parent, Sprite rounded, string name, string label,
+            bool danger = false, bool inRow = false)
         {
             var go = new GameObject(name);
             go.transform.SetParent(parent, false);
             var rect = go.AddComponent<RectTransform>();
-            rect.sizeDelta = new Vector2(0f, 56f);
-            var layoutElem = go.AddComponent<LayoutElement>();
-            layoutElem.minHeight = 56f;
+            rect.sizeDelta = new Vector2(0f, ButtonHeight);
+            if (!inRow)
+            {
+                var layoutElem = go.AddComponent<LayoutElement>();
+                layoutElem.minHeight = ButtonHeight;
+            }
 
             var image = go.AddComponent<Image>();
             image.sprite = rounded;
@@ -228,10 +410,11 @@ namespace DungeonBuilder.Editor
                 ? new Color(DangerHover.r * 0.65f, DangerHover.g * 0.65f, DangerHover.b * 0.65f, 1f)
                 : AccentPressed;
             colors.selectedColor = ButtonBg;
+            colors.disabledColor = new Color(ButtonBg.r, ButtonBg.g, ButtonBg.b, 0.4f);
             colors.fadeDuration = 0.12f;
             button.colors = colors;
 
-            var text = CreateLabel(go.transform, "Text", label, 18f, FontStyles.Normal, TextMain);
+            var text = CreateLabel(go.transform, "Text", label, ButtonFontSize, FontStyles.Normal, TextMain);
             var textRect = text.GetComponent<RectTransform>();
             textRect.anchorMin = Vector2.zero;
             textRect.anchorMax = Vector2.one;
@@ -240,24 +423,22 @@ namespace DungeonBuilder.Editor
             return button;
         }
 
-        /// <summary>
-        /// Hàng "Jump to wave": input số bên trái + nút "Jump" bên phải, cùng 1 dòng 56px.
-        /// </summary>
+        /// <summary>Hang "Jump to wave": input so ben trai + nut "Jump" ben phai, cung 1 dong.</summary>
         private static (TMP_InputField input, Button button) CreateJumpWaveRow(Transform parent, Sprite rounded)
         {
             var row = new GameObject("JumpWaveRow");
             row.transform.SetParent(parent, false);
             var rowRect = row.AddComponent<RectTransform>();
-            rowRect.sizeDelta = new Vector2(0f, 56f);
+            rowRect.sizeDelta = new Vector2(0f, ButtonHeight);
             var rowLayoutElem = row.AddComponent<LayoutElement>();
-            rowLayoutElem.minHeight = 56f;
+            rowLayoutElem.minHeight = ButtonHeight;
 
             var rowLayout = row.AddComponent<HorizontalLayoutGroup>();
             rowLayout.childControlWidth = true;
             rowLayout.childControlHeight = true;
             rowLayout.childForceExpandWidth = false;
             rowLayout.childForceExpandHeight = true;
-            rowLayout.spacing = 10f;
+            rowLayout.spacing = 9f;
 
             // --- Input field (TMP) ---
             var inputGo = new GameObject("JumpWaveInput");
@@ -265,7 +446,7 @@ namespace DungeonBuilder.Editor
             inputGo.AddComponent<RectTransform>();
             var inputLayoutElem = inputGo.AddComponent<LayoutElement>();
             inputLayoutElem.preferredWidth = 150f;
-            inputLayoutElem.minHeight = 56f;
+            inputLayoutElem.minHeight = ButtonHeight;
 
             var inputImage = inputGo.AddComponent<Image>();
             inputImage.sprite = rounded;
@@ -276,7 +457,7 @@ namespace DungeonBuilder.Editor
             var inputField = inputGo.AddComponent<TMP_InputField>();
             inputField.contentType = TMP_InputField.ContentType.IntegerNumber;
 
-            // Viewport + text con theo cấu trúc chuẩn của TMP_InputField.
+            // Viewport + text con theo cau truc chuan cua TMP_InputField.
             var textArea = new GameObject("TextArea");
             textArea.transform.SetParent(inputGo.transform, false);
             var textAreaRect = textArea.AddComponent<RectTransform>();
@@ -286,14 +467,14 @@ namespace DungeonBuilder.Editor
             textAreaRect.offsetMax = new Vector2(-12f, -6f);
             textArea.AddComponent<RectMask2D>();
 
-            var placeholder = CreateLabel(textArea.transform, "Placeholder", "wave...", 17f, FontStyles.Italic, TextMuted);
+            var placeholder = CreateLabel(textArea.transform, "Placeholder", "wave...", 19f, FontStyles.Italic, TextMuted);
             placeholder.alignment = TextAlignmentOptions.MidlineLeft;
             var placeholderRect = placeholder.GetComponent<RectTransform>();
             placeholderRect.anchorMin = Vector2.zero;
             placeholderRect.anchorMax = Vector2.one;
             placeholderRect.sizeDelta = Vector2.zero;
 
-            var inputText = CreateLabel(textArea.transform, "Text", "", 18f, FontStyles.Normal, TextMain);
+            var inputText = CreateLabel(textArea.transform, "Text", "", 21f, FontStyles.Normal, TextMain);
             inputText.alignment = TextAlignmentOptions.MidlineLeft;
             var inputTextRect = inputText.GetComponent<RectTransform>();
             inputTextRect.anchorMin = Vector2.zero;
@@ -304,7 +485,7 @@ namespace DungeonBuilder.Editor
             inputField.textComponent = inputText;
             inputField.placeholder = placeholder;
 
-            // --- Nút Jump ---
+            // --- Nut Jump ---
             var jumpButton = CreateCheatButton(row.transform, rounded, "JumpWaveButton", "Jump to wave");
             var jumpLayoutElem = jumpButton.GetComponent<LayoutElement>();
             jumpLayoutElem.flexibleWidth = 1f;

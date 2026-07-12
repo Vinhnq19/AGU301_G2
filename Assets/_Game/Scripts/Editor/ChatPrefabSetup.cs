@@ -1,4 +1,4 @@
-using DungeonBuilder.Chat;
+﻿using DungeonBuilder.Chat;
 using DungeonBuilder.UI.Chat;
 using TMPro;
 using Unity.Netcode;
@@ -42,7 +42,7 @@ namespace DungeonBuilder.Editor
             var text = root.AddComponent<TextMeshProUGUI>();
             text.fontSize = 14f;
             text.color = Color.white;
-            text.enableWordWrapping = true;
+            text.textWrappingMode = TextWrappingModes.Normal;
             text.raycastTarget = false;
 
             var item = root.AddComponent<ChatMessageItem>();
@@ -170,7 +170,7 @@ namespace DungeonBuilder.Editor
             var inputTMP = inputText.AddComponent<TextMeshProUGUI>();
             inputTMP.fontSize = 14f;
             inputTMP.color = Color.white;
-            inputTMP.enableWordWrapping = false;
+            inputTMP.textWrappingMode = TextWrappingModes.NoWrap;
 
             // Placeholder
             var placeholder = new GameObject("Placeholder");

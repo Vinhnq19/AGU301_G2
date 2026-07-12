@@ -37,6 +37,10 @@ public static class ShopFeedbackFormat
                 return new ShopFeedback("Sold out", false);
             case ShopTxResult.FailedNotSellable:
                 return new ShopFeedback("Cannot sell this item", false);
+            case ShopTxResult.FailedInvalidItem:
+                return new ShopFeedback("Item cannot be traded", false);
+            case ShopTxResult.FailedUpgradeOrder:
+                return new ShopFeedback("Buy the previous upgrade first", false);
             default:
                 return new ShopFeedback("Transaction failed", false);
         }

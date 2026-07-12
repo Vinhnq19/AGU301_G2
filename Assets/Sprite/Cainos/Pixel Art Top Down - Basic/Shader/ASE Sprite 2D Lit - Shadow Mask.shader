@@ -129,7 +129,6 @@ Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Lit - Shadow Mask"
 
 			sampler2D _MainTex;
 			CBUFFER_START( UnityPerMaterial )
-			float4 _MainTex_ST;
 			float4 _Tint;
 			float _StencilRef;
 			CBUFFER_END
@@ -209,7 +208,7 @@ Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Lit - Shadow Mask"
 				float4 positionCS = IN.positionCS;
 				float3 positionWS = IN.positionWS;
 
-				float2 uv_MainTex = IN.texCoord0.xy * _MainTex_ST.xy + _MainTex_ST.zw;
+				float2 uv_MainTex = IN.texCoord0.xy;
 				float4 temp_output_17_0 = ( tex2D( _MainTex, uv_MainTex ) * _Tint );
 				clip( temp_output_17_0.a - 0.01);
 				
@@ -298,7 +297,6 @@ Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Lit - Shadow Mask"
 
 			sampler2D _MainTex;
 			CBUFFER_START( UnityPerMaterial )
-			float4 _MainTex_ST;
 			float4 _Tint;
 			float _StencilRef;
 			CBUFFER_END
@@ -376,7 +374,7 @@ Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Lit - Shadow Mask"
 				UNITY_SETUP_INSTANCE_ID(IN);
 				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(IN);
 
-				float2 uv_MainTex = IN.texCoord0.xy * _MainTex_ST.xy + _MainTex_ST.zw;
+				float2 uv_MainTex = IN.texCoord0.xy;
 				float4 temp_output_17_0 = ( tex2D( _MainTex, uv_MainTex ) * _Tint );
 				clip( temp_output_17_0.a - 0.01);
 				
@@ -461,7 +459,6 @@ Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Lit - Shadow Mask"
 
 			sampler2D _MainTex;
 			CBUFFER_START( UnityPerMaterial )
-			float4 _MainTex_ST;
 			float4 _Tint;
 			float _StencilRef;
 			CBUFFER_END
@@ -539,7 +536,7 @@ Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Lit - Shadow Mask"
 				float4 positionCS = IN.positionCS;
 				float3 positionWS = IN.positionWS;
 
-				float2 uv_MainTex = IN.texCoord0.xy * _MainTex_ST.xy + _MainTex_ST.zw;
+				float2 uv_MainTex = IN.texCoord0.xy;
 				float4 temp_output_17_0 = ( tex2D( _MainTex, uv_MainTex ) * _Tint );
 				clip( temp_output_17_0.a - 0.01);
 				
@@ -622,7 +619,6 @@ Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Lit - Shadow Mask"
 
 			sampler2D _MainTex;
 			CBUFFER_START( UnityPerMaterial )
-			float4 _MainTex_ST;
 			float4 _Tint;
 			float _StencilRef;
 			CBUFFER_END
@@ -685,7 +681,7 @@ Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Lit - Shadow Mask"
 
 			half4 frag(VertexOutput IN) : SV_TARGET
 			{
-				float2 uv_MainTex = IN.ase_texcoord.xy * _MainTex_ST.xy + _MainTex_ST.zw;
+				float2 uv_MainTex = IN.ase_texcoord.xy;
 				float4 temp_output_17_0 = ( tex2D( _MainTex, uv_MainTex ) * _Tint );
 				clip( temp_output_17_0.a - 0.01);
 				
@@ -749,7 +745,6 @@ Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Lit - Shadow Mask"
 
 			sampler2D _MainTex;
 			CBUFFER_START( UnityPerMaterial )
-			float4 _MainTex_ST;
 			float4 _Tint;
 			float _StencilRef;
 			CBUFFER_END
@@ -811,7 +806,7 @@ Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Lit - Shadow Mask"
 
 			half4 frag(VertexOutput IN ) : SV_TARGET
 			{
-				float2 uv_MainTex = IN.ase_texcoord.xy * _MainTex_ST.xy + _MainTex_ST.zw;
+				float2 uv_MainTex = IN.ase_texcoord.xy;
 				float4 temp_output_17_0 = ( tex2D( _MainTex, uv_MainTex ) * _Tint );
 				clip( temp_output_17_0.a - 0.01);
 				

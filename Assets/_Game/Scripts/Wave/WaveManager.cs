@@ -23,6 +23,7 @@ namespace DungeonBuilder.Wave
         }
 
         [SerializeField] private WaveCatalogSO _waveCatalog;
+        public WaveCatalogSO WaveCatalog => _waveCatalog;
         [SerializeField] private EnemyPrefabMapping[] _enemyPrefabMappings;
         [SerializeField] private EnemyPath[] _enemyPaths;
         public EnemyPath[] EnemyPaths => _enemyPaths;
@@ -41,20 +42,29 @@ namespace DungeonBuilder.Wave
 
         private EventBus _eventBus;
         private INetworkPool _pool;
+        private IWaveProvider _waveProvider;
         private readonly HashSet<ulong> _activeEnemyIds = new();
         private readonly Dictionary<EnemyType, NetworkObject> _prefabLookup = new();
         private bool _isSpawningWave = false;
         private bool _skipBuildPhaseRequested = false;
 
         [Inject]
-        public void Construct(EventBus eventBus, INetworkPool pool)
+        public void Construct(EventBus eventBus, INetworkPool pool, IWaveProvider waveProvider)
         {
             _eventBus = eventBus;
             _pool = pool;
+            _waveProvider = waveProvider;
+        }
+
+        // Fallback khi không được inject (scene thiếu scope): đọc thẳng catalog như trước.
+        private void EnsureProvider()
+        {
+            _waveProvider ??= new SoWaveProvider(_waveCatalog);
         }
 
         public override void OnNetworkSpawn()
         {
+            EnsureProvider();
             _phaseCountdown.OnValueChanged += HandlePhaseCountdownChanged;
             _allWavesCompleted.OnValueChanged += HandleWavesCompleted;
             _gamePhase.OnValueChanged += HandleGamePhaseChanged;
@@ -65,7 +75,7 @@ namespace DungeonBuilder.Wave
                 _eventBus.OnGameEnded += HandleGameEndedEvent;
                 _eventBus.OnEnemyKilled += HandleEnemyKilled;
                 InitializePrefabLookup();
-                _totalWaves.Value = _waveCatalog != null && _waveCatalog.waves != null ? _waveCatalog.waves.Count : 0;
+                _totalWaves.Value = _waveProvider.WaveCount;
                 RunWaveLoopAsync().Forget();
             }
         }
@@ -106,23 +116,13 @@ namespace DungeonBuilder.Wave
                 {
                     float buildDuration = 30f; // Default fallback
                     float combatDuration = 120f; // Default fallback
-                    if (_waveCatalog != null && _waveCatalog.waves != null && _currentWave.Value < _waveCatalog.waves.Count)
+                    int waveCount = _waveProvider.WaveCount;
+                    if (waveCount > 0)
                     {
-                        var waveConfig = _waveCatalog.waves[_currentWave.Value];
-                        if (waveConfig != null)
-                        {
-                            buildDuration = waveConfig.buildPhaseDuration;
-                            combatDuration = waveConfig.combatPhaseDuration;
-                        }
-                    }
-                    else if (_waveCatalog != null && _waveCatalog.waves != null && _waveCatalog.waves.Count > 0)
-                    {
-                        var lastWave = _waveCatalog.waves[_waveCatalog.waves.Count - 1];
-                        if (lastWave != null)
-                        {
-                            buildDuration = lastWave.buildPhaseDuration;
-                            combatDuration = lastWave.combatPhaseDuration;
-                        }
+                        // Wave vượt catalog dùng config của wave cuối (giữ semantics cũ).
+                        WaveData waveConfig = _waveProvider.GetWave(Mathf.Min(_currentWave.Value, waveCount - 1));
+                        buildDuration = waveConfig.buildPhaseDuration;
+                        combatDuration = waveConfig.combatPhaseDuration;
                     }
 
                     _gamePhase.Value = GamePhase.Build;
@@ -143,8 +143,7 @@ namespace DungeonBuilder.Wave
 
                     await CountdownCombatAsync(combatDuration);
 
-                    if (_waveCatalog != null && _waveCatalog.waves != null
-                        && _currentWave.Value >= _waveCatalog.waves.Count)
+                    if (_currentWave.Value >= _waveProvider.WaveCount)
                     {
                         _allWavesCompleted.Value = true;
                         break;
@@ -208,6 +207,23 @@ namespace DungeonBuilder.Wave
             }
         }
 
+        /// <summary>
+        /// Cheat host-only: đọc lại nguồn wave data (JSON override nếu có).
+        /// Áp dụng từ wave KẾ TIẾP — không đụng wave đang chạy.
+        /// </summary>
+        public void ReloadWaveData()
+        {
+            if (!IsServer)
+            {
+                return;
+            }
+
+            EnsureProvider();
+            _waveProvider.Reload();
+            _totalWaves.Value = _waveProvider.WaveCount;
+            Debug.Log($"[WaveManager] Wave data reloaded — {_waveProvider.WaveCount} waves (applies from next wave).");
+        }
+
         /// <summary>Bat ky client nao cung co the yeu cau bo qua thoi gian chuan bi (Build phase). Server xac thuc va xu ly.</summary>
         [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
         public void RequestSkipBuildPhaseServerRpc()
@@ -227,26 +243,17 @@ namespace DungeonBuilder.Wave
 
             try
             {
-                if (!IsNetworkReady() || _pool == null || _waveCatalog == null || _waveCatalog.waves == null || _waveCatalog.waves.Count == 0 || _isGameEnded)
+                if (!IsNetworkReady() || _pool == null || _waveProvider == null || _waveProvider.WaveCount == 0 || _isGameEnded)
                 {
                     return;
                 }
 
-            WaveSO waveConfig = null;
             int waveIndex = waveNumber - 1;
-            bool isFallback = false;
+            int totalWaveCount = _waveProvider.WaveCount;
+            bool isFallback = waveIndex >= totalWaveCount;
+            WaveData waveConfig = _waveProvider.GetWave(Mathf.Min(waveIndex, totalWaveCount - 1));
 
-            if (waveIndex < _waveCatalog.waves.Count)
-            {
-                waveConfig = _waveCatalog.waves[waveIndex];
-            }
-            else
-            {
-                waveConfig = _waveCatalog.waves[_waveCatalog.waves.Count - 1];
-                isFallback = true;
-            }
-
-            if (waveConfig == null || waveConfig.spawnGroups == null)
+            if (waveConfig.spawnGroups == null)
             {
                 return;
             }
@@ -269,7 +276,7 @@ namespace DungeonBuilder.Wave
                 int spawnCount = group.count;
                 if (isFallback)
                 {
-                    spawnCount += (waveNumber - _waveCatalog.waves.Count);
+                    spawnCount += (waveNumber - totalWaveCount);
                 }
 
                 for (int i = 0; i < spawnCount; i++)
@@ -370,18 +377,13 @@ namespace DungeonBuilder.Wave
         {
             if (newValue <= 0) return;
 
+            EnsureProvider();
             bool isBoss = false;
             int waveIndex = newValue - 1;
-            if (_waveCatalog != null && _waveCatalog.waves != null)
+            int waveCount = _waveProvider.WaveCount;
+            if (waveCount > 0)
             {
-                if (waveIndex < _waveCatalog.waves.Count && _waveCatalog.waves[waveIndex] != null)
-                {
-                    isBoss = _waveCatalog.waves[waveIndex].isBossWave;
-                }
-                else if (_waveCatalog.waves.Count > 0 && _waveCatalog.waves[_waveCatalog.waves.Count - 1] != null)
-                {
-                    isBoss = _waveCatalog.waves[_waveCatalog.waves.Count - 1].isBossWave;
-                }
+                isBoss = _waveProvider.GetWave(Mathf.Min(waveIndex, waveCount - 1)).isBossWave;
             }
 
             _eventBus?.RaiseWaveStarted(newValue, isBoss);

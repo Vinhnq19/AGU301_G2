@@ -93,6 +93,40 @@ public static class WaveSheetImporter
         Debug.Log($"[WaveSheetImporter] Exported {catalog.waves.Count} waves to {csvPath}");
     }
 
+    // ---------------- Template ----------------
+
+    [MenuItem("Tools/Waves/Create CSV Template")]
+    public static void CreateTemplate() => CreateTemplate(DefaultCsvPath);
+
+    /// <summary>
+    /// Ghi file CSV mẫu tại <paramref name="csvPath"/>: header + comment hướng dẫn (dòng '#' bị Import bỏ qua)
+    /// + 3 dòng ví dụ (wave đơn, dải wave có growth, boss) — import được luôn để bắt đầu nhanh.
+    /// </summary>
+    public static void CreateTemplate(string csvPath)
+    {
+        if (string.IsNullOrEmpty(csvPath))
+        {
+            Debug.LogError("[WaveSheetImporter] CreateTemplate: đường dẫn CSV rỗng.");
+            return;
+        }
+
+        var sb = new StringBuilder();
+        sb.AppendLine(CsvHeaderWithGrowth);
+        sb.AppendLine("# Mỗi dòng = 1 nhóm quái; nhiều dòng cùng 'wave' gộp thành 1 wave.");
+        sb.AppendLine("# wave: 'N' hoặc dải 'A-B' (vd 2-9). buildTime/combatTime tính bằng giây. isBoss: TRUE/FALSE.");
+        sb.AppendLine($"# enemyType (theo tên): {string.Join(" | ", Enum.GetNames(typeof(EnemyType)))}");
+        sb.AppendLine("# count: số con. interval: giây giữa 2 con. spawnPoint/path: chỉ số cổng/đường trong scene (0=North,1=East,2=West).");
+        sb.AppendLine("# growth (cột cuối, tùy chọn): với dải 'A-B', count nhân growth mỗi wave (vd 1.2). Để trống = giữ nguyên.");
+        sb.AppendLine("# --- 3 dòng ví dụ dưới import được ngay; sửa/xóa tùy ý ---");
+        sb.AppendLine("1,30,90,FALSE,Runner,8,1.5,0,0,");
+        sb.AppendLine("2-9,25,100,FALSE,Runner,10,1.2,0,0,1.15");
+        sb.AppendLine("10,30,120,TRUE,RatKing,1,0,1,1,");
+
+        Directory.CreateDirectory(Path.GetDirectoryName(csvPath));
+        File.WriteAllText(csvPath, sb.ToString(), new UTF8Encoding(true));
+        Debug.Log($"[WaveSheetImporter] Created CSV template at {csvPath}");
+    }
+
     // ---------------- Import ----------------
 
     private sealed class Row

@@ -512,13 +512,13 @@ public sealed class WaveDesignerWindow : EditorWindow
         EditorGUI.DrawRect(rect, SidebarBg);
         EditorGUI.DrawRect(new Rect(rect.x, rect.yMax - 1f, rect.width, 1f), new Color(0f, 0f, 0f, 0.25f));
 
-        const float pad = 8f, browseW = 74f, revealW = 84f, gap = 4f;
+        const float pad = 8f, templateW = 74f, browseW = 74f, revealW = 84f, gap = 4f;
         Rect label = new Rect(rect.x + pad, rect.y + 4f, 30f, 16f);
         GUI.Label(label, new GUIContent("CSV", "Đường dẫn file CSV cho Import/Export (lưu trong EditorPrefs)"), EditorStyles.miniBoldLabel);
 
         float fieldX = label.xMax + gap;
-        float fieldW = rect.width - fieldX - pad - browseW - revealW - gap * 2f;
-        Rect field = new Rect(fieldX, rect.y + 3f, Mathf.Max(120f, fieldW), 18f);
+        float fieldW = rect.width - fieldX - pad - templateW - browseW - revealW - gap * 3f;
+        Rect field = new Rect(fieldX, rect.y + 3f, Mathf.Max(110f, fieldW), 18f);
         EditorGUI.BeginChangeCheck();
         string typed = EditorGUI.TextField(field, _csvPath);
         if (EditorGUI.EndChangeCheck())
@@ -527,7 +527,23 @@ public sealed class WaveDesignerWindow : EditorWindow
             EditorPrefs.SetString(CsvPathPrefKey, _csvPath);
         }
 
-        Rect browse = new Rect(field.xMax + gap, rect.y + 3f, browseW, 18f);
+        Rect template = new Rect(field.xMax + gap, rect.y + 3f, templateW, 18f);
+        if (GUI.Button(template, new GUIContent("Template", "Tạo file CSV mẫu (header + hướng dẫn + ví dụ) để bắt đầu"), EditorStyles.miniButton))
+        {
+            string dir = string.IsNullOrEmpty(_csvPath) ? Application.dataPath : System.IO.Path.GetDirectoryName(_csvPath);
+            string name = string.IsNullOrEmpty(_csvPath) ? "WaveSheet.csv" : System.IO.Path.GetFileName(_csvPath);
+            string picked = EditorUtility.SaveFilePanel("Tạo file CSV template", dir, name, "csv");
+            if (!string.IsNullOrEmpty(picked))
+            {
+                WaveSheetImporter.CreateTemplate(picked);
+                _csvPath = picked;
+                EditorPrefs.SetString(CsvPathPrefKey, _csvPath);
+                EditorUtility.RevealInFinder(picked);
+                GUI.FocusControl(null);
+            }
+        }
+
+        Rect browse = new Rect(template.xMax + gap, rect.y + 3f, browseW, 18f);
         if (GUI.Button(browse, new GUIContent("Browse…", "Chọn hoặc đặt vị trí file CSV"), EditorStyles.miniButton))
         {
             string startDir = string.IsNullOrEmpty(_csvPath) ? Application.dataPath : System.IO.Path.GetDirectoryName(_csvPath);

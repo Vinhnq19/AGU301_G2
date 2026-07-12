@@ -102,6 +102,8 @@ namespace DungeonBuilder.Player
                 _isDead = true;
                 _deathElapsed = 0f;
                 _deathSequenceFinished = false;
+                // Chết giữa cú swing thu hoạch → hủy trạng thái foraging để không kẹt anim/movement lock.
+                IsForaging = false;
                 // Giữ nguyên _lastDrivenFacing để chọn sprite death theo hướng cuối cùng
                 // trước khi chết (up/down/side).
             }

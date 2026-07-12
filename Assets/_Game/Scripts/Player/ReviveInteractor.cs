@@ -86,6 +86,15 @@ namespace DungeonBuilder.Player
                 return;
             }
 
+            // Server ghi nhận NGƯỜI KHÁC là reviver (mình click sau, request bị từ chối)
+            // → clear để không bị khóa di chuyển vô hạn chờ một revive không tồn tại.
+            if (_localReviveTarget.ReviverClientId != ulong.MaxValue
+                && _localReviveTarget.ReviverClientId != OwnerClientId)
+            {
+                ClearLocalTarget();
+                return;
+            }
+
             float dist = Vector2.Distance(transform.position, _localReviveTarget.transform.position);
             if (dist > _reviveRange)
             {
@@ -124,6 +133,7 @@ namespace DungeonBuilder.Player
             PlayerStats target = FindDownedPlayerUnderCursor();
             if (target == null || target == _myStats) return;
             if (!target.IsDead) return;
+            if (target.ReviverClientId != ulong.MaxValue) return; // đã có đồng minh khác đang cứu
 
             float dist = Vector2.Distance(transform.position, target.transform.position);
             if (dist > _reviveRange) return;

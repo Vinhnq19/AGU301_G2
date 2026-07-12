@@ -3,7 +3,10 @@
 > Tài liệu tự chứa cho phiên làm việc sau. Đọc xong file này là đủ context để bắt tay implement,
 > không cần lịch sử hội thoại cũ.
 >
-> **Trạng thái: Phase 1 + Phase 2 ĐÃ XONG (2026-07-12). Phase 3 chưa làm (chỉ làm khi user yêu cầu).**
+> **Trạng thái: Phase 1 + 2 + 3 ĐÃ XONG (2026-07-12).**
+> Phase 3 gồm: cột `growth` + range wave "A-B" trong CSV (3 dòng sinh được 10 wave),
+> `_endlessMode` trên WaveManager (Inspector; giết boss không thắng, HUD hiện "Wave: x"),
+> cheat "Jump to wave" trong Cheat Panel (chỉ Build phase).
 > **Đã chốt:** nguồn sheet = file CSV trong repo tại `Docs/WaveSheet.csv`.
 >
 > Đã có: `Assets/_Game/Editor/WaveSheetImporter.cs` (menu `Tools > Waves > Export/Import`),

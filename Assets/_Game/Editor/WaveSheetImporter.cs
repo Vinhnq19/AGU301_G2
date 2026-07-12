@@ -27,14 +27,24 @@ public static class WaveSheetImporter
     // Ví dụ: wave=1-9, count=10, growth=1.2 → wave 1: 10, wave 2: 12, wave 3: 14 (round), ...
     private const string CsvHeaderWithGrowth = CsvHeader + ",growth";
 
-    private static string CsvPath =>
+    /// <summary>Đường dẫn CSV mặc định (Docs/WaveSheet.csv). Wave Designer có thể trỏ path khác qua ô "CSV".</summary>
+    public static string DefaultCsvPath =>
         Path.GetFullPath(Path.Combine(Application.dataPath, "..", "Docs", "WaveSheet.csv"));
 
     // ---------------- Export ----------------
 
     [MenuItem("Tools/Waves/Export Current Waves to CSV")]
-    public static void Export()
+    public static void Export() => Export(DefaultCsvPath);
+
+    /// <summary>Export catalog hiện tại ra CSV tại <paramref name="csvPath"/> (đường dẫn tuyệt đối).</summary>
+    public static void Export(string csvPath)
     {
+        if (string.IsNullOrEmpty(csvPath))
+        {
+            Debug.LogError("[WaveSheetImporter] Export: đường dẫn CSV rỗng.");
+            return;
+        }
+
         WaveCatalogSO catalog = AssetDatabase.LoadAssetAtPath<WaveCatalogSO>(CatalogPath);
         if (catalog == null)
         {
@@ -77,10 +87,10 @@ public static class WaveSheetImporter
             }
         }
 
-        Directory.CreateDirectory(Path.GetDirectoryName(CsvPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(csvPath));
         // BOM để Excel nhận UTF-8 (sheet có thể chứa tiếng Việt sau này).
-        File.WriteAllText(CsvPath, sb.ToString(), new UTF8Encoding(true));
-        Debug.Log($"[WaveSheetImporter] Exported {catalog.waves.Count} waves to {CsvPath}");
+        File.WriteAllText(csvPath, sb.ToString(), new UTF8Encoding(true));
+        Debug.Log($"[WaveSheetImporter] Exported {catalog.waves.Count} waves to {csvPath}");
     }
 
     // ---------------- Import ----------------
@@ -100,18 +110,21 @@ public static class WaveSheetImporter
     }
 
     [MenuItem("Tools/Waves/Import Wave Sheet (CSV)")]
-    public static void Import()
+    public static void Import() => Import(DefaultCsvPath);
+
+    /// <summary>Import CSV tại <paramref name="csvPath"/> (tuyệt đối) → validate → ghi asset + rebuild catalog.</summary>
+    public static void Import(string csvPath)
     {
-        if (!File.Exists(CsvPath))
+        if (string.IsNullOrEmpty(csvPath) || !File.Exists(csvPath))
         {
-            Debug.LogError($"[WaveSheetImporter] Sheet not found: {CsvPath}. Run 'Tools > Waves > Export Current Waves to CSV' first to generate a template.");
+            Debug.LogError($"[WaveSheetImporter] Sheet not found: {csvPath}. Run 'Tools > Waves > Export Current Waves to CSV' first to generate a template.");
             return;
         }
 
         var errors = new List<string>();
         var warnings = new List<string>();
 
-        List<Row> rows = ParseCsv(File.ReadAllLines(CsvPath), errors);
+        List<Row> rows = ParseCsv(File.ReadAllLines(csvPath), errors);
         SortedDictionary<int, List<Row>> byWave = GroupAndValidate(rows, errors, warnings);
 
         foreach (string w in warnings)

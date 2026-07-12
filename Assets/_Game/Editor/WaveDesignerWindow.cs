@@ -10,8 +10,9 @@ using UnityEngine;
 /// Cửa sổ thiết kế wave trực quan — thay cho việc sửa tay asset hoặc CSV.
 /// Layout master–detail: sidebar trái = danh sách wave (badge boss/lỗi + thanh cường độ),
 /// panel phải = chi tiết wave đang chọn với bảng nhóm quái thẳng cột.
-/// SAVE (nút hoặc Ctrl+S) = validate → ghi DB_Wave_N.asset + DB_WaveCatalog (giữ GUID)
-/// → TỰ ĐỘNG export Docs/WaveSheet.csv để sheet và asset luôn đồng bộ.
+/// SAVE (nút hoặc Ctrl+S) = validate → ghi DB_Wave_N.asset + DB_WaveCatalog (giữ GUID).
+/// Export CSV / Import CSV là 2 nút riêng, dùng đường dẫn ở ô "CSV" trên thanh công cụ
+/// (đường dẫn lưu trong EditorPrefs, mặc định Docs/WaveSheet.csv).
 ///
 /// Menu: Tools > Waves > Wave Designer. Chi tiết pipeline: Docs/WAVE_DESIGN_GUIDE.md.
 /// </summary>
@@ -23,6 +24,8 @@ public sealed class WaveDesignerWindow : EditorWindow
 
     private const float SidebarWidth = 230f;
     private const float SidebarItemHeight = 52f;
+    private const float PathRowHeight = 24f;
+    private const string CsvPathPrefKey = "WaveDesigner.CsvPath";
 
     // ---------------- Palette ----------------
 
@@ -93,6 +96,10 @@ public sealed class WaveDesignerWindow : EditorWindow
     private Vector2 _detailScroll;
     private bool _dirty;
 
+    // CSV giờ export/import thủ công (tách khỏi Save). _csvExportPending = asset đã Save nhưng sheet chưa cập nhật.
+    private string _csvPath;
+    private bool _csvExportPending;
+
     // Thông tin scene phục vụ popup + validate (null nếu scene đang mở không có WaveManager).
     private string[] _spawnPointLabels;
     private string[] _pathLabels;
@@ -121,6 +128,7 @@ public sealed class WaveDesignerWindow : EditorWindow
         titleContent = new GUIContent("Wave Designer");
         // Chấm "chưa save" trên tab + hộp thoại xác nhận khi đóng có thay đổi (API chuẩn của EditorWindow).
         saveChangesMessage = "Wave Designer đang có thay đổi chưa Save. Save trước khi đóng?";
+        _csvPath = EditorPrefs.GetString(CsvPathPrefKey, WaveSheetImporter.DefaultCsvPath);
         RefreshSceneInfo();
         if (_waves.Count == 0)
         {
@@ -154,6 +162,7 @@ public sealed class WaveDesignerWindow : EditorWindow
         _waves.Clear();
         _issues.Clear();
         ClearDirty();
+        _csvExportPending = false; // vừa nạp từ asset — coi như đồng bộ, không nhắc export
         _selected = 0;
 
         WaveCatalogSO catalog = AssetDatabase.LoadAssetAtPath<WaveCatalogSO>(CatalogPath);
@@ -255,11 +264,9 @@ public sealed class WaveDesignerWindow : EditorWindow
             }
         }
 
-        // Đồng bộ CSV mỗi lần Save — sheet luôn khớp với asset.
-        WaveSheetImporter.Export();
-
         ClearDirty();
-        Debug.Log($"[WaveDesigner] Saved {_waves.Count} waves ({created} created) + exported CSV.");
+        _csvExportPending = true; // asset đã đổi — cần bấm Export CSV để cập nhật sheet
+        Debug.Log($"[WaveDesigner] Saved {_waves.Count} waves ({created} created). Bấm Export CSV để cập nhật sheet.");
     }
 
     // ---------------- Validation ----------------
@@ -391,7 +398,11 @@ public sealed class WaveDesignerWindow : EditorWindow
 
         DrawToolbar();
 
-        Rect content = new Rect(0f, EditorStyles.toolbar.fixedHeight, position.width, position.height - EditorStyles.toolbar.fixedHeight - 22f);
+        float topY = EditorStyles.toolbar.fixedHeight;
+        DrawCsvPathRow(new Rect(0f, topY, position.width, PathRowHeight));
+        topY += PathRowHeight;
+
+        Rect content = new Rect(0f, topY, position.width, position.height - topY - 22f);
         Rect sidebar = new Rect(content.x, content.y, SidebarWidth, content.height);
         Rect detail = new Rect(content.x + SidebarWidth, content.y, content.width - SidebarWidth, content.height);
 
@@ -424,7 +435,7 @@ public sealed class WaveDesignerWindow : EditorWindow
         // Nút Save nhuộm accent khi có thay đổi — đập vào mắt là biết cần bấm.
         Color oldBg = GUI.backgroundColor;
         if (_dirty) GUI.backgroundColor = Accent;
-        if (GUILayout.Button(new GUIContent(_dirty ? " Save •" : " Save", "Ghi asset + export CSV (Ctrl+S)"), EditorStyles.toolbarButton, GUILayout.Width(70f)))
+        if (GUILayout.Button(new GUIContent(_dirty ? " Save •" : " Save", "Ghi asset (Ctrl+S). CSV export riêng bằng nút Export CSV."), EditorStyles.toolbarButton, GUILayout.Width(70f)))
         {
             SaveAll();
         }
@@ -439,15 +450,25 @@ public sealed class WaveDesignerWindow : EditorWindow
             }
         }
 
-        if (GUILayout.Button(new GUIContent("Import CSV", "Nạp Docs/WaveSheet.csv vào asset rồi load lại tool"), EditorStyles.toolbarButton, GUILayout.Width(85f)))
+        GUILayout.Space(6f);
+
+        if (GUILayout.Button(new GUIContent("Import CSV", "Nạp CSV (theo đường dẫn ô bên dưới) vào asset rồi load lại tool"), EditorStyles.toolbarButton, GUILayout.Width(85f)))
         {
             if (!_dirty || EditorUtility.DisplayDialog("Bỏ thay đổi?", "Đang có chỉnh sửa chưa Save. Import CSV sẽ ghi đè bằng nội dung sheet.", "Import", "Hủy"))
             {
-                WaveSheetImporter.Import();
+                WaveSheetImporter.Import(_csvPath);
                 RefreshSceneInfo();
-                LoadFromAssets();
+                LoadFromAssets(); // đặt _csvExportPending = false
             }
         }
+
+        // Export CSV tách riêng khỏi Save — nhuộm vàng khi asset đã Save mà sheet chưa cập nhật.
+        if (_csvExportPending) GUI.backgroundColor = new Color32(255, 213, 79, 255);
+        if (GUILayout.Button(new GUIContent(_csvExportPending ? "Export CSV •" : "Export CSV", "Ghi asset hiện tại ra CSV (theo đường dẫn ô bên dưới)"), EditorStyles.toolbarButton, GUILayout.Width(90f)))
+        {
+            ExportCsv();
+        }
+        GUI.backgroundColor = oldBg;
 
         GUILayout.FlexibleSpace();
 
@@ -456,6 +477,78 @@ public sealed class WaveDesignerWindow : EditorWindow
         GUILayout.Label($"{_waves.Count} waves · {totalAll} quái tổng", EditorStyles.miniLabel);
 
         EditorGUILayout.EndHorizontal();
+    }
+
+    /// <summary>Export asset đã Save ra CSV tại _csvPath. Nếu còn thay đổi chưa Save thì hỏi Save trước.</summary>
+    private void ExportCsv()
+    {
+        if (string.IsNullOrEmpty(_csvPath))
+        {
+            EditorUtility.DisplayDialog("Thiếu đường dẫn", "Chưa đặt đường dẫn CSV. Nhập hoặc bấm Browse ở ô \"CSV\".", "OK");
+            return;
+        }
+
+        if (_dirty)
+        {
+            int choice = EditorUtility.DisplayDialogComplex(
+                "Có thay đổi chưa Save",
+                "Export đọc từ asset đã Save nên sẽ KHÔNG gồm sửa đổi chưa Save. Bạn muốn làm gì?",
+                "Save & Export", "Hủy", "Export bản đã lưu");
+            if (choice == 1) return;                 // Hủy
+            if (choice == 0)                         // Save & Export
+            {
+                SaveAll();
+                if (_issues.Count > 0) return;       // Save lỗi validate → dừng
+            }
+            // choice == 2: export asset đã lưu như hiện trạng
+        }
+
+        WaveSheetImporter.Export(_csvPath);
+        _csvExportPending = false;
+    }
+
+    private void DrawCsvPathRow(Rect rect)
+    {
+        EditorGUI.DrawRect(rect, SidebarBg);
+        EditorGUI.DrawRect(new Rect(rect.x, rect.yMax - 1f, rect.width, 1f), new Color(0f, 0f, 0f, 0.25f));
+
+        const float pad = 8f, browseW = 74f, revealW = 84f, gap = 4f;
+        Rect label = new Rect(rect.x + pad, rect.y + 4f, 30f, 16f);
+        GUI.Label(label, new GUIContent("CSV", "Đường dẫn file CSV cho Import/Export (lưu trong EditorPrefs)"), EditorStyles.miniBoldLabel);
+
+        float fieldX = label.xMax + gap;
+        float fieldW = rect.width - fieldX - pad - browseW - revealW - gap * 2f;
+        Rect field = new Rect(fieldX, rect.y + 3f, Mathf.Max(120f, fieldW), 18f);
+        EditorGUI.BeginChangeCheck();
+        string typed = EditorGUI.TextField(field, _csvPath);
+        if (EditorGUI.EndChangeCheck())
+        {
+            _csvPath = typed;
+            EditorPrefs.SetString(CsvPathPrefKey, _csvPath);
+        }
+
+        Rect browse = new Rect(field.xMax + gap, rect.y + 3f, browseW, 18f);
+        if (GUI.Button(browse, new GUIContent("Browse…", "Chọn hoặc đặt vị trí file CSV"), EditorStyles.miniButton))
+        {
+            string startDir = string.IsNullOrEmpty(_csvPath) ? Application.dataPath : System.IO.Path.GetDirectoryName(_csvPath);
+            string startName = string.IsNullOrEmpty(_csvPath) ? "WaveSheet.csv" : System.IO.Path.GetFileName(_csvPath);
+            string picked = EditorUtility.SaveFilePanel("Chọn / đặt file CSV wave", startDir, startName, "csv");
+            if (!string.IsNullOrEmpty(picked))
+            {
+                _csvPath = picked;
+                EditorPrefs.SetString(CsvPathPrefKey, _csvPath);
+                GUI.FocusControl(null);
+            }
+        }
+
+        Rect reveal = new Rect(browse.xMax + gap, rect.y + 3f, revealW, 18f);
+        using (new EditorGUI.DisabledScope(string.IsNullOrEmpty(_csvPath) || !System.IO.File.Exists(_csvPath)))
+        {
+            if (GUI.Button(reveal, new GUIContent("Mở thư mục", "Hiện file CSV trong Explorer"), EditorStyles.miniButton))
+            {
+                EditorUtility.RevealInFinder(_csvPath);
+            }
+        }
     }
 
     private void DrawStatusBar(Rect rect)
@@ -483,11 +576,17 @@ public sealed class WaveDesignerWindow : EditorWindow
             }
             return;
         }
+        else if (_csvExportPending)
+        {
+            var warnStyle = new GUIStyle(EditorStyles.miniLabel);
+            warnStyle.normal.textColor = new Color32(255, 213, 79, 255);
+            GUI.Label(left, "● Asset đã Save — bấm Export CSV để cập nhật sheet", warnStyle);
+        }
         else
         {
             var okStyle = new GUIStyle(EditorStyles.miniLabel);
             okStyle.normal.textColor = new Color32(108, 203, 95, 255);
-            GUI.Label(left, "✔ Hợp lệ — Save sẽ ghi asset + Docs/WaveSheet.csv", okStyle);
+            GUI.Label(left, "✔ Hợp lệ — Save ghi asset, Export CSV ghi sheet", okStyle);
         }
 
         Rect right = new Rect(rect.xMax - 200f, rect.y + 3f, 192f, 16f);

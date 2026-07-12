@@ -9,20 +9,26 @@
 
 ### Cách A: Cửa sổ Wave Designer (khuyên dùng — trực quan, không cần mở Excel)
 
-Menu **Tools > Waves > Wave Designer**:
+Menu **Tools > Waves > Wave Designer**. Bố cục: cột trái là danh sách wave, panel phải là chi tiết wave đang chọn.
 
-- Mỗi wave 1 khung: chỉnh **Build (s)** / **Combat (s)** / tick **Boss**; header hiện tổng số quái.
-- Từng nhóm quái 1 dòng: chọn loại quái, số con, giây giữa 2 con, cổng spawn + đường đi
+- Mỗi wave: chỉnh **Build (s)** / **Combat (s)** / tick **Boss wave**; sidebar hiện tổng số quái + thanh cường độ.
+- Bảng nhóm quái: chọn loại quái, số con, giây giữa 2 con, **cổng spawn**
   (popup theo tên North/East/West — mở SampleScene để có popup và validate đầy đủ).
+  *Đường đi tự chọn theo cổng spawn — không cần khai báo.*
 - Nút: **+ Thêm nhóm quái**, **+ Thêm Wave** (copy wave cuối làm nền), **Nhân bản**, **Xóa**, **▲▼** đổi thứ tự.
-- **Save (asset + CSV)**: kiểm tra lỗi (sai thì hiện đỏ trong cửa sổ, KHÔNG ghi gì) →
-  ghi vào game + **tự động xuất `Docs/WaveSheet.csv`** — sheet và game luôn khớp nhau.
-- **Import CSV → Tool**: có người sửa CSV ngoài Excel thì bấm nút này để nạp vào cửa sổ.
+- **Save** (hoặc `Ctrl+S`): kiểm tra lỗi (sai thì hiện đỏ trong cửa sổ, KHÔNG ghi gì) → ghi vào game (asset).
+- **Export CSV**: ghi dữ liệu ra file CSV (theo ô đường dẫn). Nút chuyển **vàng** khi asset đã Save nhưng sheet chưa cập nhật — nhắc bạn export để commit sheet.
+- **Import CSV**: có người sửa CSV ngoài Excel thì bấm nút này để nạp vào game + cửa sổ.
+- **Template**: tạo file CSV mẫu (header + hướng dẫn + ví dụ) để bắt đầu từ đầu.
+- Ô **CSV**: đường dẫn file dùng cho Import/Export (nhớ giữa các phiên); **Browse…** để chọn chỗ khác.
 - Loại quái chưa có prefab hiện dấu ⚠ ngay trên dòng.
 
-### Cách B: Sửa thẳng file CSV (quen Excel / sửa hàng loạt / dùng dải wave + growth)
+> Save chỉ ghi asset (vào game); muốn cập nhật file `Docs/WaveSheet.csv` thì bấm **Export CSV**.
+
+### Cách B: Sửa thẳng file CSV (quen Excel / sửa hàng loạt)
 
 ```
+Chưa có sheet? → Tools > Waves > Create CSV Template
 Mở WaveSheet.csv → Sửa số liệu → Unity: Tools > Waves > Import Wave Sheet (CSV)
 → Đọc Console (lỗi thì sửa tiếp / OK thì Play) → Play thử bằng cheat
 ```
@@ -43,7 +49,7 @@ Mở WaveSheet.csv → Sửa số liệu → Unity: Tools > Waves > Import Wave 
 ## 2. Ý nghĩa từng cột
 
 ```csv
-wave,buildTime,combatTime,isBoss,enemyType,count,interval,spawnPoint,path,growth
+wave,buildTime,combatTime,isBoss,enemyType,count,interval,spawnPoint
 ```
 
 | Cột | Ý nghĩa | Ghi chú |
@@ -56,35 +62,36 @@ wave,buildTime,combatTime,isBoss,enemyType,count,interval,spawnPoint,path,growth
 | `count` | Số con của nhóm này | > 0 |
 | `interval` | Giây giữa 2 con spawn | 0 = ra cùng lúc |
 | `spawnPoint` | Cổng xuất quái | `0` = Bắc, `1` = Đông, `2` = Tây |
-| `path` | Đường quái đi | `0` = đường Bắc, `1` = Đông, `2` = Tây — thường đặt **trùng số với spawnPoint** |
-| `growth` | Hệ số tăng quái mỗi wave | Chỉ có tác dụng khi `wave` là dải `A-B`. Bỏ trống = không tăng |
 
 - **1 dòng = 1 nhóm quái.** Một wave muốn nhiều loại quái / nhiều cổng thì viết nhiều dòng cùng số wave.
 - Wave phải đánh số liền mạch `1, 2, 3...` không được nhảy cóc.
+- **Đường đi tự động** theo `spawnPoint` (cổng Bắc → đường Bắc...) — không cần cột riêng.
 
 ---
 
-## 3. Viết nhanh bằng dải wave + growth
+## 3. Viết nhanh bằng dải wave
 
-Thay vì viết 9 dòng gần giống nhau, viết 1 dòng:
-
-```csv
-1-9,60,100,FALSE,Runner,10,1,0,0,1.2
-```
-
-nghĩa là: wave 1 có 10 Runner, mỗi wave sau **nhân 1.2** (làm tròn):
-wave 2 = 12, wave 3 = 14, wave 4 = 17, ... wave 9 = 43 con.
-
-Ví dụ nguyên 1 màn 10 wave chỉ cần 3 dòng:
+Nếu nhiều wave giống hệt nhau, viết 1 dòng với dải `A-B` thay vì lặp lại:
 
 ```csv
-wave,buildTime,combatTime,isBoss,enemyType,count,interval,spawnPoint,path,growth
-1-9,60,100,FALSE,Runner,10,1,0,0,1.2
-1-9,60,100,FALSE,Spitter,3,2,2,2,1.3
-10,60,180,TRUE,RatKing,1,0,1,1,
+1-5,60,100,FALSE,Runner,10,1,0
 ```
 
-Có thể trộn dải + dòng lẻ (vd thêm `5,60,100,FALSE,Bloater,2,3,1,1,` để riêng wave 5 có Bloater) — miễn là `buildTime/combatTime/isBoss` của cùng 1 wave khớp nhau giữa các dòng.
+nghĩa là: wave 1→5 mỗi wave đều có 10 Runner ra cổng Bắc (số quái giữ nguyên qua các wave).
+
+Ví dụ nguyên 1 màn 10 wave gọn lại:
+
+```csv
+wave,buildTime,combatTime,isBoss,enemyType,count,interval,spawnPoint
+1-9,60,100,FALSE,Runner,10,1,0
+1-9,60,100,FALSE,Spitter,3,2,2
+10,60,180,TRUE,RatKing,1,0,1
+```
+
+- Muốn số quái **tăng dần** qua từng wave thì viết mỗi wave một dòng riêng với `count` khác nhau
+  (hoặc dùng nút **Nhân bản** trong Wave Designer rồi sửa), hoặc bật **Endless Mode** (mục 4).
+- Trộn dải + dòng lẻ được (vd thêm `5,60,100,FALSE,Bloater,2,3,1` để riêng wave 5 có Bloater) —
+  miễn là `buildTime/combatTime/isBoss` của cùng 1 wave khớp nhau giữa các dòng.
 
 ---
 
@@ -116,7 +123,7 @@ Cấu trúc `waves.json` (chỉ dành cho test nhanh trên máy dev — **đừn
     {
       "buildTime": 30, "combatTime": 60, "isBoss": false,
       "spawnGroups": [
-        { "enemyType": "Runner", "count": 10, "interval": 1.0, "spawnPoint": 0, "path": 0 }
+        { "enemyType": "Runner", "count": 10, "interval": 1.0, "spawnPoint": 0 }
       ]
     }
   ]
@@ -130,6 +137,7 @@ Console sẽ ghi rõ đang chạy nguồn nào: `Using JSON override (...)` hay 
 ## 6. Checklist trước khi commit
 
 - [ ] Import báo `Import OK`, không có warning lạ trong Console.
+- [ ] Bấm **Export CSV** để `Docs/WaveSheet.csv` khớp với asset (nếu sửa bằng Wave Designer).
 - [ ] Play thử ít nhất wave đầu + wave boss (dùng Jump to wave).
 - [ ] Commit **cả** `Docs/WaveSheet.csv` **và** thư mục `Assets/_Game/Generated/Data/WaveData/` (CSV và asset phải đi cùng nhau).
 - [ ] Không commit `Assets/StreamingAssets/waves.json` (file test cá nhân).

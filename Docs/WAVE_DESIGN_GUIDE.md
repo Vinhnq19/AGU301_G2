@@ -5,7 +5,22 @@
 
 ---
 
-## 1. Vòng làm việc chuẩn (5 bước)
+## 1. Hai cách chỉnh wave — chọn 1
+
+### Cách A: Cửa sổ Wave Designer (khuyên dùng — trực quan, không cần mở Excel)
+
+Menu **Tools > Waves > Wave Designer**:
+
+- Mỗi wave 1 khung: chỉnh **Build (s)** / **Combat (s)** / tick **Boss**; header hiện tổng số quái.
+- Từng nhóm quái 1 dòng: chọn loại quái, số con, giây giữa 2 con, cổng spawn + đường đi
+  (popup theo tên North/East/West — mở SampleScene để có popup và validate đầy đủ).
+- Nút: **+ Thêm nhóm quái**, **+ Thêm Wave** (copy wave cuối làm nền), **Nhân bản**, **Xóa**, **▲▼** đổi thứ tự.
+- **Save (asset + CSV)**: kiểm tra lỗi (sai thì hiện đỏ trong cửa sổ, KHÔNG ghi gì) →
+  ghi vào game + **tự động xuất `Docs/WaveSheet.csv`** — sheet và game luôn khớp nhau.
+- **Import CSV → Tool**: có người sửa CSV ngoài Excel thì bấm nút này để nạp vào cửa sổ.
+- Loại quái chưa có prefab hiện dấu ⚠ ngay trên dòng.
+
+### Cách B: Sửa thẳng file CSV (quen Excel / sửa hàng loạt / dùng dải wave + growth)
 
 ```
 Mở WaveSheet.csv → Sửa số liệu → Unity: Tools > Waves > Import Wave Sheet (CSV)

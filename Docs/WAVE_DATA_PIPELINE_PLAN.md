@@ -3,8 +3,15 @@
 > Tài liệu tự chứa cho phiên làm việc sau. Đọc xong file này là đủ context để bắt tay implement,
 > không cần lịch sử hội thoại cũ.
 >
-> **Trạng thái: ĐÃ CHỐT phương án C (Hybrid). CHƯA implement.**
-> **Câu hỏi còn treo:** nguồn sheet là *file CSV trong repo* hay *Google Sheets online (fetch qua URL publish-to-web)* — hỏi user trước khi bắt đầu Phase 1.
+> **Trạng thái: Phase 1 + Phase 2 ĐÃ XONG (2026-07-12). Phase 3 chưa làm (chỉ làm khi user yêu cầu).**
+> **Đã chốt:** nguồn sheet = file CSV trong repo tại `Docs/WaveSheet.csv`.
+>
+> Đã có: `Assets/_Game/Editor/WaveSheetImporter.cs` (menu `Tools > Waves > Export/Import`),
+> `IWaveProvider`/`SoWaveProvider`/`JsonWaveProvider` trong `Assets/_Game/Scripts/Wave/`,
+> đăng ký DI trong `GameLifetimeScope`, nút "Reload Waves (JSON)" trong Cheat Panel,
+> HUD hiển thị tổng wave dynamic (bỏ hardcode "/10").
+> JSON override: tạo file `Assets/StreamingAssets/waves.json` (không commit) — schema xem class
+> `JsonWaveProvider.SheetJson`: `{"waves":[{"buildTime","combatTime","isBoss","spawnGroups":[{"enemyType","count","interval","spawnPoint","path"}]}]}`.
 
 ---
 

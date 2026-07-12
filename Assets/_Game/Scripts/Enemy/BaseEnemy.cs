@@ -150,8 +150,6 @@ namespace Assets._Game.Scripts.Enemy
                 speed = 0f;
             }
 
-            _animator.SetFloat("Speed", speed);
-
             if (speed > 0.05f && _visual != null)
             {
                 CacheInitialScaleIfNeeded();

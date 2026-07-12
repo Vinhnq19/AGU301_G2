@@ -11,6 +11,9 @@ public class ShopItemPanel : MonoBehaviour
     [SerializeField] private Button sellButton;
     [SerializeField] private GameObject soldOutLabel;
 
+    // Label của nút Buy. Không gán trong Inspector cũng được — Setup tự tìm child TMP.
+    [SerializeField] private TextMeshProUGUI buyButtonLabel;
+
     [Header("Layouts")]
     [SerializeField] private GameObject buyButtonLayout;
     [SerializeField] private GameObject sellButtonLayout;
@@ -56,15 +59,29 @@ public class ShopItemPanel : MonoBehaviour
             costText.text = $"{item.Price} {item.CurrencyType}";
         }
 
-        // Buy button logic
+        // Item nâng cấp kỹ năng: chỉ có 1 nút "Update", KHÔNG bán được.
+        bool canSell = item.isSellable && !item.IsUpgrade;
+
+        // Buy button logic — với item Update thì nút này chính là nút "Update".
         bool canBuy = !item.IsSoldOut && ownedCurrency >= item.Price;
         buyButton.interactable = canBuy;
-        
+
+        // Đổi label nút Buy: "Update" cho item nâng cấp, "Buy" cho item thường.
+        // Panel được pool/tái sử dụng nên PHẢI set cả 2 nhánh để không dính label cũ.
+        if (buyButtonLabel == null && buyButton != null)
+        {
+            buyButtonLabel = buyButton.GetComponentInChildren<TextMeshProUGUI>(true);
+        }
+        if (buyButtonLabel != null)
+        {
+            buyButtonLabel.text = item.IsUpgrade ? "Update" : "Buy";
+        }
+
         if (buyButtonLayout != null)
         {
             buyButtonLayout.SetActive(!canBuy); // Hiện overlay (layout) khi không mua được
         }
-        
+
         if (soldOutLabel != null)
         {
             soldOutLabel.SetActive(item.IsSoldOut);
@@ -73,16 +90,17 @@ public class ShopItemPanel : MonoBehaviour
         // Sell button logic
         if (sellButton != null)
         {
-            sellButton.gameObject.SetActive(item.isSellable);
-            sellButton.interactable = item.isSellable;
-            
+            sellButton.gameObject.SetActive(canSell);
+            sellButton.interactable = canSell;
+
             if (sellButtonLayout != null)
             {
-                sellButtonLayout.SetActive(!item.isSellable); // Hiện overlay khi không bán được
+                // Item Update thì không có khái niệm bán → ẩn luôn overlay "không bán được".
+                sellButtonLayout.SetActive(!canSell && !item.IsUpgrade);
             }
 
             sellButton.onClick.RemoveAllListeners();
-            if (item.isSellable)
+            if (canSell)
             {
                 sellButton.onClick.AddListener(() => onSell?.Invoke(itemId));
             }

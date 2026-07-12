@@ -182,6 +182,16 @@ namespace DungeonBuilder.Networking.Scopes
                 {
                     resolver.InjectGameObject(node.gameObject);
                 }
+
+                // Inject MOI Shop trong scene (shop tai nguyen, shop upgrade, ...).
+                // Truoc day dua vao autoInjectGameObjects — de sot shop moi them vao scene
+                // (bug thuc te: "Shop - Upgrade" khong duoc inject -> _sharedResources null
+                // -> moi giao dich fail im lang). Construct da idempotent nen inject trung
+                // voi autoInject cung khong sao.
+                foreach (Shop shop in FindObjectsByType<Shop>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                {
+                    resolver.Inject(shop);
+                }
             });
         }
     }

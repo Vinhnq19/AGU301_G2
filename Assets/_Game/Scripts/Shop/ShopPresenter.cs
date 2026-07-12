@@ -77,6 +77,23 @@ public class ShopPresenter
             return;
         }
 
+        // Item nâng cấp kỹ năng: "Update" là hành động 1 bước — nâng cấp ngay qty = 1,
+        // KHÔNG mở popup nhập số lượng (mua/bán). Affordability + stock đã check ở trên.
+        if (item.IsUpgrade)
+        {
+            // Check thứ tự level phía client cho feedback tức thì (server vẫn guard lại):
+            // Lv N chỉ mua được khi skill hiện tại == N - 1 (skill khởi tạo ở 1).
+            if (item.upgradeLevel > 0 && shopNetwork != null &&
+                shopNetwork.GetResourceAmount(item.ResourceType) != item.upgradeLevel - 1)
+            {
+                ShowFeedback(ShopTxResult.FailedUpgradeOrder, item.ResourceType, 0, item.CurrencyType.ToResourceType(), 0);
+                return;
+            }
+
+            DoTransaction(item, ShopAction.Buy, 1);
+            return;
+        }
+
         // Mở popup nhập số lượng; khi xác nhận → DoTransaction (Buy).
         // Popup tự clamp số lượng về [1, maxQty].
         view.ShowQuantityPopup(item.Name, item.Icon, ShopAction.Buy, maxQty, item.Price,
@@ -103,8 +120,9 @@ public class ShopPresenter
         }
 
         // Presenter-side guard: tránh mở popup nếu item không sellable
-        // (View đã disable button nhưng check thêm để chắc)
-        if (!item.isSellable)
+        // (View đã disable button nhưng check thêm để chắc).
+        // Item nâng cấp (Update) không bao giờ bán được.
+        if (!item.isSellable || item.IsUpgrade)
         {
             Debug.LogWarning($"Item is not sellable: {itemId}");
             return;
@@ -139,12 +157,12 @@ public class ShopPresenter
         if (action == ShopAction.Buy)
         {
             Debug.Log($"Buying {qty}x {item.Id}");
-            shopNetwork.BuyItem(item.ResourceType, qty);
+            shopNetwork.BuyItem(item.Id, qty);
         }
         else
         {
             Debug.Log($"Selling {qty}x {item.Id}");
-            shopNetwork.SellItem(item.ResourceType, qty);
+            shopNetwork.SellItem(item.Id, qty);
         }
     }
 

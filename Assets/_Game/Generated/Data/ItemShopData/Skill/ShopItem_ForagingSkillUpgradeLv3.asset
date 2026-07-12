@@ -22,3 +22,4 @@ MonoBehaviour:
   CurrencyType: 0
   RemainingQuantity: 1
   ResourceType: 16
+  upgradeLevel: 3

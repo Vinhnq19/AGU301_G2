@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: ShopItem_BombTower 1
   m_EditorClassIdentifier: Assembly-CSharp::ShopItem
   Icon: {fileID: -5522529318680141169, guid: bb2e83693108377489e6b6945c0bb101, type: 3}
-  Id: 3
+  Id: 17
   Name: Mining Lv Up
   Price: 1000
   Sell: 0

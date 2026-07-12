@@ -35,4 +35,18 @@ public class ShopFeedbackFormatTests
     [Test] public void FailedNotSellable() =>
         Assert.AreEqual("Cannot sell this item",
             ShopFeedbackFormat.Format(ShopTxResult.FailedNotSellable, "", 0, "", 0).Message);
+
+    [Test] public void FailedInvalidItem()
+    {
+        var f = ShopFeedbackFormat.Format(ShopTxResult.FailedInvalidItem, "", 0, "", 0);
+        Assert.IsFalse(f.Success);
+        Assert.AreEqual("Item cannot be traded", f.Message);
+    }
+
+    [Test] public void FailedUpgradeOrder()
+    {
+        var f = ShopFeedbackFormat.Format(ShopTxResult.FailedUpgradeOrder, "", 0, "", 0);
+        Assert.IsFalse(f.Success);
+        Assert.AreEqual("Buy the previous upgrade first", f.Message);
+    }
 }

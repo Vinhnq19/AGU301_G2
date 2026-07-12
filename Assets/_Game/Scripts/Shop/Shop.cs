@@ -1,4 +1,5 @@
 using Unity.Netcode;
+using Unity.Collections;
 using UnityEngine;
 using System.Collections.Generic;
 using VContainer;
@@ -25,8 +26,11 @@ public class Shop : NetworkBehaviour
     // Network synchronized shop item data
     private NetworkList<ShopItemData> networkItemData;
 
-    // Mapping ResourceType -> ShopItemData Index
-    private Dictionary<ResourceType, int> itemDataIndexMap = new Dictionary<ResourceType, int>();
+    // Mapping item Id -> ShopItemData Index.
+    // Khóa theo Id (duy nhất) chứ KHÔNG theo ResourceType: nhiều item có thể chung
+    // một ResourceType (vd Foraging Skill Lv2 & Lv3 đều là ForgingSkill) → nếu key bằng
+    // ResourceType thì chúng đè nhau và giao dịch chạy sai item.
+    private Dictionary<string, int> itemDataIndexMap = new Dictionary<string, int>();
 
     private void Awake()
     {
@@ -91,9 +95,19 @@ public class Shop : NetworkBehaviour
 
         foreach (var item in model.items)
         {
+            // Id trùng → itemDataIndexMap đè nhau và Find(x => x.Id == itemId) trả sai item
+            // (giao dịch chạy trên item khác, trừ stock sai slot). Phải là lỗi cấu hình chết người,
+            // log loud để dev sửa asset ngay.
+            if (itemDataIndexMap.ContainsKey(item.Id))
+            {
+                Debug.LogError(
+                    $"[Shop] DUPLICATE ShopItem Id '{item.Id}' ('{item.Name}') trong model.items — " +
+                    "giao dịch sẽ chạy sai item. Sửa Id trong asset ShopItem để mỗi Id là duy nhất.", this);
+            }
+
             // Sync Sell price vào NetworkList để server-authoritative runtime change (sales/events)
             var itemData = new ShopItemData(item.ResourceType, item.RemainingQuantity, item.Sell);
-            itemDataIndexMap[item.ResourceType] = networkItemData.Count;
+            itemDataIndexMap[item.Id] = networkItemData.Count;
             networkItemData.Add(itemData);
         }
     }
@@ -171,7 +185,7 @@ public class Shop : NetworkBehaviour
     /// Gọi từ Presenter để mua item theo ResourceType và đồng bộ trên network.
     /// Hỗ trợ số lượng: mua `quantity` unit cùng lúc.
     /// </summary>
-    public void BuyItem(ResourceType resourceType, int quantity)
+    public void BuyItem(string itemId, int quantity)
     {
         if (quantity <= 0)
             return;
@@ -180,40 +194,61 @@ public class Shop : NetworkBehaviour
         {
             // Pass `default` for RpcParams on the send side; NGO populates
             // rpcParams.Receive.SenderClientId from the real sender on the server.
-            BuyItemServerRpc(resourceType, quantity, default);
+            BuyItemServerRpc(new FixedString32Bytes(itemId), quantity, default);
         }
         else
         {
-            ProcessBuyItem(resourceType, quantity, NetworkManager.ServerClientId);
+            ProcessBuyItem(itemId, quantity, NetworkManager.ServerClientId);
         }
     }
 
     [Rpc(SendTo.Server)]
-    private void BuyItemServerRpc(ResourceType resourceType, int quantity, RpcParams rpcParams)
+    private void BuyItemServerRpc(FixedString32Bytes itemId, int quantity, RpcParams rpcParams)
     {
-        ProcessBuyItem(resourceType, quantity, rpcParams.Receive.SenderClientId);
+        ProcessBuyItem(itemId.ToString(), quantity, rpcParams.Receive.SenderClientId);
     }
 
-    private void ProcessBuyItem(ResourceType resourceType, int quantity, ulong requesterClientId)
+    private void ProcessBuyItem(string itemId, int quantity, ulong requesterClientId)
     {
         if (_sharedResources == null)
             return;
 
-        var shopItem = model.items.Find(x => x.ResourceType == resourceType);
+        var shopItem = model.items.Find(x => x.Id == itemId);
         if (shopItem == null)
             return;
 
-        if (!itemDataIndexMap.TryGetValue(resourceType, out int index) || index < 0 || index >= networkItemData.Count)
+        if (!itemDataIndexMap.TryGetValue(itemId, out int index) || index < 0 || index >= networkItemData.Count)
             return;
 
         var itemData = networkItemData[index];
 
         ResourceType currencyRT = shopItem.CurrencyType.ToResourceType();
 
+        // Item mà "hàng" chính là tiền tệ (Coin/Token) = cấu hình sai → chặn, tránh
+        // mua/bán tiền bằng tiền (in tiền). Vd HealPack từng bị set ResourceType = Coin.
+        if (shopItem.ResourceType == ResourceType.Coin || shopItem.ResourceType == ResourceType.Token)
+        {
+            Debug.LogWarning($"[Shop] Item '{shopItem.Name}' có ResourceType là tiền tệ ({shopItem.ResourceType}) — chặn giao dịch. Sửa asset.", this);
+            SendFeedback(ShopTxResult.FailedInvalidItem, shopItem.ResourceType, 0, currencyRT, 0, requesterClientId);
+            return;
+        }
+
+        // Item nâng cấp theo level: bắt buộc mua đúng thứ tự (Lv2 rồi mới Lv3).
+        // Skill khởi tạo ở 1, nên Lv N chỉ hợp lệ khi lượng hiện tại == N - 1.
+        if (shopItem.IsUpgrade && shopItem.upgradeLevel > 0)
+        {
+            int current = _sharedResources.GetAmount(shopItem.ResourceType);
+            if (current != shopItem.upgradeLevel - 1)
+            {
+                SendFeedback(ShopTxResult.FailedUpgradeOrder, shopItem.ResourceType, 0, currencyRT, 0, requesterClientId);
+                return;
+            }
+        }
+
         // Sold out?
         if (shopItem.IsSoldOut)
         {
-            SendFeedback(ShopTxResult.FailedStock, resourceType, 0, currencyRT, 0, requesterClientId);
+            SendFeedback(ShopTxResult.FailedStock, shopItem.ResourceType, 0, currencyRT, 0, requesterClientId);
             return;
         }
 
@@ -225,7 +260,7 @@ public class Shop : NetworkBehaviour
 
             if (qty <= 0)
             {
-                SendFeedback(ShopTxResult.FailedStock, resourceType, 0, currencyRT, 0, requesterClientId);
+                SendFeedback(ShopTxResult.FailedStock, shopItem.ResourceType, 0, currencyRT, 0, requesterClientId);
                 return;
             }
         }
@@ -235,7 +270,7 @@ public class Shop : NetworkBehaviour
         var cost = new ResourceCost[] { new ResourceCost(currencyRT, totalCost) };
         if (!_sharedResources.CanAfford(cost) || !_sharedResources.TrySpend(cost))
         {
-            SendFeedback(ShopTxResult.FailedAfford, resourceType, 0, currencyRT, 0, requesterClientId);
+            SendFeedback(ShopTxResult.FailedAfford, shopItem.ResourceType, 0, currencyRT, 0, requesterClientId);
             return;
         }
 
@@ -247,9 +282,9 @@ public class Shop : NetworkBehaviour
         }
 
         // Grant the resource server-side; NetworkList replicates → ResourceChanged → HUD updates.
-        _sharedResources.TryAdd(resourceType, qty);
+        _sharedResources.TryAdd(shopItem.ResourceType, qty);
 
-        SendFeedback(ShopTxResult.Success, resourceType, qty, currencyRT, totalCost, requesterClientId);
+        SendFeedback(ShopTxResult.Success, shopItem.ResourceType, qty, currencyRT, totalCost, requesterClientId);
     }
 
     [Inject]
@@ -260,6 +295,9 @@ public class Shop : NetworkBehaviour
 
         if (_sharedResources != null)
         {
+            // Idempotent: Construct co the duoc goi 2 lan (autoInjectGameObjects + build
+            // callback inject moi Shop) — unsubscribe truoc de khong double-subscribe.
+            _sharedResources.ResourceChanged -= HandleSharedResourceChanged;
             _sharedResources.ResourceChanged += HandleSharedResourceChanged;
         }
     }
@@ -278,53 +316,62 @@ public class Shop : NetworkBehaviour
     /// Client sẽ gửi RPC tới Server; Server xử lý trực tiếp.
     /// Hỗ trợ số lượng: bán `quantity` unit cùng lúc.
     /// </summary>
-    public void SellItem(ResourceType resourceType, int quantity)
+    public void SellItem(string itemId, int quantity)
     {
         if (quantity <= 0)
             return;
 
         if (!IsServer)
         {
-            SellItemServerRpc(resourceType, quantity, default);
+            SellItemServerRpc(new FixedString32Bytes(itemId), quantity, default);
         }
         else
         {
-            ProcessSellItem(resourceType, quantity, NetworkManager.ServerClientId);
+            ProcessSellItem(itemId, quantity, NetworkManager.ServerClientId);
         }
     }
 
     [Rpc(SendTo.Server)]
-    private void SellItemServerRpc(ResourceType resourceType, int quantity, RpcParams rpcParams)
+    private void SellItemServerRpc(FixedString32Bytes itemId, int quantity, RpcParams rpcParams)
     {
-        ProcessSellItem(resourceType, quantity, rpcParams.Receive.SenderClientId);
+        ProcessSellItem(itemId.ToString(), quantity, rpcParams.Receive.SenderClientId);
     }
 
-    private void ProcessSellItem(ResourceType resourceType, int quantity, ulong requesterClientId)
+    private void ProcessSellItem(string itemId, int quantity, ulong requesterClientId)
     {
         if (_sharedResources == null)
             return;
 
-        var shopItem = model.items.Find(x => x.ResourceType == resourceType);
+        var shopItem = model.items.Find(x => x.Id == itemId);
         if (shopItem == null)
             return;
 
-        if (!shopItem.isSellable)
+        // Item có "hàng" là tiền tệ → bán = in tiền (spend 1 Coin nhận Sell*qty Coin). Chặn cứng.
+        if (shopItem.ResourceType == ResourceType.Coin || shopItem.ResourceType == ResourceType.Token)
         {
-            SendFeedback(ShopTxResult.FailedNotSellable, shopItem.CurrencyType.ToResourceType(), 0, resourceType, 0, requesterClientId);
+            Debug.LogWarning($"[Shop] Item '{shopItem.Name}' có ResourceType là tiền tệ ({shopItem.ResourceType}) — chặn bán. Sửa asset.", this);
+            SendFeedback(ShopTxResult.FailedInvalidItem, shopItem.CurrencyType.ToResourceType(), 0, shopItem.ResourceType, 0, requesterClientId);
             return;
         }
 
-        if (!itemDataIndexMap.TryGetValue(resourceType, out int index) || index < 0 || index >= networkItemData.Count)
+        // Item nâng cấp (Update) không bán được — chặn server-side, không tin client.
+        if (!shopItem.isSellable || shopItem.IsUpgrade)
+        {
+            SendFeedback(ShopTxResult.FailedNotSellable, shopItem.CurrencyType.ToResourceType(), 0, shopItem.ResourceType, 0, requesterClientId);
+            return;
+        }
+
+        if (!itemDataIndexMap.TryGetValue(itemId, out int index) || index < 0 || index >= networkItemData.Count)
             return;
 
         var itemData = networkItemData[index];
         int qty = quantity;
 
         // Spend the resource atomically; fail the whole batch if the player lacks enough.
-        var spend = new ResourceCost[] { new ResourceCost(resourceType, qty) };
+        var spend = new ResourceCost[] { new ResourceCost(shopItem.ResourceType, qty) };
         if (!_sharedResources.TrySpend(spend))
         {
-            SendFeedback(ShopTxResult.FailedNoResource, shopItem.CurrencyType.ToResourceType(), 0, resourceType, 0, requesterClientId);
+            SendFeedback(ShopTxResult.FailedNoResource, shopItem.CurrencyType.ToResourceType(), 0, shopItem.ResourceType, 0, requesterClientId);
             return;
         }
 
@@ -336,7 +383,7 @@ public class Shop : NetworkBehaviour
             _sharedResources.TryAdd(currencyRT, received);
         }
 
-        SendFeedback(ShopTxResult.Success, currencyRT, received, resourceType, qty, requesterClientId);
+        SendFeedback(ShopTxResult.Success, currencyRT, received, shopItem.ResourceType, qty, requesterClientId);
     }
 
     private void SendFeedback(

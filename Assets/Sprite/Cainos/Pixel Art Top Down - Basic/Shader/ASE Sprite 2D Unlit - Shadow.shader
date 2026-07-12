@@ -1,12 +1,13 @@
 // Made with Amplify Shader Editor v1.9.9.5
 // Available at the Unity Asset Store - http://u3d.as/y3X 
-Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Unlit"
+Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Unlit - Shadow"
 {
 	Properties
 	{
 		[HideInInspector] _EmissionColor("Emission Color", Color) = (1,1,1,1)
 		_MainTex( "Main Tex", 2D ) = "white" {}
-		[HDR] _Tint( "Tint", Color ) = ( 1, 1, 1, 1 )
+		_StencilRef( "Stencil Ref", Float ) = 33
+		_Tint( "Tint", Color ) = ( 0.3411765, 0.1882353, 0.1137255, 0.1960784 )
 		[HideInInspector] _texcoord( "", 2D ) = "white" {}
 
 		[HideInInspector][NoScaleOffset] unity_Lightmaps("unity_Lightmaps", 2DArray) = "" {}
@@ -47,7 +48,9 @@ Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Unlit"
 			ColorMask RGBA
 			Stencil
 			{
-				Ref 0
+				Ref [_StencilRef]
+				Comp Equal
+				Pass Zero
 			}
 
 			HLSLPROGRAM
@@ -102,7 +105,7 @@ Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Unlit"
 			sampler2D _MainTex;
 			CBUFFER_START( UnityPerMaterial )
 			float4 _Tint;
-			float4 _MainTex_ST;
+			float _StencilRef;
 			CBUFFER_END
 
 
@@ -178,7 +181,7 @@ Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Unlit"
 				float4 positionCS = IN.positionCS;
 				float3 positionWS = IN.positionWS;
 
-				float2 uv_MainTex = IN.texCoord0.xy * _MainTex_ST.xy + _MainTex_ST.zw;
+				float2 uv_MainTex = IN.texCoord0.xy;
 				float4 tex2DNode11 = tex2D( _MainTex, uv_MainTex );
 				clip( tex2DNode11.a - 0.01);
 				
@@ -225,7 +228,9 @@ Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Unlit"
 			ColorMask RGBA
 			Stencil
 			{
-				Ref 0
+				Ref [_StencilRef]
+				Comp Equal
+				Pass Zero
 			}
 
 			HLSLPROGRAM
@@ -280,7 +285,7 @@ Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Unlit"
 			sampler2D _MainTex;
 			CBUFFER_START( UnityPerMaterial )
 			float4 _Tint;
-			float4 _MainTex_ST;
+			float _StencilRef;
 			CBUFFER_END
 
 
@@ -356,7 +361,7 @@ Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Unlit"
 				float4 positionCS = IN.positionCS;
 				float3 positionWS = IN.positionWS;
 
-				float2 uv_MainTex = IN.texCoord0.xy * _MainTex_ST.xy + _MainTex_ST.zw;
+				float2 uv_MainTex = IN.texCoord0.xy;
 				float4 tex2DNode11 = tex2D( _MainTex, uv_MainTex );
 				clip( tex2DNode11.a - 0.01);
 				
@@ -441,7 +446,7 @@ Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Unlit"
 			sampler2D _MainTex;
 			CBUFFER_START( UnityPerMaterial )
 			float4 _Tint;
-			float4 _MainTex_ST;
+			float _StencilRef;
 			CBUFFER_END
 
 
@@ -502,7 +507,7 @@ Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Unlit"
 
 			half4 frag(VertexOutput IN) : SV_TARGET
 			{
-				float2 uv_MainTex = IN.ase_texcoord.xy * _MainTex_ST.xy + _MainTex_ST.zw;
+				float2 uv_MainTex = IN.ase_texcoord.xy;
 				float4 tex2DNode11 = tex2D( _MainTex, uv_MainTex );
 				clip( tex2DNode11.a - 0.01);
 				
@@ -567,7 +572,7 @@ Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Unlit"
 			sampler2D _MainTex;
 			CBUFFER_START( UnityPerMaterial )
 			float4 _Tint;
-			float4 _MainTex_ST;
+			float _StencilRef;
 			CBUFFER_END
 
 
@@ -627,7 +632,7 @@ Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Unlit"
 
 			half4 frag(VertexOutput IN ) : SV_TARGET
 			{
-				float2 uv_MainTex = IN.ase_texcoord.xy * _MainTex_ST.xy + _MainTex_ST.zw;
+				float2 uv_MainTex = IN.ase_texcoord.xy;
 				float4 tex2DNode11 = tex2D( _MainTex, uv_MainTex );
 				clip( tex2DNode11.a - 0.01);
 				
@@ -649,13 +654,14 @@ Shader "Cainos/Pixel Art Top Down - Basic/Sprite 2D Unlit"
 Version=19905
 Node;AmplifyShaderEditor.TexturePropertyNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;10;-720,48;Inherit;True;Property;_MainTex;Main Tex;0;0;Create;True;0;0;0;False;0;False;None;None;False;white;Auto;Texture2D;False;-1;0;2;SAMPLER2D;0;SAMPLERSTATE;1
 Node;AmplifyShaderEditor.SamplerNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;11;-464,48;Inherit;True;Property;_TextureSample0;Texture Sample 0;1;0;Create;True;0;0;0;False;0;False;-1;None;None;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;False;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;6;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT3;5
-Node;AmplifyShaderEditor.ColorNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;13;-464,-176;Inherit;False;Property;_Tint;Tint;1;1;[HDR];Create;True;0;0;0;False;0;False;1,1,1,1;0,0,0,0;True;True;0;6;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT3;5
+Node;AmplifyShaderEditor.ColorNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;13;-432,-176;Inherit;False;Property;_Tint;Tint;2;0;Create;True;0;0;0;False;0;False;0.3411765,0.1882353,0.1137255,0.1960784;0,0,0,0;True;True;0;6;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT3;5
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;24;-96,16;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;FLOAT;0;False;1;COLOR;0
+Node;AmplifyShaderEditor.RangedFloatNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;12;-624,-160;Inherit;False;Property;_StencilRef;Stencil Ref;1;0;Create;True;0;0;0;True;0;False;33;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.ClipNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;29;80,32;Inherit;False;3;0;COLOR;0,0,0,0;False;1;FLOAT;0;False;2;FLOAT;0.01;False;1;COLOR;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;26;96,16;Float;False;False;-1;2;AmplifyShaderEditor.MaterialInspector;0;1;New Amplify Shader;cf964e524c8e69742b1d21fbe2ebcc4a;True;Sprite Unlit Forward;0;1;Sprite Unlit Forward;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Transparent=RenderType;Queue=Transparent=Queue=0;True;0;True;14;all;0;False;True;2;5;False;;10;False;;3;1;False;;10;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;True;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;2;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalForward;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;26;96,16;Float;False;False;-1;2;AmplifyShaderEditor.MaterialInspector;0;1;New Amplify Shader;cf964e524c8e69742b1d21fbe2ebcc4a;True;Sprite Unlit Forward;0;1;Sprite Unlit Forward;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Transparent=RenderType;Queue=Transparent=Queue=0;True;0;True;14;all;0;False;True;2;5;False;;10;False;;3;1;False;;10;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;True;0;True;;255;False;;255;False;;5;False;;2;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;2;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalForward;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;27;96,16;Float;False;False;-1;2;AmplifyShaderEditor.MaterialInspector;0;1;New Amplify Shader;cf964e524c8e69742b1d21fbe2ebcc4a;True;SceneSelectionPass;0;2;SceneSelectionPass;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Transparent=RenderType;Queue=Transparent=Queue=0;True;0;True;14;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=SceneSelectionPass;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;28;96,16;Float;False;False;-1;2;AmplifyShaderEditor.MaterialInspector;0;1;New Amplify Shader;cf964e524c8e69742b1d21fbe2ebcc4a;True;ScenePickingPass;0;3;ScenePickingPass;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Transparent=RenderType;Queue=Transparent=Queue=0;True;0;True;14;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Picking;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;25;288,32;Float;False;True;-1;2;AmplifyShaderEditor.MaterialInspector;0;14;Cainos/Pixel Art Top Down - Basic/Sprite 2D Unlit;cf964e524c8e69742b1d21fbe2ebcc4a;True;Sprite Unlit;0;0;Sprite Unlit;4;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Transparent=RenderType;Queue=Transparent=Queue=0;True;0;True;14;all;0;False;True;2;5;False;;10;False;;3;1;False;;10;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;True;True;True;0;False;_StencilRef;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;2;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=Universal2D;False;False;0;Hidden/InternalErrorShader;0;0;Standard;3;Vertex Position;1;0;Debug Display;0;0;External Alpha;0;0;0;4;True;True;True;True;False;;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;25;272,16;Float;False;True;-1;2;AmplifyShaderEditor.MaterialInspector;0;14;Cainos/Pixel Art Top Down - Basic/Sprite 2D Unlit - Shadow;cf964e524c8e69742b1d21fbe2ebcc4a;True;Sprite Unlit;0;0;Sprite Unlit;4;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Transparent=RenderType;Queue=Transparent=Queue=0;True;0;True;14;all;0;False;True;2;5;False;;10;False;;3;1;False;;10;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;True;True;True;0;True;_StencilRef;255;False;;255;False;;5;False;;2;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;2;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=Universal2D;False;False;0;Hidden/InternalErrorShader;0;0;Standard;3;Vertex Position;1;0;Debug Display;0;0;External Alpha;0;0;0;4;True;True;True;True;False;;False;0
 WireConnection;11;0;10;0
 WireConnection;24;0;13;0
 WireConnection;24;1;11;4
@@ -663,4 +669,4 @@ WireConnection;29;0;24;0
 WireConnection;29;1;11;4
 WireConnection;25;1;29;0
 ASEEND*/
-//CHKSM=F04630C8414530A9F73207CFDA495CD823658B37
+//CHKSM=AE1751C3357E504444DB4EA654DD7C89586497A6

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: ShopItem_BombTower
   m_EditorClassIdentifier: Assembly-CSharp::ShopItem
   Icon: {fileID: 7197127382677024802, guid: 9f698149da9e7924a8e8f2fdf2626b31, type: 3}
-  Id: 3
+  Id: 16
   Name: Forgaing Lv Up
   Price: 1000
   Sell: 0

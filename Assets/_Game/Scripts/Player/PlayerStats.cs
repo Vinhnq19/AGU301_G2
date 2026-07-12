@@ -321,6 +321,18 @@ namespace DungeonBuilder.Player
         }
 
         /// <summary>
+        /// Server-only (cheat/debug — CheatPanel): hồi sinh NGAY LẬP TỨC nếu đang chết —
+        /// full HP, teleport về spawn (dùng lại flow auto-respawn). False nếu không phải
+        /// server hoặc player chưa chết.
+        /// </summary>
+        public bool ServerForceRevive()
+        {
+            if (!IsServer || !_isDead.Value) return false;
+            ServerAutoRespawn();
+            return true;
+        }
+
+        /// <summary>
         /// Server: auto-respawn tại điểm spawn ban đầu khi countdown về 0. Teleport qua owner client
         /// (vì ClientNetworkTransform là owner-authoritative, server không gọi Teleport trực tiếp được).
         /// </summary>

@@ -55,8 +55,7 @@ public sealed class WaveDesignerWindow : EditorWindow
         public EnemyType EnemyType = EnemyType.Runner;
         public int Count = 10;
         public float Interval = 1f;
-        public int SpawnPoint;
-        public int Path;
+        public int SpawnPoint; // path auto = SpawnPoint khi save (mỗi cổng có 1 đường tương ứng)
 
         public GroupDraft Clone() => (GroupDraft)MemberwiseClone();
     }
@@ -188,8 +187,7 @@ public sealed class WaveDesignerWindow : EditorWindow
                     EnemyType = g.enemyType,
                     Count = g.count,
                     Interval = g.spawnInterval,
-                    SpawnPoint = g.spawnPointIndex,
-                    Path = g.pathIndex
+                    SpawnPoint = g.spawnPointIndex
                 });
             }
             _waves.Add(draft);
@@ -239,7 +237,7 @@ public sealed class WaveDesignerWindow : EditorWindow
                     count = g.Count,
                     spawnInterval = g.Interval,
                     spawnPointIndex = g.SpawnPoint,
-                    pathIndex = g.Path
+                    pathIndex = g.SpawnPoint // path auto = cổng spawn
                 });
             }
 
@@ -302,11 +300,12 @@ public sealed class WaveDesignerWindow : EditorWindow
 
                 if (_spawnPointLabels != null && (g.SpawnPoint < 0 || g.SpawnPoint >= _spawnPointLabels.Length))
                 {
-                    _issues.Add((i, $"{gp}: spawnPoint {g.SpawnPoint} ngoài phạm vi (0..{_spawnPointLabels.Length - 1})."));
+                    _issues.Add((i, $"{gp}: cổng spawn {g.SpawnPoint} ngoài phạm vi (0..{_spawnPointLabels.Length - 1})."));
                 }
-                if (_pathLabels != null && (g.Path < 0 || g.Path >= _pathLabels.Length))
+                else if (_pathLabels != null && g.SpawnPoint >= _pathLabels.Length)
                 {
-                    _issues.Add((i, $"{gp}: path {g.Path} ngoài phạm vi (0..{_pathLabels.Length - 1})."));
+                    // path auto = spawnPoint nên cổng phải có đường tương ứng.
+                    _issues.Add((i, $"{gp}: cổng {g.SpawnPoint} không có đường tương ứng (scene chỉ có {_pathLabels.Length} đường)."));
                 }
                 if (_mappedEnemyTypes != null && !_mappedEnemyTypes.Contains(g.EnemyType))
                 {
@@ -579,7 +578,7 @@ public sealed class WaveDesignerWindow : EditorWindow
         }
         else if (_spawnPointLabels == null)
         {
-            GUI.Label(left, EditorGUIUtility.TrTextContentWithIcon(" Không thấy WaveManager — mở SampleScene để có popup cổng/đường + validate đủ", "console.warnicon.sml"), EditorStyles.miniLabel);
+            GUI.Label(left, EditorGUIUtility.TrTextContentWithIcon(" Không thấy WaveManager — mở SampleScene để có popup cổng spawn + validate đủ", "console.warnicon.sml"), EditorStyles.miniLabel);
             Rect btn = new Rect(rect.xMax - 120f, rect.y + 2f, 112f, 18f);
             if (GUI.Button(btn, "Mở SampleScene", EditorStyles.miniButton))
             {
@@ -841,8 +840,7 @@ public sealed class WaveDesignerWindow : EditorWindow
         GUI.Label(cols.Enemy, "Loại quái", _columnHeaderStyle);
         GUI.Label(cols.Count, "Số lượng", _columnHeaderStyle);
         GUI.Label(cols.Interval, "Giãn cách (s)", _columnHeaderStyle);
-        GUI.Label(cols.Spawn, "Cổng spawn", _columnHeaderStyle);
-        GUI.Label(cols.Path, "Đường đi", _columnHeaderStyle);
+        GUI.Label(cols.Spawn, new GUIContent("Cổng spawn", "Đường đi tự chọn theo cổng"), _columnHeaderStyle);
 
         int removeGroup = -1;
         for (int gi = 0; gi < wave.Groups.Count; gi++)
@@ -874,12 +872,10 @@ public sealed class WaveDesignerWindow : EditorWindow
             if (_spawnPointLabels != null)
             {
                 g.SpawnPoint = EditorGUI.Popup(Pad(cols.Spawn), g.SpawnPoint, _spawnPointLabels);
-                g.Path = EditorGUI.Popup(Pad(cols.Path), g.Path, _pathLabels);
             }
             else
             {
                 g.SpawnPoint = EditorGUI.IntField(Pad(cols.Spawn), g.SpawnPoint);
-                g.Path = EditorGUI.IntField(Pad(cols.Path), g.Path);
             }
 
             if (GUI.Button(new Rect(cols.Delete.x, cols.Delete.y + 3f, 20f, 18f), new GUIContent("✕", "Xóa nhóm này"), EditorStyles.miniButton))
@@ -930,17 +926,16 @@ public sealed class WaveDesignerWindow : EditorWindow
 
     private struct GroupColumns
     {
-        public Rect Dot, Enemy, Count, Interval, Spawn, Path, Delete;
+        public Rect Dot, Enemy, Count, Interval, Spawn, Delete;
     }
 
     /// <summary>Chia cột cho bảng nhóm quái — header và row dùng chung để luôn thẳng hàng.</summary>
     private static GroupColumns ComputeColumns(Rect row)
     {
         const float dotW = 14f, countW = 64f, intervalW = 84f, deleteW = 24f, gap = 6f;
-        float flexible = row.width - dotW - countW - intervalW - deleteW - gap * 6f;
-        float enemyW = Mathf.Max(90f, flexible * 0.38f);
-        float spawnW = Mathf.Max(80f, flexible * 0.31f);
-        float pathW = Mathf.Max(80f, flexible * 0.31f);
+        float flexible = row.width - dotW - countW - intervalW - deleteW - gap * 5f;
+        float enemyW = Mathf.Max(120f, flexible * 0.55f);
+        float spawnW = Mathf.Max(110f, flexible * 0.45f);
 
         float x = row.x;
         GroupColumns c;
@@ -949,7 +944,6 @@ public sealed class WaveDesignerWindow : EditorWindow
         c.Count = new Rect(x, row.y, countW, row.height); x += countW + gap;
         c.Interval = new Rect(x, row.y, intervalW, row.height); x += intervalW + gap;
         c.Spawn = new Rect(x, row.y, spawnW, row.height); x += spawnW + gap;
-        c.Path = new Rect(x, row.y, pathW, row.height); x += pathW + gap;
         c.Delete = new Rect(x, row.y, deleteW, row.height);
         return c;
     }

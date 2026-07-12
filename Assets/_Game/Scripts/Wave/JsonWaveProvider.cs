@@ -37,7 +37,7 @@ namespace DungeonBuilder.Wave
             public int count;
             public float interval;
             public int spawnPoint;
-            public int path;
+            // path bỏ khỏi schema — auto = spawnPoint. Field 'path' cũ trong JSON (nếu có) bị JsonUtility bỏ qua.
         }
 
         private readonly IWaveProvider _fallback;
@@ -98,9 +98,9 @@ namespace DungeonBuilder.Wave
                         {
                             throw new Exception($"wave {i + 1}: enemyType '{g.enemyType}' is not a valid EnemyType.");
                         }
-                        if (g.count <= 0 || g.interval < 0f || g.spawnPoint < 0 || g.path < 0)
+                        if (g.count <= 0 || g.interval < 0f || g.spawnPoint < 0)
                         {
-                            throw new Exception($"wave {i + 1}: invalid count/interval/spawnPoint/path values.");
+                            throw new Exception($"wave {i + 1}: invalid count/interval/spawnPoint values.");
                         }
 
                         groups.Add(new SpawnGroup
@@ -109,7 +109,7 @@ namespace DungeonBuilder.Wave
                             count = g.count,
                             spawnInterval = g.interval,
                             spawnPointIndex = g.spawnPoint,
-                            pathIndex = g.path
+                            pathIndex = g.spawnPoint // path auto = cổng spawn
                         });
                     }
 

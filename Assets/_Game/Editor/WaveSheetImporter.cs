@@ -22,10 +22,10 @@ public static class WaveSheetImporter
 {
     private const string WaveDataFolder = "Assets/_Game/Generated/Data/WaveData";
     private const string CatalogPath = WaveDataFolder + "/DB_WaveCatalog.asset";
-    private const string CsvHeader = "wave,buildTime,combatTime,isBoss,enemyType,count,interval,spawnPoint,path";
-    // Cột growth (tùy chọn, cột 10): hệ số nhân count mỗi wave khi cột wave là range "A-B".
-    // Ví dụ: wave=1-9, count=10, growth=1.2 → wave 1: 10, wave 2: 12, wave 3: 14 (round), ...
-    private const string CsvHeaderWithGrowth = CsvHeader + ",growth";
+    // 8 cột. path bỏ đi (auto = spawnPoint, vì mỗi cổng có 1 đường tương ứng), growth cũng bỏ.
+    // Vẫn đọc được sheet cũ có thêm cột path/growth (các cột thừa bị bỏ qua).
+    private const string CsvHeader = "wave,buildTime,combatTime,isBoss,enemyType,count,interval,spawnPoint";
+    private const int MinColumns = 8;
 
     /// <summary>Đường dẫn CSV mặc định (Docs/WaveSheet.csv). Wave Designer có thể trỏ path khác qua ô "CSV".</summary>
     public static string DefaultCsvPath =>
@@ -53,7 +53,7 @@ public static class WaveSheetImporter
         }
 
         var sb = new StringBuilder();
-        sb.AppendLine(CsvHeaderWithGrowth);
+        sb.AppendLine(CsvHeader);
 
         for (int i = 0; i < catalog.waves.Count; i++)
         {
@@ -81,9 +81,7 @@ public static class WaveSheetImporter
                     g.enemyType.ToString(),
                     g.count.ToString(CultureInfo.InvariantCulture),
                     g.spawnInterval.ToString(CultureInfo.InvariantCulture),
-                    g.spawnPointIndex.ToString(CultureInfo.InvariantCulture),
-                    g.pathIndex.ToString(CultureInfo.InvariantCulture),
-                    "")); // growth: export luôn ra dữ liệu phẳng, để trống = 1
+                    g.spawnPointIndex.ToString(CultureInfo.InvariantCulture)));
             }
         }
 
@@ -111,16 +109,16 @@ public static class WaveSheetImporter
         }
 
         var sb = new StringBuilder();
-        sb.AppendLine(CsvHeaderWithGrowth);
+        sb.AppendLine(CsvHeader);
         sb.AppendLine("# Mỗi dòng = 1 nhóm quái; nhiều dòng cùng 'wave' gộp thành 1 wave.");
-        sb.AppendLine("# wave: 'N' hoặc dải 'A-B' (vd 2-9). buildTime/combatTime tính bằng giây. isBoss: TRUE/FALSE.");
+        sb.AppendLine("# wave: 'N' hoặc dải 'A-B' (vd 2-9, một dòng sinh nhiều wave). buildTime/combatTime: giây. isBoss: TRUE/FALSE.");
         sb.AppendLine($"# enemyType (theo tên): {string.Join(" | ", Enum.GetNames(typeof(EnemyType)))}");
-        sb.AppendLine("# count: số con. interval: giây giữa 2 con. spawnPoint/path: chỉ số cổng/đường trong scene (0=North,1=East,2=West).");
-        sb.AppendLine("# growth (cột cuối, tùy chọn): với dải 'A-B', count nhân growth mỗi wave (vd 1.2). Để trống = giữ nguyên.");
+        sb.AppendLine("# count: số con. interval: giây giữa 2 con. spawnPoint: chỉ số cổng (0=North,1=East,2=West).");
+        sb.AppendLine("# Đường đi tự chọn theo cổng spawn — không cần khai báo.");
         sb.AppendLine("# --- 3 dòng ví dụ dưới import được ngay; sửa/xóa tùy ý ---");
-        sb.AppendLine("1,30,90,FALSE,Runner,8,1.5,0,0,");
-        sb.AppendLine("2-9,25,100,FALSE,Runner,10,1.2,0,0,1.15");
-        sb.AppendLine("10,30,120,TRUE,RatKing,1,0,1,1,");
+        sb.AppendLine("1,30,90,FALSE,Runner,8,1.5,0");
+        sb.AppendLine("2-9,25,100,FALSE,Runner,10,1.2,0");
+        sb.AppendLine("10,30,120,TRUE,RatKing,1,0,1");
 
         Directory.CreateDirectory(Path.GetDirectoryName(csvPath));
         File.WriteAllText(csvPath, sb.ToString(), new UTF8Encoding(true));
@@ -140,7 +138,6 @@ public static class WaveSheetImporter
         public int Count;
         public float Interval;
         public int SpawnPoint;
-        public int Path;
     }
 
     [MenuItem("Tools/Waves/Import Wave Sheet (CSV)")]
@@ -199,10 +196,10 @@ public static class WaveSheetImporter
             if (!headerSeen)
             {
                 string normalized = line.Replace(" ", "").ToLowerInvariant();
-                if (normalized != CsvHeader.ToLowerInvariant()
-                    && normalized != CsvHeaderWithGrowth.ToLowerInvariant())
+                // StartsWith để chấp nhận sheet cũ có thêm cột ',path' / ',path,growth' ở cuối.
+                if (!normalized.StartsWith(CsvHeader.ToLowerInvariant()))
                 {
-                    errors.Add($"line {lineNumber}: header mismatch. Expected '{CsvHeader}' (cột growth tùy chọn), got '{line}'.");
+                    errors.Add($"line {lineNumber}: header mismatch. Expected '{CsvHeader}', got '{line}'.");
                     return rows;
                 }
                 headerSeen = true;
@@ -210,9 +207,9 @@ public static class WaveSheetImporter
             }
 
             string[] cols = line.Split(',');
-            if (cols.Length != 9 && cols.Length != 10)
+            if (cols.Length < MinColumns)
             {
-                errors.Add($"line {lineNumber}: expected 9-10 columns, got {cols.Length}. (Nếu dùng dấu phẩy thập phân kiểu vi-VN thì đổi sang dấu chấm '.')");
+                errors.Add($"line {lineNumber}: expected at least {MinColumns} columns, got {cols.Length}. (Nếu dùng dấu phẩy thập phân kiểu vi-VN thì đổi sang dấu chấm '.')");
                 continue;
             }
 
@@ -231,18 +228,7 @@ public static class WaveSheetImporter
             ok &= ParseInt(cols[5], "count", lineNumber, errors, out row.Count);
             ok &= ParseFloat(cols[6], "interval", lineNumber, errors, out row.Interval);
             ok &= ParseInt(cols[7], "spawnPoint", lineNumber, errors, out row.SpawnPoint);
-            ok &= ParseInt(cols[8], "path", lineNumber, errors, out row.Path);
-
-            float growth = 1f;
-            if (cols.Length == 10 && cols[9].Length > 0)
-            {
-                ok &= ParseFloat(cols[9], "growth", lineNumber, errors, out growth);
-                if (growth <= 0f)
-                {
-                    errors.Add($"line {lineNumber}: growth must be > 0 (got {growth.ToString(CultureInfo.InvariantCulture)}).");
-                    ok = false;
-                }
-            }
+            // Cột 9+ (path/growth của sheet cũ) bị bỏ qua — path auto = spawnPoint.
 
             if (!ok)
             {
@@ -251,15 +237,14 @@ public static class WaveSheetImporter
 
             if (row.Count <= 0)
             {
-                // Check trước khi expand — expand clamp min 1 nên phải bắt count gốc <= 0 tại đây.
                 errors.Add($"line {lineNumber}: count must be > 0 (got {row.Count}).");
                 continue;
             }
 
-            // Expand range: mỗi wave trong [start, end] một Row, count nhân growth^(w - start).
+            // Expand range: mỗi wave trong [start, end] một Row, count giữ nguyên (không còn growth).
             for (int w = waveStart; w <= waveEnd; w++)
             {
-                var expanded = new Row
+                rows.Add(new Row
                 {
                     Line = lineNumber,
                     Wave = w,
@@ -267,12 +252,10 @@ public static class WaveSheetImporter
                     CombatTime = row.CombatTime,
                     IsBoss = row.IsBoss,
                     EnemyType = row.EnemyType,
-                    Count = Mathf.Max(1, Mathf.RoundToInt(row.Count * Mathf.Pow(growth, w - waveStart))),
+                    Count = row.Count,
                     Interval = row.Interval,
-                    SpawnPoint = row.SpawnPoint,
-                    Path = row.Path
-                };
-                rows.Add(expanded);
+                    SpawnPoint = row.SpawnPoint
+                });
             }
         }
 
@@ -323,20 +306,17 @@ public static class WaveSheetImporter
             {
                 errors.Add($"line {row.Line}: spawnPoint must be >= 0 (got {row.SpawnPoint}).");
             }
-            if (row.Path < 0)
-            {
-                errors.Add($"line {row.Line}: path must be >= 0 (got {row.Path}).");
-            }
 
             if (hasSceneLimits)
             {
+                // spawnPoint vừa là cổng vừa là chỉ số đường (auto) — phải hợp lệ cho cả hai mảng.
                 if (row.SpawnPoint >= spawnPointCount)
                 {
                     errors.Add($"line {row.Line}: spawnPoint {row.SpawnPoint} out of range — scene has {spawnPointCount} spawn points (valid: 0..{spawnPointCount - 1}).");
                 }
-                if (row.Path >= pathCount)
+                else if (row.SpawnPoint >= pathCount)
                 {
-                    errors.Add($"line {row.Line}: path {row.Path} out of range — scene has {pathCount} enemy paths (valid: 0..{pathCount - 1}).");
+                    errors.Add($"line {row.Line}: spawnPoint {row.SpawnPoint} không có đường tương ứng — scene chỉ có {pathCount} enemy paths.");
                 }
                 if (!mappedTypes.Contains(row.EnemyType))
                 {
@@ -444,7 +424,7 @@ public static class WaveSheetImporter
                     count = r.Count,
                     spawnInterval = r.Interval,
                     spawnPointIndex = r.SpawnPoint,
-                    pathIndex = r.Path
+                    pathIndex = r.SpawnPoint // path auto = cổng spawn (mỗi cổng có 1 đường tương ứng)
                 });
                 groupCount++;
             }

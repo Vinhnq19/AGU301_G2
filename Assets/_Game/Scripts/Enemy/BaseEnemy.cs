@@ -150,8 +150,6 @@ namespace Assets._Game.Scripts.Enemy
                 speed = 0f;
             }
 
-            _animator.SetFloat("Speed", speed);
-
             if (speed > 0.05f && _visual != null)
             {
                 CacheInitialScaleIfNeeded();
@@ -285,14 +283,33 @@ namespace Assets._Game.Scripts.Enemy
         }
 
         private DungeonBuilder.Player.PlayerStats _playerTarget;
+        private static readonly Collider2D[] PlayerScanResults = new Collider2D[8];
 
-        /// <summary>Quet xem co Player nao dung trong tam danh khong (melee). Cache ket qua vao _playerTarget.</summary>
+        /// <summary>
+        /// Quet xem co Player CON SONG nao dung trong tam danh khong (melee). Cache ket qua vao _playerTarget.
+        /// Player chet bi bo qua — khong lam enemy dung lai "danh xac" thay vi di tiep ve core.
+        /// </summary>
         protected virtual bool IsPlayerInAttackRange()
         {
-            int playerMask = LayerMask.GetMask("Player");
-            Collider2D hit = Physics2D.OverlapCircle(transform.position, _attackRange, playerMask);
-            _playerTarget = hit != null ? hit.GetComponentInParent<DungeonBuilder.Player.PlayerStats>() : null;
-            return _playerTarget != null;
+            var filter = new ContactFilter2D();
+            filter.SetLayerMask(LayerMask.GetMask("Player"));
+            filter.useLayerMask = true;
+            filter.useTriggers = true;
+
+            _playerTarget = null;
+            int count = Physics2D.OverlapCircle(transform.position, _attackRange, filter, PlayerScanResults);
+            for (int i = 0; i < count; i++)
+            {
+                if (PlayerScanResults[i] == null) continue;
+                var stats = PlayerScanResults[i].GetComponentInParent<DungeonBuilder.Player.PlayerStats>();
+                if (stats != null && !stats.IsDead)
+                {
+                    _playerTarget = stats;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public virtual bool IsCoreInAttackRange()
@@ -548,6 +565,9 @@ namespace Assets._Game.Scripts.Enemy
 
             // Quái không bắn mỏ tài nguyên
             if (damageable is DungeonBuilder.Harvesting.HarvestableNode) return false;
+
+            // Player chết không bị chọn làm mục tiêu (đợi hồi sinh).
+            if (damageable is DungeonBuilder.Player.PlayerStats stats && stats.IsDead) return false;
 
             return true;
         }

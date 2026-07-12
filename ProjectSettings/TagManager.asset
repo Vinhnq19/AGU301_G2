@@ -17,9 +17,9 @@ TagManager:
   - Enemy
   - Minimap
   - Map
-  - 
-  - 
-  - 
+  - Layer 1
+  - Layer 2
+  - Layer 3
   - 
   - 
   - 
@@ -55,6 +55,15 @@ TagManager:
     locked: 0
   - name: Minimap
     uniqueID: 2575303553
+    locked: 0
+  - name: Layer 1
+    uniqueID: 842774607
+    locked: 0
+  - name: Layer 2
+    uniqueID: 964030730
+    locked: 0
+  - name: Layer 3
+    uniqueID: 1161725977
     locked: 0
   m_RenderingLayers:
   - Default

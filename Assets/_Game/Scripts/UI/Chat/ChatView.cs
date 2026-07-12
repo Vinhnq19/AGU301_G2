@@ -24,6 +24,10 @@ namespace DungeonBuilder.UI.Chat
         [Header("Settings")]
         [SerializeField] private float _fadeDuration = 0.2f;
 
+        [Header("Cheat")]
+        [Tooltip("Gõ đúng mật mã này trong chat sẽ mở CheatPanel thay vì gửi tin nhắn.")]
+        [SerializeField] private string _cheatCode = "/huydeptrai";
+
         private bool _isPanelVisible;
         private bool _isInputActive;
 
@@ -213,6 +217,25 @@ namespace DungeonBuilder.UI.Chat
 
             string text = _inputField.text;
             _inputField.text = string.Empty;
+
+            // Mật mã cheat: không gửi lên network (giữ bí mật), mở CheatPanel và đóng chat.
+            if (!string.IsNullOrEmpty(_cheatCode) &&
+                string.Equals(text.Trim(), _cheatCode, System.StringComparison.OrdinalIgnoreCase))
+            {
+                var cheatPanel = FindFirstObjectByType<DungeonBuilder.UI.Cheat.CheatPanelView>(FindObjectsInactive.Include);
+                if (cheatPanel != null)
+                {
+                    cheatPanel.Show();
+                }
+                else
+                {
+                    Debug.LogWarning("[ChatView] Không tìm thấy CheatPanelView trong scene.");
+                }
+
+                HidePanel();
+                return;
+            }
+
             Presenter?.SubmitMessage(text);
             _inputField.ActivateInputField();
         }

@@ -79,6 +79,18 @@ namespace DungeonBuilder.Networking.Scopes
             if (_waveManager != null)
             {
                 builder.RegisterComponent(_waveManager);
+
+                // Nguồn wave data: Editor/Dev build cho phép override bằng StreamingAssets/waves.json
+                // (hot reload qua Cheat Panel); build release luôn đọc WaveCatalog SO.
+                builder.Register<IWaveProvider>(_ =>
+                {
+                    IWaveProvider soProvider = new SoWaveProvider(_waveManager.WaveCatalog);
+                    if (Application.isEditor || Debug.isDebugBuild)
+                    {
+                        return new JsonWaveProvider(soProvider);
+                    }
+                    return soProvider;
+                }, Lifetime.Singleton);
             }
 
             if (AudioManager.Instance != null)

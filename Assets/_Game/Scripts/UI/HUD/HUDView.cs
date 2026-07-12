@@ -68,7 +68,9 @@ namespace DungeonBuilder.UI.HUD
             SetText(_tokenText, Presenter.GetResource(ResourceType.Token).ToString());
             SetText(_miningSkillText, Presenter.GetResource(ResourceType.MiningSkill).ToString());
             SetText(_forgingSkillText, Presenter.GetResource(ResourceType.ForgingSkill).ToString());
-            SetText(_waveText, Presenter.GetWave().ToString() + "/10");
+            // Endless mode: totalWaves = 0 → chỉ hiện số wave, không kèm tổng.
+            int totalWaves = Presenter.GetTotalWaves();
+            SetText(_waveText, totalWaves > 0 ? $"{Presenter.GetWave()}/{totalWaves}" : Presenter.GetWave().ToString());
             int countdownSeconds = Mathf.Max(0, Mathf.CeilToInt(Presenter.GetCountdown()));
             SetText(_countdownText, $"{countdownSeconds / 60:00}:{countdownSeconds % 60:00}");
             SetText(_coreHealthText, Presenter.GetCoreHealth().ToString());

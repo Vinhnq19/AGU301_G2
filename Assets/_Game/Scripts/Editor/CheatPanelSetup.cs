@@ -61,7 +61,7 @@ namespace DungeonBuilder.Editor
             panelRect.anchorMax = new Vector2(1f, 0.5f);
             panelRect.pivot = new Vector2(1f, 0.5f);
             panelRect.anchoredPosition = new Vector2(-20f, 0f);
-            panelRect.sizeDelta = new Vector2(430f, 480f);
+            panelRect.sizeDelta = new Vector2(430f, 590f);
             var panelImage = panel.AddComponent<Image>();
             panelImage.sprite = rounded;
             panelImage.type = Image.Type.Sliced;
@@ -136,6 +136,9 @@ namespace DungeonBuilder.Editor
             var fullHeal = CreateCheatButton(list.transform, rounded, "FullHealButton", "Hoi day mau");
             var kill = CreateCheatButton(list.transform, rounded, "KillButton", "Tu sat (test respawn)", danger: true);
 
+            CreateSectionLabel(list.transform, "WAVE");
+            var reloadWaves = CreateCheatButton(list.transform, rounded, "ReloadWavesButton", "Reload Waves (JSON)");
+
             // Wire serialized fields
             var so = new SerializedObject(view);
             so.FindProperty("_visualRoot").objectReferenceValue = visualRoot;
@@ -144,6 +147,7 @@ namespace DungeonBuilder.Editor
             so.FindProperty("_addRareResourcesButton").objectReferenceValue = addRare;
             so.FindProperty("_fullHealButton").objectReferenceValue = fullHeal;
             so.FindProperty("_killPlayerButton").objectReferenceValue = kill;
+            so.FindProperty("_reloadWavesButton").objectReferenceValue = reloadWaves;
             so.ApplyModifiedPropertiesWithoutUndo();
 
             PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);

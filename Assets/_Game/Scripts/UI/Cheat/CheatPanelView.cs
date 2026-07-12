@@ -1,6 +1,7 @@
 using DungeonBuilder.Core.Enums;
 using DungeonBuilder.Networking;
 using DungeonBuilder.Player;
+using DungeonBuilder.Wave;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
@@ -24,6 +25,7 @@ namespace DungeonBuilder.UI.Cheat
         [SerializeField] private Button _addRareResourcesButton;
         [SerializeField] private Button _fullHealButton;
         [SerializeField] private Button _killPlayerButton;
+        [SerializeField] private Button _reloadWavesButton;
 
         [Header("Settings")]
         [SerializeField, Min(1)] private int _resourceAmount = 500;
@@ -48,6 +50,7 @@ namespace DungeonBuilder.UI.Cheat
             if (_addRareResourcesButton != null) _addRareResourcesButton.onClick.AddListener(() => AddResources(RareResources));
             if (_fullHealButton != null) _fullHealButton.onClick.AddListener(FullHealLocalPlayer);
             if (_killPlayerButton != null) _killPlayerButton.onClick.AddListener(KillLocalPlayer);
+            if (_reloadWavesButton != null) _reloadWavesButton.onClick.AddListener(ReloadWaves);
 
             Hide();
         }
@@ -110,6 +113,28 @@ namespace DungeonBuilder.UI.Cheat
             }
 
             stats.Heal(stats.MaxHP); // server-only: chi co tac dung khi la host
+        }
+
+        /// <summary>
+        /// Doc lai StreamingAssets/waves.json (hot reload) — chi host, ap dung tu wave ke tiep.
+        /// Xem Docs/WAVE_DATA_PIPELINE_PLAN.md.
+        /// </summary>
+        private void ReloadWaves()
+        {
+            if (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsServer)
+            {
+                Debug.LogWarning("[CheatPanel] Reload Waves chi dung duoc khi la HOST.");
+                return;
+            }
+
+            var waveManager = FindFirstObjectByType<WaveManager>();
+            if (waveManager == null)
+            {
+                Debug.LogWarning("[CheatPanel] Khong tim thay WaveManager.");
+                return;
+            }
+
+            waveManager.ReloadWaveData();
         }
 
         private void KillLocalPlayer()

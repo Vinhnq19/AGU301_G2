@@ -114,6 +114,17 @@ namespace DungeonBuilder.UI.HUD
 
         private void HandlePhaseCountdownChanged(float secondsRemaining)
         {
+            // Tổng wave chưa có trước khi wave 1 bắt đầu (WaveManager spawn sau presenter)
+            // — lấy một lần từ NetworkVariable ngay tick countdown đầu tiên.
+            if (Model.TotalWaves <= 0)
+            {
+                WaveManager waveManager = Object.FindFirstObjectByType<WaveManager>();
+                if (waveManager != null)
+                {
+                    Model.SetTotalWaves(waveManager.TotalWavesNetVar.Value);
+                }
+            }
+
             Model.SetCountdown(secondsRemaining);
         }
 

@@ -30,6 +30,10 @@ namespace DungeonBuilder.Wave
         [SerializeField] private Transform _coreTarget;
         [SerializeField] private Transform[] _spawnPoints;
 
+        [Header("Endless Mode")]
+        [Tooltip("Bật: sau wave cuối không kết thúc trận — lặp lại wave cuối với số quái tăng dần mỗi wave. Giết boss KHÔNG thắng ngay. HUD hiện số wave không kèm tổng.")]
+        [SerializeField] private bool _endlessMode;
+
         private readonly NetworkVariable<int> _currentWave = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         private readonly NetworkVariable<int> _totalWaves = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
@@ -78,7 +82,8 @@ namespace DungeonBuilder.Wave
                 _eventBus.OnGameEnded += HandleGameEndedEvent;
                 _eventBus.OnEnemyKilled += HandleEnemyKilled;
                 InitializePrefabLookup();
-                _totalWaves.Value = _waveProvider.WaveCount;
+                // Endless: totalWaves = 0 làm tín hiệu cho HUD hiện "Wave: x" không kèm tổng.
+                _totalWaves.Value = _endlessMode ? 0 : _waveProvider.WaveCount;
                 RunWaveLoopAsync().Forget();
             }
         }
@@ -146,7 +151,9 @@ namespace DungeonBuilder.Wave
 
                     await CountdownCombatAsync(combatDuration);
 
-                    if (_currentWave.Value >= _waveProvider.WaveCount)
+                    // Endless mode: không bao giờ kết thúc theo số wave — SpawnWaveAsync tự dùng
+                    // config wave cuối + cộng thêm quái theo số wave vượt (nhánh fallback).
+                    if (!_endlessMode && _currentWave.Value >= _waveProvider.WaveCount)
                     {
                         _allWavesCompleted.Value = true;
                         break;
@@ -223,8 +230,31 @@ namespace DungeonBuilder.Wave
 
             EnsureProvider();
             _waveProvider.Reload();
-            _totalWaves.Value = _waveProvider.WaveCount;
+            _totalWaves.Value = _endlessMode ? 0 : _waveProvider.WaveCount;
             Debug.Log($"[WaveManager] Wave data reloaded — {_waveProvider.WaveCount} waves (applies from next wave).");
+        }
+
+        /// <summary>
+        /// Cheat host-only: nhảy tới wave X. Chỉ dùng trong Build phase — wave X sẽ spawn
+        /// khi build phase kết thúc (bấm SKIP để vào ngay). Trả false nếu không hợp lệ.
+        /// </summary>
+        public bool ServerJumpToWave(int targetWave)
+        {
+            if (!IsServer || targetWave < 1)
+            {
+                return false;
+            }
+
+            if (_gamePhase.Value != GamePhase.Build)
+            {
+                Debug.LogWarning("[WaveManager] Jump to wave chỉ dùng được trong Build phase.");
+                return false;
+            }
+
+            // Loop sẽ ++ khi build kết thúc → set X-1 để wave kế tiếp đúng là X.
+            _currentWave.Value = targetWave - 1;
+            Debug.Log($"[WaveManager] Jumped — wave {targetWave} will spawn when build phase ends.");
+            return true;
         }
 
         /// <summary>Bat ky client nao cung co the yeu cau bo qua thoi gian chuan bi (Build phase). Server xac thuc va xu ly.</summary>
@@ -401,6 +431,13 @@ namespace DungeonBuilder.Wave
         {
             if (isBoss && IsServer)
             {
+                if (_endlessMode)
+                {
+                    // Endless: boss chỉ là quái mạnh lặp lại, giết không kết thúc trận.
+                    Debug.Log("[WaveManager] Boss killed (endless mode) — game continues.");
+                    return;
+                }
+
                 Debug.Log($"[WaveManager] Boss killed! Ending game with victory.");
                 _allWavesCompleted.Value = true; // Trigger win
             }

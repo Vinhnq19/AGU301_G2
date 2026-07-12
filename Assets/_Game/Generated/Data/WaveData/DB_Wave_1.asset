@@ -16,13 +16,8 @@ MonoBehaviour:
   combatPhaseDuration: 100
   isBossWave: 0
   spawnGroups:
-  - enemyType: 0
-    count: 10
-    spawnInterval: 1.5
-    spawnPointIndex: 0
-    pathIndex: 0
-  - enemyType: 0
-    count: 10
+  - enemyType: 3
+    count: 1
     spawnInterval: 1.5
     spawnPointIndex: 2
     pathIndex: 2

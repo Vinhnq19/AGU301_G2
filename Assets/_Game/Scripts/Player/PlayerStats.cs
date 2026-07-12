@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using DungeonBuilder.Data;
 using Unity.Netcode;
 using Unity.Netcode.Components;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace DungeonBuilder.Player
 {
@@ -17,7 +19,23 @@ namespace DungeonBuilder.Player
         [SerializeField, Min(0.1f)] private float _reviveMaxDistance = 2.5f;
 
         [Header("Auto Respawn")]
-        [SerializeField, Min(0f)] private float _autoRespawnDuration = 20f;
+        [Tooltip("Thời gian hồi sinh cơ bản (giây). 0 = tắt auto-respawn hoàn toàn.")]
+        [FormerlySerializedAs("_autoRespawnDuration")]
+        [SerializeField, Min(0f)] private float _baseRespawnTime = 20f;
+        [Tooltip("Cộng thêm theo wave: (wave hiện tại - 1) × giá trị này.")]
+        [SerializeField, Min(0f)] private float _respawnTimePerWave = 0.5f;
+        [Tooltip("Cộng thêm theo số lần đã chết trong trận (tính cả lần này): deathCount × giá trị này.")]
+        [SerializeField, Min(0f)] private float _respawnTimePerDeath = 2f;
+        [SerializeField, Min(0f)] private float _minRespawnTime = 3f;
+        [SerializeField, Min(1f)] private float _maxRespawnTime = 60f;
+        [Tooltip("Bật tăng thời gian hồi sinh theo wave hiện tại.")]
+        [SerializeField] private bool _scaleRespawnByWave = true;
+        [Tooltip("Bật tăng thời gian hồi sinh theo số lần chết trong trận.")]
+        [SerializeField] private bool _scaleRespawnByDeaths = true;
+
+        [Header("Post-Revive")]
+        [Tooltip("Bất tử trong N giây ngay sau khi sống lại (revive hoặc auto-respawn) để không chết ngay lập tức.")]
+        [SerializeField, Min(0f)] private float _postReviveInvulnerability = 2f;
 
         private readonly NetworkVariable<float> _hp = new(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         private readonly NetworkVariable<float> _mana = new(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
@@ -31,6 +49,17 @@ namespace DungeonBuilder.Player
 
         /// <summary>Vị trí spawn ban đầu của player (capture tại OnNetworkSpawn phía server). Dùng cho auto-respawn.</summary>
         private Vector3 _initialSpawnPosition;
+
+        /// <summary>Server-only: số lần đã chết trong trận này. Dùng cộng thời gian hồi sinh.</summary>
+        private int _deathCount;
+
+        /// <summary>Server-only: bất tử tới thời điểm này (Time.time) sau khi vừa hồi sinh.</summary>
+        private float _invulnerableUntil;
+
+        /// <summary>Các collider non-trigger cache tại Awake — chuyển sang trigger khi chết để xác không chặn đường.</summary>
+        private Collider2D[] _solidColliders;
+
+        private DungeonBuilder.Wave.WaveManager _waveManager;
 
         public event Action<float, float> OnHPChanged;
         public event Action<float, float> OnManaChanged;
@@ -68,9 +97,24 @@ namespace DungeonBuilder.Player
         public float ReviveHealFraction => _reviveHealFraction;
         public float ReviveMaxDistance => _reviveMaxDistance;
 
-        public float AutoRespawnDuration => _autoRespawnDuration;
         public float AutoRespawnCountdown => _autoRespawnCountdown.Value;
         public Vector3 InitialSpawnPosition => _initialSpawnPosition;
+
+        private void Awake()
+        {
+            // Cache các collider đặc (non-trigger) để chuyển đổi khi chết/hồi sinh.
+            // Collider vốn là trigger (vd vùng hút tài nguyên) giữ nguyên, không đụng.
+            var all = GetComponentsInChildren<Collider2D>(true);
+            var solids = new List<Collider2D>(all.Length);
+            foreach (Collider2D c in all)
+            {
+                if (c != null && !c.isTrigger)
+                {
+                    solids.Add(c);
+                }
+            }
+            _solidColliders = solids.ToArray();
+        }
 
         public override void OnNetworkSpawn()
         {
@@ -91,6 +135,9 @@ namespace DungeonBuilder.Player
                 _shield.Value = 0f;
                 _stamina.Value = 100f;
             }
+
+            // Đồng bộ trạng thái collider theo trạng thái chết hiện tại (late-join thấy đúng xác).
+            ApplyCorpsePhysics(_isDead.Value);
 
             OnHPChanged?.Invoke(_hp.Value, MaxHP);
             OnManaChanged?.Invoke(_mana.Value, MaxMana);
@@ -118,7 +165,7 @@ namespace DungeonBuilder.Player
             // Auto-respawn countdown: nếu đếm về 0 và không có ai cứu (hoặc duration=0 thì tắt) → respawn.
             // Lưu ý: countdown chạy SONG SONG với revive. Nếu có ai cứu xong trước khi countdown hết,
             // CompleteRevive() sẽ set countdown = 0 → UI ẩn, player hồi sinh ở chỗ chết với HP = _reviveHealFraction.
-            if (_autoRespawnDuration > 0f && _autoRespawnCountdown.Value > 0f)
+            if (_baseRespawnTime > 0f && _autoRespawnCountdown.Value > 0f)
             {
                 float newCountdown = _autoRespawnCountdown.Value - Time.deltaTime;
                 if (newCountdown <= 0f)
@@ -165,6 +212,12 @@ namespace DungeonBuilder.Player
                 return;
             }
 
+            if (Time.time < _invulnerableUntil)
+            {
+                // Vừa hồi sinh — còn trong khoảng bất tử ngắn.
+                return;
+            }
+
             float shieldAbsorb = Mathf.Min(_shield.Value, amount);
             _shield.Value -= shieldAbsorb;
             float newHP = Mathf.Max(0f, _hp.Value - (amount - shieldAbsorb));
@@ -190,6 +243,7 @@ namespace DungeonBuilder.Player
         {
             if (!IsServer || !_isDead.Value) return false;
             if (reviverClientId == OwnerClientId) return false; // không tự cứu mình
+            if (_reviverClientId.Value != ulong.MaxValue) return false; // đã có người đang cứu — không cho cướp slot / reset progress
             _reviverClientId.Value = reviverClientId;
             _reviveProgress.Value = 0f;
             return true;
@@ -213,8 +267,41 @@ namespace DungeonBuilder.Player
             _isDead.Value = true;
             _reviveProgress.Value = 0f;
             _reviverClientId.Value = ulong.MaxValue;
+            _deathCount++;
             // Bắt đầu đếm auto-respawn (nếu enabled). UI sẽ hiện số giây còn lại.
-            _autoRespawnCountdown.Value = _autoRespawnDuration > 0f ? _autoRespawnDuration : 0f;
+            _autoRespawnCountdown.Value = ComputeRespawnTime();
+        }
+
+        /// <summary>
+        /// RespawnTime = Base + WaveBonus + DeathCountBonus, clamp [min, max].
+        /// WaveBonus = (wave hiện tại - 1) × perWave; DeathCountBonus = số lần chết (gồm lần này) × perDeath.
+        /// Trả 0 khi auto-respawn bị tắt (base = 0).
+        /// </summary>
+        private float ComputeRespawnTime()
+        {
+            if (_baseRespawnTime <= 0f)
+            {
+                return 0f;
+            }
+
+            float time = _baseRespawnTime;
+
+            if (_scaleRespawnByWave)
+            {
+                if (_waveManager == null)
+                {
+                    _waveManager = FindFirstObjectByType<DungeonBuilder.Wave.WaveManager>();
+                }
+                int wave = _waveManager != null ? _waveManager.CurrentWave : 0;
+                time += Mathf.Max(0, wave - 1) * _respawnTimePerWave;
+            }
+
+            if (_scaleRespawnByDeaths)
+            {
+                time += _deathCount * _respawnTimePerDeath;
+            }
+
+            return Mathf.Clamp(time, _minRespawnTime, _maxRespawnTime);
         }
 
         private void CancelReviveState()
@@ -230,6 +317,7 @@ namespace DungeonBuilder.Player
             CancelReviveState();
             // Revive xong (chưa hết countdown): hủy auto-respawn, ở lại chỗ chết với HP = _reviveHealFraction.
             _autoRespawnCountdown.Value = 0f;
+            _invulnerableUntil = Time.time + _postReviveInvulnerability;
         }
 
         /// <summary>
@@ -243,6 +331,7 @@ namespace DungeonBuilder.Player
             _isDead.Value = false;
             _autoRespawnCountdown.Value = 0f;
             CancelReviveState();
+            _invulnerableUntil = Time.time + _postReviveInvulnerability;
 
             // Teleport về điểm spawn ban đầu. Gửi RPC cho owner để authority side gọi Teleport
             // (ClientNetworkTransform chỉ cho phép authority = owner thay đổi transform).
@@ -328,7 +417,29 @@ namespace DungeonBuilder.Player
 
         private void HandleDeadStateChangedNetworked(bool previousValue, bool newValue)
         {
+            ApplyCorpsePhysics(newValue);
             OnDeadStateChanged?.Invoke(newValue);
+        }
+
+        /// <summary>
+        /// Chạy trên MỌI peer khi trạng thái chết đổi: xác chết chuyển collider đặc sang trigger
+        /// để không chặn đường (enemy lẫn đồng minh); hồi sinh thì trả lại như cũ.
+        /// Trigger vẫn nhận Physics2D.OverlapPoint → click chuột để revive vẫn hoạt động bình thường.
+        /// </summary>
+        private void ApplyCorpsePhysics(bool isDead)
+        {
+            if (_solidColliders == null)
+            {
+                return;
+            }
+
+            foreach (Collider2D collider in _solidColliders)
+            {
+                if (collider != null)
+                {
+                    collider.isTrigger = isDead;
+                }
+            }
         }
 
         private void HandleAnyReviveChange<T>(T previousValue, T newValue)

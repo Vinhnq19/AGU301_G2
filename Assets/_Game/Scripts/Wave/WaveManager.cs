@@ -34,6 +34,9 @@ namespace DungeonBuilder.Wave
         private readonly NetworkVariable<int> _totalWaves = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
         public NetworkVariable<int> TotalWavesNetVar => _totalWaves;
+
+        /// <summary>Wave hiện tại (1-based, 0 = chưa bắt đầu wave nào). Đọc được trên mọi peer.</summary>
+        public int CurrentWave => _currentWave.Value;
         private readonly NetworkVariable<float> _phaseCountdown = new(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         private readonly NetworkVariable<GamePhase> _gamePhase = new(GamePhase.Build, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         private readonly NetworkVariable<bool> _allWavesCompleted = new(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);

@@ -18,6 +18,8 @@ namespace DungeonBuilder.UI
 
         private void OnEnable()
         {
+            Time.timeScale = 0f;
+
             if (AudioManager.Instance == null)
                 return;
 
@@ -28,6 +30,8 @@ namespace DungeonBuilder.UI
 
         private void OnDisable()
         {
+            Time.timeScale = 1f;
+
             RemoveListener(masterVolumeSlider, OnMasterVolumeChanged);
             RemoveListener(bgmVolumeSlider, OnBGMVolumeChanged);
             RemoveListener(sfxVolumeSlider, OnSFXVolumeChanged);

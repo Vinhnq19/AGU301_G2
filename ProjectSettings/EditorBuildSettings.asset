@@ -17,7 +17,7 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/huycv.unity
     guid: 5b2a98da172197a4ca247215a5f75e0b
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/GameplayScene.unity
     guid: 91495953f56ac4643b84c32a001de7f8
   m_configObjects:

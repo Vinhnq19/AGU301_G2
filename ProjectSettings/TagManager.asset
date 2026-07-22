@@ -20,8 +20,8 @@ TagManager:
   - Layer 1
   - Layer 2
   - Layer 3
-  - 
-  - 
+  - NoGlobalLight
+  - CaveShadow
   - 
   - 
   - 
@@ -40,6 +40,9 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Cave
+    uniqueID: 705412859
     locked: 0
   - name: Player
     uniqueID: 3656494939

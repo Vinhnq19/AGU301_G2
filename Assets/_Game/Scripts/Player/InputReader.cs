@@ -30,6 +30,14 @@ namespace DungeonBuilder.Player
         public event Action<int> OnHotbarPressed;
 
         /// <summary>
+        /// Cổng chặn input gameplay toàn cục. Khi true (vd đang gõ chat) InputReader nuốt mọi
+        /// input: Move trả về 0, các action rời rạc (attack/dash/interact/đổi tool/hotbar) bị bỏ qua.
+        /// Tách biệt điều khiển nhân vật khỏi thao tác gõ chat. Static vì chỉ có 1 người chơi local
+        /// và ChatView (UI) không giữ tham chiếu tới InputReader của player.
+        /// </summary>
+        public static bool GameplayBlocked { get; set; }
+
+        /// <summary>
         /// Bật / tắt toàn bộ Player action map runtime.
         /// Dùng để khóa mọi input khi player chết / đang revive (không nhận attack, dash, move, hotbar…).
         /// Khác với component.enabled: cái này chỉ đụng action map, không ảnh hưởng subscription.
@@ -206,7 +214,9 @@ namespace DungeonBuilder.Player
 
         private void HandleMove(InputAction.CallbackContext context)
         {
-            OnMove?.Invoke(context.ReadValue<Vector2>());
+            // Đang gõ chat → coi như không di chuyển (trả 0). PlayerController còn zero velocity
+            // mỗi FixedUpdate nên cả trường hợp đang GIỮ phím lúc mở chat cũng đứng yên.
+            OnMove?.Invoke(GameplayBlocked ? Vector2.zero : context.ReadValue<Vector2>());
         }
 
         private void HandleLook(InputAction.CallbackContext context)
@@ -216,6 +226,7 @@ namespace DungeonBuilder.Player
 
         private void HandleAttackPerformed(InputAction.CallbackContext context)
         {
+            if (GameplayBlocked) return;
             DBLog.Info($"input.attack.{GetInstanceID()}", "Input Attack performed.", 0.2f, this);
             OnAttackPressed?.Invoke();
         }
@@ -227,32 +238,42 @@ namespace DungeonBuilder.Player
 
         private void HandleInteractPerformed(InputAction.CallbackContext context)
         {
+            if (GameplayBlocked) return;
             DBLog.Info($"input.interact.{GetInstanceID()}", "Input Interact performed.", 0.2f, this);
             OnInteractPressed?.Invoke();
         }
 
         private void HandleDashPerformed(InputAction.CallbackContext context)
         {
+            if (GameplayBlocked) return;
             OnDashPressed?.Invoke();
         }
 
         private void HandleNextToolPerformed(InputAction.CallbackContext context)
         {
+            if (GameplayBlocked) return;
             DBLog.Info($"input.next-tool.{GetInstanceID()}", "Input NextTool performed.", 0.2f, this);
             OnNextToolPressed?.Invoke();
         }
 
         private void HandlePrevToolPerformed(InputAction.CallbackContext context)
         {
+            if (GameplayBlocked) return;
             DBLog.Info($"input.prev-tool.{GetInstanceID()}", "Input PrevTool performed.", 0.2f, this);
             OnPrevToolPressed?.Invoke();
         }
 
-        private void HandleHotbar1(InputAction.CallbackContext context) => OnHotbarPressed?.Invoke(0);
-        private void HandleHotbar2(InputAction.CallbackContext context) => OnHotbarPressed?.Invoke(1);
-        private void HandleHotbar3(InputAction.CallbackContext context) => OnHotbarPressed?.Invoke(2);
-        private void HandleHotbar4(InputAction.CallbackContext context) => OnHotbarPressed?.Invoke(3);
-        private void HandleHotbar5(InputAction.CallbackContext context) => OnHotbarPressed?.Invoke(4);
-        private void HandleHotbar6(InputAction.CallbackContext context) => OnHotbarPressed?.Invoke(5);
+        private void FireHotbar(int index)
+        {
+            if (GameplayBlocked) return;
+            OnHotbarPressed?.Invoke(index);
+        }
+
+        private void HandleHotbar1(InputAction.CallbackContext context) => FireHotbar(0);
+        private void HandleHotbar2(InputAction.CallbackContext context) => FireHotbar(1);
+        private void HandleHotbar3(InputAction.CallbackContext context) => FireHotbar(2);
+        private void HandleHotbar4(InputAction.CallbackContext context) => FireHotbar(3);
+        private void HandleHotbar5(InputAction.CallbackContext context) => FireHotbar(4);
+        private void HandleHotbar6(InputAction.CallbackContext context) => FireHotbar(5);
     }
 }

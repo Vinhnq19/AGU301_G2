@@ -1,6 +1,7 @@
 using System.Collections;
 using DG.Tweening;
 using DungeonBuilder.Chat;
+using DungeonBuilder.Player;
 using DungeonBuilder.UI.Base;
 using TMPro;
 using Unity.Netcode;
@@ -49,6 +50,8 @@ namespace DungeonBuilder.UI.Chat
 
         private void OnDestroy()
         {
+            // Tránh kẹt cổng chặn ở true nếu ChatView bị hủy (đổi scene) lúc đang gõ.
+            InputReader.GameplayBlocked = false;
             Presenter?.Dispose();
         }
 
@@ -59,20 +62,8 @@ namespace DungeonBuilder.UI.Chat
                 return;
             }
 
-            if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
-            {
-                if (!_isInputActive)
-                {
-                    ShowPanelWithInput();
-                }
-                else if (_inputField != null && !string.IsNullOrWhiteSpace(_inputField.text))
-                {
-                    SendCurrentInput();
-                }
-            }
-
-            // Phím ` (BackQuote): bật/tắt chat panel. Dùng ` vì ký tự này không gõ trong
-            // tin nhắn nên toggle được cả khi input field đang focus. Mở là focus input luôn.
+            // Phím ` (BackQuote) là phím DUY NHẤT để bật/tắt chat. Dùng ` vì ký tự này không
+            // gõ trong tin nhắn nên toggle được cả khi input field đang focus. Mở là focus input luôn.
             if (Input.GetKeyDown(KeyCode.BackQuote))
             {
                 if (_isPanelVisible)
@@ -82,6 +73,16 @@ namespace DungeonBuilder.UI.Chat
                 else
                 {
                     ShowPanelWithInput();
+                }
+            }
+
+            // Enter CHỈ để GỬI khi đang gõ — không còn dùng để mở chat nữa.
+            if (_isInputActive &&
+                (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)))
+            {
+                if (_inputField != null && !string.IsNullOrWhiteSpace(_inputField.text))
+                {
+                    SendCurrentInput();
                 }
             }
 
@@ -140,6 +141,8 @@ namespace DungeonBuilder.UI.Chat
             ShowPanel();
 
             _isInputActive = true;
+            // Đang gõ chat → chặn input gameplay (di chuyển/attack/dash/hotbar…) để tách biệt.
+            InputReader.GameplayBlocked = true;
             if (_inputField != null)
             {
                 StartCoroutine(FocusInputNextFrame());
@@ -172,6 +175,8 @@ namespace DungeonBuilder.UI.Chat
         {
             _isPanelVisible = false;
             _isInputActive = false;
+            // Thoát chat → mở lại input gameplay.
+            InputReader.GameplayBlocked = false;
 
             if (_inputField != null)
             {
@@ -199,6 +204,7 @@ namespace DungeonBuilder.UI.Chat
         {
             _isPanelVisible = false;
             _isInputActive = false;
+            InputReader.GameplayBlocked = false;
 
             if (_panelCanvasGroup != null)
             {

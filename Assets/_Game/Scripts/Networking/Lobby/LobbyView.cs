@@ -19,6 +19,8 @@ namespace DungeonBuilder.Networking.Lobby
         [SerializeField] private Button _startButton;
         [SerializeField] private Button _disconnectButton;
         [SerializeField] private Button _backToMenuButton;
+        [Tooltip("Nút copy Room ID (IP) vào clipboard để share cho bạn bè vào phòng.")]
+        [SerializeField] private Button _copyRoomIdButton;
 
         [Header("Texts")]
         [SerializeField] private TMP_Text _roomIdText;
@@ -37,6 +39,7 @@ namespace DungeonBuilder.Networking.Lobby
             _startButton?.onClick.AddListener(OnStartClicked);
             _disconnectButton?.onClick.AddListener(OnDisconnectClicked);
             _backToMenuButton?.onClick.AddListener(OnBackToMenuClicked);
+            _copyRoomIdButton?.onClick.AddListener(OnCopyRoomIdClicked);
             _playerNameInput?.onEndEdit.AddListener(OnPlayerNameChanged);
         }
 
@@ -47,6 +50,7 @@ namespace DungeonBuilder.Networking.Lobby
             _startButton?.onClick.RemoveListener(OnStartClicked);
             _disconnectButton?.onClick.RemoveListener(OnDisconnectClicked);
             _backToMenuButton?.onClick.RemoveListener(OnBackToMenuClicked);
+            _copyRoomIdButton?.onClick.RemoveListener(OnCopyRoomIdClicked);
             _playerNameInput?.onEndEdit.RemoveListener(OnPlayerNameChanged);
             Presenter?.Dispose();
         }
@@ -164,6 +168,25 @@ namespace DungeonBuilder.Networking.Lobby
         private void OnBackToMenuClicked()
         {
             Presenter?.OnBackToMenuClicked();
+        }
+
+        /// <summary>Copy Room ID (IP host) vào clipboard hệ thống để share cho bạn bè.</summary>
+        private void OnCopyRoomIdClicked()
+        {
+            LobbyModel model = GetModel();
+            string id = model != null ? model.LocalIp : null;
+            if (string.IsNullOrEmpty(id))
+            {
+                return;
+            }
+
+            GUIUtility.systemCopyBuffer = id;
+
+            // Feedback nhanh trên status (sẽ bị Render() ghi đè khi có cập nhật kết nối mới).
+            if (_statusText != null)
+            {
+                _statusText.text = $"Đã copy Room ID: {id}";
+            }
         }
 
         private void OnPlayerNameChanged(string newName)

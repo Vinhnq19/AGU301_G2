@@ -339,11 +339,26 @@ public static class WaveSheetImporter
             for (int i = 1; i < kv.Value.Count; i++)
             {
                 Row r = kv.Value[i];
-                if (!Mathf.Approximately(r.BuildTime, first.BuildTime)
-                    || !Mathf.Approximately(r.CombatTime, first.CombatTime)
-                    || r.IsBoss != first.IsBoss)
+                // Chỉ ra ĐÚNG field nào lệch + giá trị hai bên, để sửa sheet không phải đoán.
+                var diffs = new List<string>();
+                if (!Mathf.Approximately(r.BuildTime, first.BuildTime))
                 {
-                    errors.Add($"line {r.Line}: wave {kv.Key} has inconsistent buildTime/combatTime/isBoss (must match line {first.Line}).");
+                    diffs.Add($"buildTime {r.BuildTime.ToString(CultureInfo.InvariantCulture)} != {first.BuildTime.ToString(CultureInfo.InvariantCulture)}");
+                }
+                if (!Mathf.Approximately(r.CombatTime, first.CombatTime))
+                {
+                    diffs.Add($"combatTime {r.CombatTime.ToString(CultureInfo.InvariantCulture)} != {first.CombatTime.ToString(CultureInfo.InvariantCulture)}");
+                }
+                if (r.IsBoss != first.IsBoss)
+                {
+                    diffs.Add($"isBoss {r.IsBoss} != {first.IsBoss}");
+                }
+
+                if (diffs.Count > 0)
+                {
+                    errors.Add($"line {r.Line}: wave {kv.Key} has inconsistent wave-level values vs line {first.Line} " +
+                               $"({string.Join("; ", diffs)}). buildTime/combatTime/isBoss thuộc về CẢ wave — " +
+                               $"mọi dòng cùng wave {kv.Key} phải ghi giống nhau.");
                 }
             }
         }

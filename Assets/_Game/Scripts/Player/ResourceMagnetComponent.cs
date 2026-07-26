@@ -10,8 +10,11 @@ namespace DungeonBuilder.Player
 {
     public sealed class ResourceMagnetComponent : NetworkBehaviour
     {
-        [SerializeField] private float[] _radiusBySkillLevel = { 0f, 0f, 1.5f, 2.5f, 3.5f, 5f };
-        [SerializeField] private LayerMask _dropLayer;
+        [Tooltip("Bán kính hút theo MiningSkill. Index 0/1 là mức cơ bản — phải > 0 để Hero đi gần " +
+                 "là hút được ngay từ đầu game (skill mặc định = 1); nâng skill thì hút xa hơn.")]
+        [SerializeField] private float[] _radiusBySkillLevel = { 1.8f, 1.8f, 2.4f, 3.2f, 4f, 5f };
+        [Tooltip("Layer của các ResourceDrop (mặc định drop nằm ở layer Default).")]
+        [SerializeField] private LayerMask _dropLayer = 1; // 1 << 0 = Default
 
         private IResourceService _resourceService;
         private float _currentRadius;
@@ -35,6 +38,16 @@ namespace DungeonBuilder.Player
             base.OnNetworkSpawn();
 
             if (!IsServer) return;
+
+            // Inject có thể chưa chạy (thiếu wire ở LifetimeScope) — vẫn phải hút được ở mức cơ bản
+            // thay vì NullReference rồi tắt hẳn tính năng.
+            if (_resourceService == null)
+            {
+                Debug.LogWarning("[ResourceMagnet] IResourceService chưa được inject — dùng bán kính cơ bản, " +
+                                 "magnet sẽ không nâng theo MiningSkill.", this);
+                UpdateRadius(0);
+                return;
+            }
 
             _resourceService.ResourceChanged += HandleResourceChanged;
             UpdateRadius(_resourceService.GetAmount(ResourceType.MiningSkill));
@@ -71,8 +84,24 @@ namespace DungeonBuilder.Player
 
         private void UpdateRadius(int skillLevel)
         {
+            if (_radiusBySkillLevel == null || _radiusBySkillLevel.Length == 0)
+            {
+                _currentRadius = 0f;
+                return;
+            }
+
             int idx = Mathf.Clamp(skillLevel, 0, _radiusBySkillLevel.Length - 1);
             _currentRadius = _radiusBySkillLevel[idx];
+        }
+
+        private void OnDrawGizmosSelected()
+        {
+            if (_radiusBySkillLevel == null || _radiusBySkillLevel.Length == 0) return;
+
+            // Runtime: vẽ bán kính đang dùng. Edit mode: vẽ bán kính cơ bản (index 0).
+            float radius = _currentRadius > 0f ? _currentRadius : _radiusBySkillLevel[0];
+            Gizmos.color = new Color(0.2f, 0.9f, 1f, 0.35f);
+            Gizmos.DrawWireSphere(transform.position, radius);
         }
     }
 }

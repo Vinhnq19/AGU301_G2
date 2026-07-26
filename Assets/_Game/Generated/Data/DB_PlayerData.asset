@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ebc45759b8efd74791692e6affaa09a, type: 3}
   m_Name: DB_PlayerData
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.PlayerDataSO
-  maxHP: 100
+  maxHP: 200
   speed: 5
   maxMana: 100
   dashCooldown: 1

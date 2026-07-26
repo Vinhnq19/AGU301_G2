@@ -30,6 +30,10 @@ namespace DungeonBuilder.Wave
         [SerializeField] private Transform _coreTarget;
         [SerializeField] private Transform[] _spawnPoints;
 
+        [Header("Wave Pacing")]
+        [Tooltip("Nhân với spawnInterval của từng group. 0.35 gom quái thành cụm nhưng vẫn giữ nhịp đọc được.")]
+        [SerializeField, Range(0.1f, 1f)] private float _spawnIntervalScale = 0.35f;
+
         [Header("Endless Mode")]
         [Tooltip("Bật: sau wave cuối không kết thúc trận — lặp lại wave cuối với số quái tăng dần mỗi wave. Giết boss KHÔNG thắng ngay. HUD hiện số wave không kèm tổng.")]
         [SerializeField] private bool _endlessMode;
@@ -281,21 +285,57 @@ namespace DungeonBuilder.Wave
                     return;
                 }
 
-            int waveIndex = waveNumber - 1;
-            int totalWaveCount = _waveProvider.WaveCount;
-            bool isFallback = waveIndex >= totalWaveCount;
-            WaveData waveConfig = _waveProvider.GetWave(Mathf.Min(waveIndex, totalWaveCount - 1));
+                int waveIndex = waveNumber - 1;
+                int totalWaveCount = _waveProvider.WaveCount;
+                bool isFallback = waveIndex >= totalWaveCount;
+                WaveData waveConfig = _waveProvider.GetWave(Mathf.Min(waveIndex, totalWaveCount - 1));
 
-            if (waveConfig.spawnGroups == null)
-            {
-                return;
+                if (waveConfig.spawnGroups == null)
+                {
+                    return;
+                }
+
+                // Mỗi cổng là một lane độc lập: các lane xuất quân đồng thời, còn đội hình
+                // trong cùng lane vẫn giữ đúng thứ tự group mà designer đã cấu hình.
+                var groupsByLane = new Dictionary<int, List<SpawnGroup>>();
+                foreach (SpawnGroup group in waveConfig.spawnGroups)
+                {
+                    if (!groupsByLane.TryGetValue(group.spawnPointIndex, out List<SpawnGroup> laneGroups))
+                    {
+                        laneGroups = new List<SpawnGroup>();
+                        groupsByLane.Add(group.spawnPointIndex, laneGroups);
+                    }
+
+                    laneGroups.Add(group);
+                }
+
+                int endlessExtraCount = isFallback ? waveNumber - totalWaveCount : 0;
+                var laneTasks = new List<UniTask>(groupsByLane.Count);
+                foreach (List<SpawnGroup> laneGroups in groupsByLane.Values)
+                {
+                    laneTasks.Add(SpawnLaneAsync(laneGroups, endlessExtraCount));
+                }
+
+                await UniTask.WhenAll(laneTasks);
+
+                if (IsServer && _gamePhase.Value != GamePhase.Combat)
+                {
+                    // Fallback khi toàn bộ group không có prefab hợp lệ.
+                    _gamePhase.Value = GamePhase.Combat;
+                }
             }
-
-            bool isFirstEnemy = true;
-
-            foreach (var group in waveConfig.spawnGroups)
+            finally
             {
-                if (!IsNetworkReady())
+                _isSpawningWave = false;
+            }
+        }
+
+        private async UniTask SpawnLaneAsync(IReadOnlyList<SpawnGroup> groups, int extraCountPerGroup)
+        {
+            for (int groupIndex = 0; groupIndex < groups.Count; groupIndex++)
+            {
+                SpawnGroup group = groups[groupIndex];
+                if (!IsNetworkReady() || _isGameEnded)
                 {
                     return;
                 }
@@ -306,12 +346,7 @@ namespace DungeonBuilder.Wave
                     continue;
                 }
 
-                int spawnCount = group.count;
-                if (isFallback)
-                {
-                    spawnCount += (waveNumber - totalWaveCount);
-                }
-
+                int spawnCount = group.count + extraCountPerGroup;
                 for (int i = 0; i < spawnCount; i++)
                 {
                     if (!IsNetworkReady() || _isGameEnded)
@@ -319,56 +354,57 @@ namespace DungeonBuilder.Wave
                         return;
                     }
 
-                    if (isFirstEnemy && IsServer)
+                    if (_gamePhase.Value != GamePhase.Combat)
                     {
                         _gamePhase.Value = GamePhase.Combat;
-                        isFirstEnemy = false;
                     }
 
-                    Transform spawnPoint = GetSpawnPoint(group.spawnPointIndex);
-                    Vector3 position = spawnPoint != null ? spawnPoint.position : transform.position;
-                    Quaternion rotation = spawnPoint != null ? spawnPoint.rotation : Quaternion.identity;
+                    SpawnEnemy(prefab, group);
 
-                    NetworkObject enemyObj = _pool.Get(prefab, position, rotation);
-                    if (enemyObj != null)
+                    float scaledInterval = Mathf.Max(0f, group.spawnInterval * _spawnIntervalScale);
+                    if (scaledInterval > 0f && i < spawnCount - 1)
                     {
-                        BaseEnemy enemy = enemyObj.GetComponent<BaseEnemy>();
-                        if (enemy != null)
-                        {
-                            enemy.SetCoreTarget(_coreTarget);
-
-                            if (_enemyPaths != null && group.pathIndex >= 0 && group.pathIndex < _enemyPaths.Length)
-                            {
-                                EnemyPath path = _enemyPaths[group.pathIndex];
-                                if (path != null && path.Waypoints != null)
-                                {
-                                    enemy.SetPath(path.Waypoints);
-                                }
-                            }
-                        }
-
-                        if (!enemyObj.IsSpawned)
-                        {
-                            enemyObj.Spawn();
-                        }
-
-                        _activeEnemyIds.Add(enemyObj.NetworkObjectId);
+                        await UniTask.Delay(
+                            TimeSpan.FromSeconds(scaledInterval),
+                            cancellationToken: destroyCancellationToken);
                     }
+                }
+            }
+        }
 
-                    await UniTask.Delay(TimeSpan.FromSeconds(group.spawnInterval), cancellationToken: destroyCancellationToken);
+        private void SpawnEnemy(NetworkObject prefab, SpawnGroup group)
+        {
+            Transform spawnPoint = GetSpawnPoint(group.spawnPointIndex);
+            Vector3 position = spawnPoint != null ? spawnPoint.position : transform.position;
+            Quaternion rotation = spawnPoint != null ? spawnPoint.rotation : Quaternion.identity;
+
+            NetworkObject enemyObj = _pool.Get(prefab, position, rotation);
+            if (enemyObj == null)
+            {
+                return;
+            }
+
+            BaseEnemy enemy = enemyObj.GetComponent<BaseEnemy>();
+            if (enemy != null)
+            {
+                enemy.SetCoreTarget(_coreTarget);
+
+                if (_enemyPaths != null && group.pathIndex >= 0 && group.pathIndex < _enemyPaths.Length)
+                {
+                    EnemyPath path = _enemyPaths[group.pathIndex];
+                    if (path != null && path.Waypoints != null)
+                    {
+                        enemy.SetPath(path.Waypoints);
+                    }
                 }
             }
 
-            if (isFirstEnemy && IsServer)
+            if (!enemyObj.IsSpawned)
             {
-                // Fallback if no enemies were spawned
-                _gamePhase.Value = GamePhase.Combat;
+                enemyObj.Spawn();
             }
-            }
-            finally
-            {
-                _isSpawningWave = false;
-            }
+
+            _activeEnemyIds.Add(enemyObj.NetworkObjectId);
         }
 
         private Transform GetSpawnPoint(int index)

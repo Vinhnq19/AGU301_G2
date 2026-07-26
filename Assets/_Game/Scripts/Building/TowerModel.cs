@@ -20,12 +20,15 @@ namespace Assets._Game.Scripts.Building
         public int Level { get; private set; } = 1;
         public float CurrentHealth { get; private set; }
 
-        private float GetMultiplier() => Level == 1 ? 1f : (Level == 2 ? 1.5f : 2f);
+        private float GetHealthMultiplier() => Level == 1 ? 1f : (Level == 2 ? 1.3f : 1.6f);
+        private float GetDamageMultiplier() => Level == 1 ? 1f : (Level == 2 ? 1.5f : 2f);
+        private float GetRangeMultiplier() => Level == 1 ? 1f : (Level == 2 ? 1.08f : 1.15f);
+        private float GetAttackRateMultiplier() => Level == 1 ? 1f : (Level == 2 ? 1.15f : 1.3f);
 
-        public float MaxHealth  => _data != null ? _data.maxHealth * GetMultiplier() : 100f;
-        public float Damage     => _data != null ? _data.damage * GetMultiplier() : 0f;
-        public float Range      => _data != null ? _data.range * GetMultiplier() : 0f;
-        public float AttackRate => _data != null ? _data.attackRate * GetMultiplier() : 1f;
+        public float MaxHealth  => _data != null ? _data.maxHealth * GetHealthMultiplier() : 100f;
+        public float Damage     => _data != null ? _data.damage * GetDamageMultiplier() : 0f;
+        public float Range      => _data != null ? _data.range * GetRangeMultiplier() : 0f;
+        public float AttackRate => _data != null ? _data.attackRate * GetAttackRateMultiplier() : 1f;
         public bool CanUpgrade  => _data != null && Level < _data.maxLevel;
 
         public IReadOnlyList<ResourceCost> BuildCost   => _data?.buildCost   ?? Array.Empty<ResourceCost>();

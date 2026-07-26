@@ -1,30 +1,54 @@
 using Assets._Game.Scripts.Enemy;
-using DungeonBuilder.Core.Interfaces;
 using UnityEngine;
 
 namespace DungeonBuilder.Enemy.Types
 {
     /// <summary>
-    /// Spitter: Quái vật tấn công tầm xa bằng cách bắn đạn acid.
-    /// Không bị cản lại bởi tường (bắn qua tường).
+    /// Spitter: quái tầm xa bắn đạn acid, không bị tường cản (bắn qua tường).
+    ///
+    /// Thứ tự ưu tiên mục tiêu KHÔNG còn hardcode trong đây nữa — cấu hình bằng
+    /// Targeting Profile trên prefab (mặc định nên là Tower → Player → Core).
+    /// Thêm hành vi giữ khoảng cách: đã trong tầm bắn thì lùi ra, không đi vào melee.
     /// </summary>
     public sealed class SpitterEnemy : BaseEnemy
     {
-        private Transform _currentTarget;
-        private readonly Collider2D[] _targetScanResults = new Collider2D[16];
+        [Header("Spitter")]
+        [Tooltip("Tỉ lệ tầm bắn muốn giữ. 0.7 = cố giữ khoảng cách ~70% tầm bắn; " +
+                 "gần hơn thì lùi ra. Để 0 = không lùi (như cũ).")]
+        [SerializeField, Range(0f, 1f)] private float _preferredRangeRatio = 0.7f;
+
+        [Tooltip("Tốc độ lùi ra so với tốc độ đi thường.")]
+        [SerializeField, Range(0.1f, 1f)] private float _backpedalSpeedRatio = 0.6f;
 
         public override bool IsBlockedByWall()
         {
             return false;
         }
 
-        public override bool IsCoreInAttackRange()
+        public override void MoveTowardsTarget()
         {
-            _currentTarget = FindNearestTarget();
-            return _currentTarget != null;
+            // Giữ khoảng cách: nếu mục tiêu lại quá gần thì lùi ra thay vì áp sát.
+            if (_preferredRangeRatio > 0f && CurrentTarget != null)
+            {
+                float preferred = _attackRange * _preferredRangeRatio;
+                float dist = Vector3.Distance(transform.position, CurrentTarget.position);
+
+                if (dist < preferred)
+                {
+                    Vector3 away = (transform.position - CurrentTarget.position);
+                    if (away.sqrMagnitude > 0.0001f)
+                    {
+                        away.Normalize();
+                        transform.position += away * (MoveSpeed * _backpedalSpeedRatio * Time.deltaTime);
+                    }
+                    return;
+                }
+            }
+
+            base.MoveTowardsTarget();
         }
 
-        public override void AttackCore()
+        public override void AttackCurrentTarget()
         {
             if (!IsServer) return;
 
@@ -33,86 +57,12 @@ namespace DungeonBuilder.Enemy.Types
                 return;
             }
 
-            if (_currentTarget == null)
-            {
-                _currentTarget = FindNearestTarget();
-            }
-            if (_currentTarget == null) return;
+            if (CurrentTarget == null) return;
 
             _lastAttackTime = Time.time;
 
             // Bắn đạn acid màu xanh lá cây, kích thước nhỏ gọn (size = 0.7)
-            ShootProjectileAt(_currentTarget, new Color(0.2f, 0.9f, 0.2f, 1f), 0.7f);
-        }
-
-        private Transform FindNearestTarget()
-        {
-            int layerMask = ~LayerMask.GetMask("Enemy");
-            ContactFilter2D filter = new ContactFilter2D();
-            filter.SetLayerMask(layerMask);
-            filter.useLayerMask = true;
-            filter.useTriggers = true;
-            int count = Physics2D.OverlapCircle(transform.position, _attackRange, filter, _targetScanResults);
-
-            Transform bestTower = null;
-            float closestTowerDist = float.MaxValue;
-
-            Transform bestHeroOrCore = null;
-            float closestHeroOrCoreDist = float.MaxValue;
-
-            for (int i = 0; i < count; i++)
-            {
-                if (_targetScanResults[i] == null) continue;
-
-                // Kiểm tra xem có thể gây sát thương không
-                IDamageable damageable = _targetScanResults[i].GetComponentInParent<IDamageable>();
-                if (!IsValidTarget(damageable)) continue;
-
-                float dist = Vector3.Distance(transform.position, _targetScanResults[i].transform.position);
-
-                // Phân loại: Tháp canh (Tower) vs Anh hùng/Lõi (Hero/Core)
-                var tower = damageable as DungeonBuilder.Building.BaseTower;
-                if (tower != null)
-                {
-                    if (!tower.IsTargetable) continue; // Bỏ qua bẫy gai
-
-                    if (dist < closestTowerDist)
-                    {
-                        closestTowerDist = dist;
-                        bestTower = _targetScanResults[i].transform;
-                    }
-                }
-                else
-                {
-                    // Anh hùng hoặc lõi hoặc các đối tượng damageable khác
-                    if (dist < closestHeroOrCoreDist)
-                    {
-                        closestHeroOrCoreDist = dist;
-                        bestHeroOrCore = _targetScanResults[i].transform;
-                    }
-                }
-            }
-
-            // Kiểm tra Core Target
-            if (_coreTarget != null)
-            {
-                float coreDist = Vector3.Distance(transform.position, _coreTarget.position);
-                if (coreDist <= _attackRange)
-                {
-                    if (coreDist < closestHeroOrCoreDist)
-                    {
-                        closestHeroOrCoreDist = coreDist;
-                        bestHeroOrCore = _coreTarget;
-                    }
-                }
-            }
-
-            // Thứ tự ưu tiên: Tower > Core = Hero
-            if (bestTower != null)
-            {
-                return bestTower;
-            }
-            return bestHeroOrCore;
+            ShootProjectileAt(CurrentTarget, new Color(0.2f, 0.9f, 0.2f, 1f), 0.7f);
         }
     }
 }

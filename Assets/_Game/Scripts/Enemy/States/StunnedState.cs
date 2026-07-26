@@ -27,7 +27,7 @@ namespace DungeonBuilder.Enemy.States
             _elapsed += UnityEngine.Time.deltaTime;
             if (_elapsed >= _duration)
             {
-                enemy.ChangeState(new MoveToCoreState());
+                enemy.ChangeState(MoveToCoreState.Instance);
             }
         }
     }

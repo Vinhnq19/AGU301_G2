@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: DB_LaserTowerData
   m_EditorClassIdentifier: Assembly-CSharp::Assets._Game.Scripts.Data.TowerDataSO
   towerType: 4
-  maxHealth: 1000
+  maxHealth: 480
   damage: 50
-  range: 15
+  range: 6.5
   attackRate: 0.3
   bulletSpeed: 8
   bulletLifetime: 3

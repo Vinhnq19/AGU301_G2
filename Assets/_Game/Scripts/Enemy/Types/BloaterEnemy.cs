@@ -19,10 +19,15 @@ namespace DungeonBuilder.Enemy.Types
         [SerializeField, Min(0.1f)] private float _gasDuration = 3f;
         [SerializeField, Min(0.1f)] private float _gasCooldown = 5f;
         [SerializeField, Min(0.1f)] private float _gasTickInterval = 1f;
+        [Tooltip("Thời gian báo trước (giây) giữa lúc hiện vòng gas và lúc bắt đầu gây damage — " +
+                 "cho người chơi kịp phản ứng/né. Để 0 = nổ ngay như cũ (không công bằng).")]
+        [SerializeField, Min(0f)] private float _gasWindup = 0.7f;
         [SerializeField] private SpriteRenderer _gasFillVisual;
 
         private float _gasActiveTimer;
         private float _gasCooldownTimer;
+        private float _gasWindupTimer;
+        private bool _isWindingUp;
         private bool _isGasActive;
         private float _damageTickTimer;
         private readonly Collider2D[] _gasScanResults = new Collider2D[32];
@@ -55,14 +60,26 @@ namespace DungeonBuilder.Enemy.Types
                     StopGasVisualClientRpc();
                 }
             }
+            else if (_isWindingUp)
+            {
+                // Giai đoạn báo trước: vòng gas đã hiện nhưng CHƯA gây damage.
+                _gasWindupTimer -= Time.deltaTime;
+                if (_gasWindupTimer <= 0f)
+                {
+                    _isWindingUp = false;
+                    _isGasActive = true;
+                    _gasActiveTimer = _gasDuration;
+                    _damageTickTimer = 0f; // hết windup mới bắt đầu tick damage
+                }
+            }
             else
             {
                 _gasCooldownTimer -= Time.deltaTime;
                 if (_gasCooldownTimer <= 0f)
                 {
-                    _isGasActive = true;
-                    _gasActiveTimer = _gasDuration;
-                    _damageTickTimer = 0f; // Gây sát thương ngay lập tức khi kích hoạt
+                    // Hiện telegraph trước, damage đến sau _gasWindup giây.
+                    _isWindingUp = true;
+                    _gasWindupTimer = _gasWindup;
                     StartGasVisualClientRpc();
                 }
             }
@@ -97,6 +114,11 @@ namespace DungeonBuilder.Enemy.Types
         public override void OnReturnToPool()
         {
             base.OnReturnToPool();
+            // Reset cả trạng thái windup, tránh con tái dùng từ pool nổ gas ngay khi spawn.
+            _isWindingUp = false;
+            _isGasActive = false;
+            _gasWindupTimer = 0f;
+            _gasActiveTimer = 0f;
             _pulseTween?.Kill();
             _fadeTween?.Kill();
             _gasFillTween?.Kill();

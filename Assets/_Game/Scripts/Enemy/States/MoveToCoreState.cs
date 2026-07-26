@@ -2,8 +2,15 @@ using Assets._Game.Scripts.Enemy;
 
 namespace DungeonBuilder.Enemy.States
 {
+    /// <summary>
+    /// Đi theo đường về core. State KHÔNG giữ dữ liệu riêng nên dùng 1 instance dùng chung
+    /// (<see cref="Instance"/>) — tránh cấp phát mỗi lần chuyển state, quan trọng khi có
+    /// hàng trăm enemy liên tục đổi qua lại giữa Move và Attack.
+    /// </summary>
     public sealed class MoveToCoreState : IEnemyState
     {
+        public static readonly MoveToCoreState Instance = new();
+
         public void Enter(BaseEnemy enemy)
         {
         }
@@ -14,19 +21,21 @@ namespace DungeonBuilder.Enemy.States
 
         public void Update(BaseEnemy enemy)
         {
-            if (enemy.IsCoreInAttackRange())
+            enemy.SenseIfDue();
+
+            if (enemy.HasAttackTarget)
             {
-                enemy.ChangeState(new AttackCoreState());
+                enemy.ChangeState(AttackTargetState.Instance);
                 return;
             }
 
             if (enemy.IsBlockedByWall())
             {
-                enemy.ChangeState(new AttackWallState());
+                enemy.ChangeState(AttackWallState.Instance);
                 return;
             }
 
-            enemy.MoveTowardsCore();
+            enemy.MoveTowardsTarget();
         }
     }
 }

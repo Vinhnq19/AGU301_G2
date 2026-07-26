@@ -33,10 +33,13 @@ namespace DungeonBuilder.Enemy.Types
         [SerializeField, Min(1)] private int _summonCount = 10;
         [SerializeField, Min(0.01f)] private float _summonDelayBetweenRunners = 0.35f;
 
-        [SerializeField, Range(0.1f, 0.9f)] private float _selfHealThreshold = 0.75f;
+        [SerializeField, Range(0.1f, 0.9f)] private float _selfHealThreshold = 0.45f;
         [SerializeField, Min(0.1f)] private float _selfHealDuration = 5f;
         [SerializeField, Min(0.1f)] private float _selfHealCooldown = 10f;
         [SerializeField, Min(0.1f)] private float _selfHealRate = 2f;
+        [Tooltip("Tổng damage nhận trong lúc đang hồi máu để CẮT MẠCH hồi. Biến pha hồi máu thành " +
+                 "bài kiểm tra sát thương thay vì chỉ đứng đợi hết timer. Để 0 = không cắt được.")]
+        [SerializeField, Min(0f)] private float _healInterruptDamage = 60f;
 
         private const float _bossScale = 2.2f;
 
@@ -47,6 +50,7 @@ namespace DungeonBuilder.Enemy.Types
         private bool _isHealing = false;
         private float _healDurationTimer = 0f;
         private float _healTickTimer = 0f;
+        private float _damageDuringHeal = 0f;
 
         private Transform[] _gates;
         private LineRenderer[] _laserRenderers;
@@ -99,6 +103,34 @@ namespace DungeonBuilder.Enemy.Types
             _waveManager = FindFirstObjectByType<WaveManager>();
         }
 
+        /// <summary>
+        /// Dồn damage trong lúc boss hồi máu; đủ ngưỡng thì CẮT MẠCH hồi ngay.
+        /// Người chơi bơm đủ sát thương sẽ phá được pha hồi máu thay vì đứng đợi.
+        /// </summary>
+        protected override void OnDamaged(float amount)
+        {
+            if (!_isHealing || _healInterruptDamage <= 0f)
+            {
+                return;
+            }
+
+            _damageDuringHeal += amount;
+            if (_damageDuringHeal >= _healInterruptDamage)
+            {
+                EndHealing();
+            }
+        }
+
+        /// <summary>Kết thúc pha hồi máu (hết thời gian hoặc bị cắt mạch).</summary>
+        private void EndHealing()
+        {
+            _isHealing = false;
+            _damageDuringHeal = 0f;
+            _slowMultiplier = 1f;                    // Phục hồi di chuyển
+            _healCooldownTimer = _selfHealCooldown;  // Reset cooldown hồi máu
+            StopHealVisualClientRpc();
+        }
+
         protected override void Update()
         {
             base.Update();
@@ -118,10 +150,7 @@ namespace DungeonBuilder.Enemy.Types
 
                 if (_healDurationTimer <= 0f)
                 {
-                    _isHealing = false;
-                    _slowMultiplier = 1f; // Phục hồi di chuyển
-                    _healCooldownTimer = _selfHealCooldown; // Reset cooldown hồi máu
-                    StopHealVisualClientRpc();
+                    EndHealing();
                 }
                 return; // Đang hồi phục sẽ không di chuyển/tấn công
             }
@@ -137,6 +166,7 @@ namespace DungeonBuilder.Enemy.Types
                 _isHealing = true;
                 _healDurationTimer = _selfHealDuration;
                 _healTickTimer = 0f;
+                _damageDuringHeal = 0f;
                 _slowMultiplier = 0f; // Đứng yên
                 StartHealVisualClientRpc();
                 return;

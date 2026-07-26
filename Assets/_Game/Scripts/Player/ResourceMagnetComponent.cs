@@ -22,10 +22,15 @@ namespace DungeonBuilder.Player
 
         private readonly Collider2D[] _overlapBuffer = new Collider2D[32];
 
-        [Inject]
-        public void Construct(IResourceService resourceService)
+        // KHÔNG dùng [Inject] cho IResourceService: player được spawn runtime nên
+        // PlayerLifetimeScope không có parent là GameLifetimeScope → VContainer không resolve được
+        // (ném "No such registration of type: IResourceService"). Lấy trực tiếp service ở
+        // OnNetworkSpawn thay vì phụ thuộc DI xuyên scope.
+        private static IResourceService FindResourceService()
         {
-            _resourceService = resourceService;
+            var shared = FindFirstObjectByType<DungeonBuilder.Networking.SharedResourceManager>(
+                FindObjectsInactive.Include);
+            return shared as IResourceService;
         }
 
         private void Awake()
@@ -39,15 +44,22 @@ namespace DungeonBuilder.Player
 
             if (!IsServer) return;
 
-            // Inject có thể chưa chạy (thiếu wire ở LifetimeScope) — vẫn phải hút được ở mức cơ bản
-            // thay vì NullReference rồi tắt hẳn tính năng.
-            if (_resourceService == null)
-            {
-                Debug.LogWarning("[ResourceMagnet] IResourceService chưa được inject — dùng bán kính cơ bản, " +
-                                 "magnet sẽ không nâng theo MiningSkill.", this);
-                UpdateRadius(0);
-                return;
-            }
+            // Bán kính cơ bản có ngay để hút được từ giây đầu; nếu service chưa sẵn sàng
+            // (player spawn trước khi GameRoot của scene mới init) thì FixedUpdate sẽ thử lại.
+            UpdateRadius(0);
+            TryBindResourceService();
+        }
+
+        /// <summary>
+        /// Gắn vào IResourceService khi nó đã tồn tại. Gọi lại được nhiều lần — cần vậy vì
+        /// player được spawn ngay lúc chuyển scene, thời điểm đó SharedResourceManager có thể chưa có.
+        /// </summary>
+        private void TryBindResourceService()
+        {
+            if (_resourceService != null) return;
+
+            _resourceService = FindResourceService();
+            if (_resourceService == null) return;
 
             _resourceService.ResourceChanged += HandleResourceChanged;
             UpdateRadius(_resourceService.GetAmount(ResourceType.MiningSkill));
@@ -63,7 +75,12 @@ namespace DungeonBuilder.Player
 
         private void FixedUpdate()
         {
-            if (!IsServer || _currentRadius <= 0f) return;
+            if (!IsServer) return;
+
+            // Retry gắn service (rẻ: chỉ chạy tới khi gắn được, sau đó return ngay).
+            TryBindResourceService();
+
+            if (_currentRadius <= 0f) return;
             // Player chết thì không hút đồ.
             if (_playerStats != null && _playerStats.IsDead) return;
 

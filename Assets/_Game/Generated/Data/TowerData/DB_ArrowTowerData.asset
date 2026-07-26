@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: DB_ArrowTowerData
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Data.TowerDataSO
   towerType: 0
-  maxHealth: 500
+  maxHealth: 320
   damage: 20
-  range: 10
+  range: 6
   attackRate: 1.5
   bulletSpeed: 10
   bulletLifetime: 3

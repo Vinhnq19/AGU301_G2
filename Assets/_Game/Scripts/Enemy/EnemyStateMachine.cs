@@ -8,6 +8,9 @@ namespace DungeonBuilder.Enemy
         private readonly BaseEnemy _enemy;
         private IEnemyState _currentState;
 
+        /// <summary>Đang có state hay không — dùng để phát hiện enemy bị "chết đứng" (state null).</summary>
+        public bool HasState => _currentState != null;
+
         public EnemyStateMachine(BaseEnemy enemy)
         {
             _enemy = enemy;

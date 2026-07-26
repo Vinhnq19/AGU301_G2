@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Assets._Game.Scripts.Data;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
@@ -26,6 +27,18 @@ namespace Assets._Game.Scripts.Enemy
         [SerializeField] protected NetworkObject _projectilePrefab;
         [SerializeField] private NetworkObject _tokenDropPrefab;
 
+        [Header("Targeting — đánh gì trước")]
+        [SerializeField] private EnemyTargetingProfile _targeting = new();
+        [Tooltip("Nhịp 'cảm nhận' môi trường (giây). Di chuyển vẫn mỗi frame, chỉ quét mục tiêu/vật chắn " +
+                 "theo nhịp này để không tốn hàng chục nghìn query physics mỗi giây khi đông quái.")]
+        [SerializeField, Min(0.02f)] private float _senseInterval = 0.12f;
+
+        [Header("Crowd Spread — chống chồng lên nhau")]
+        [Tooltip("Lệch tốc độ ngẫu nhiên mỗi con (±tỉ lệ) để đám quái không dính khít thành 1 khối.")]
+        [SerializeField, Range(0f, 0.5f)] private float _speedJitter = 0.12f;
+        [Tooltip("Lệch ngang tối đa so với đường đi (unit) — tạo bề dày cho đoàn quái.")]
+        [SerializeField, Min(0f)] private float _laneOffsetRange = 0.6f;
+
         private readonly NetworkVariable<float> _currentHP = new(0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
         private EventBus _eventBus;
@@ -50,6 +63,22 @@ namespace Assets._Game.Scripts.Enemy
         protected Animator _animator;
         private Vector3 _lastPosition;
 
+        // --- Sensing cache (làm mới theo _senseInterval, không phải mỗi frame) ---
+        private float _nextSenseTime;
+        private bool _hasTarget;
+        private EnemyTargetKind _targetKind;
+        private Transform _targetTransform;
+        private DungeonBuilder.Player.PlayerStats _targetPlayerStats;
+        private DungeonBuilder.Building.BaseTower _targetTower;
+        private bool _targetChase;
+        private bool _blockedCached;
+
+        // --- Crowd spread (mỗi con một giá trị riêng, gán khi lấy từ pool) ---
+        private float _speedMultiplier = 1f;
+        private float _laneOffset;
+
+        private static readonly Collider2D[] SenseResults = new Collider2D[48];
+
         private void CacheInitialScaleIfNeeded()
         {
             if (!_hasCachedScale && _visual != null)
@@ -60,8 +89,20 @@ namespace Assets._Game.Scripts.Enemy
         }
 
         public EnemyType EnemyType => _data != null ? _data.enemyType : EnemyType.Drone;
-        public float MoveSpeed => (_data != null ? _data.moveSpeed : 2f) * _slowMultiplier;
+
+        /// <summary>Tốc độ cơ bản × slow × jitter riêng của con này. virtual để type con thêm buff (vd Runner nước rút).</summary>
+        public virtual float MoveSpeed => (_data != null ? _data.moveSpeed : 2f) * _slowMultiplier * _speedMultiplier;
+
         public Transform Visual => _visual;
+
+        /// <summary>Cấu hình ưu tiên mục tiêu (cho type con đọc, vd Spitter).</summary>
+        protected EnemyTargetingProfile Targeting => _targeting;
+
+        /// <summary>Mục tiêu hiện tại đã chọn theo bậc ưu tiên (null nếu chưa có).</summary>
+        protected Transform CurrentTarget => _targetTransform;
+
+        /// <summary>Có mục tiêu để giao tranh hay không (đọc từ cache của lần sense gần nhất).</summary>
+        public bool HasAttackTarget => _hasTarget;
 
         [Inject]
         public void Construct(EventBus eventBus, INetworkPool pool, CoreManager coreManager)
@@ -131,6 +172,17 @@ namespace Assets._Game.Scripts.Enemy
                 return;
             }
 
+            // Awake không chạy lại sau domain reload (hot-reload script khi đang Play) nên
+            // field runtime này có thể null — dựng lại thay vì spam NullReference mỗi frame.
+            _stateMachine ??= new EnemyStateMachine(this);
+
+            // Chốt an toàn: nếu vì thứ tự khởi tạo (pool trả về trước khi OnNetworkSpawn chạy)
+            // mà enemy chưa có state thì nó sẽ đứng bất động vĩnh viễn — tự vào lại state đi.
+            if (!_stateMachine.HasState)
+            {
+                _stateMachine.ChangeState(MoveToCoreState.Instance);
+            }
+
             _stateMachine.Update();
         }
 
@@ -177,11 +229,29 @@ namespace Assets._Game.Scripts.Enemy
             _currentHP.Value = Mathf.Max(0f, _currentHP.Value - amount);
             ApplyKnockbackClientRpc(Vector3.up * 0.1f, 0.1f);
             PlayDamageFlashClientRpc();
+            OnDamaged(amount);
 
             if (_currentHP.Value <= 0f)
             {
                 DieAsync().Forget();
             }
+        }
+
+        /// <summary>Hook cho type con phản ứng khi trúng damage (vd boss bị cắt mạch hồi máu). Server-only.</summary>
+        protected virtual void OnDamaged(float amount)
+        {
+        }
+
+        /// <summary>Gán tốc độ + lane lệch riêng cho từng con để đám quái không trùng khít.</summary>
+        private void RandomizeCrowdSpread()
+        {
+            _speedMultiplier = _speedJitter > 0f
+                ? 1f + UnityEngine.Random.Range(-_speedJitter, _speedJitter)
+                : 1f;
+
+            _laneOffset = _laneOffsetRange > 0f
+                ? UnityEngine.Random.Range(-_laneOffsetRange, _laneOffsetRange)
+                : 0f;
         }
 
         public void Heal(float amount)
@@ -200,6 +270,12 @@ namespace Assets._Game.Scripts.Enemy
             _currentPathWaypoints = null;
             _currentWaypointIndex = 0;
             SetPhysicsActive(true);
+            RandomizeCrowdSpread();
+            ClearTarget();
+            _blockedCached = false;
+            _currentBlocker = null;
+            // Lệch pha nhịp sense giữa các con → tải physics dàn đều thay vì dồn cùng 1 frame.
+            _nextSenseTime = Time.time + UnityEngine.Random.Range(0f, _senseInterval);
 
             CacheInitialScaleIfNeeded();
 
@@ -216,10 +292,15 @@ namespace Assets._Game.Scripts.Enemy
         {
             _isDying = false;
             _slowMultiplier = 1f;
+            _speedMultiplier = 1f;
+            _laneOffset = 0f;
             _stateMachine.ChangeState(null);
             SetPhysicsActive(false);
             _currentPathWaypoints = null;
             _currentWaypointIndex = 0;
+            ClearTarget();
+            _blockedCached = false;
+            _currentBlocker = null;
 
             CacheInitialScaleIfNeeded();
 
@@ -250,7 +331,146 @@ namespace Assets._Game.Scripts.Enemy
             _currentWaypointIndex = 0;
         }
 
+        /// <summary>
+        /// Làm mới cache cảm nhận nếu đã tới nhịp. State gọi mỗi frame nhưng chỉ quét thật
+        /// theo <see cref="_senseInterval"/> — mỗi con lệch pha nhau nên tải physics dàn đều.
+        /// </summary>
+        public void SenseIfDue()
+        {
+            if (!IsServer || _isDying)
+            {
+                return;
+            }
+
+            if (Time.time < _nextSenseTime)
+            {
+                return;
+            }
+
+            _nextSenseTime = Time.time + _senseInterval;
+            Sense();
+        }
+
+        /// <summary>
+        /// MỘT lần quét chung: chọn mục tiêu theo bậc ưu tiên + xác định vật chắn đường.
+        /// Trước đây mỗi frame chạy 1 Raycast + 1 OverlapCircle cho từng con.
+        /// </summary>
+        protected virtual void Sense()
+        {
+            AcquireTargetByPriority();
+            _blockedCached = ScanBlocker();
+        }
+
+        /// <summary>
+        /// Duyệt các bậc ưu tiên theo thứ tự: bậc nào tìm được mục tiêu trong bán kính của nó
+        /// thì chốt luôn, không xét bậc dưới. Chỉ dùng 1 OverlapCircle ở bán kính lớn nhất.
+        /// </summary>
+        private void AcquireTargetByPriority()
+        {
+            ClearTarget();
+
+            float maxRange = _targeting.GetMaxDetectRange(_attackRange);
+            var filter = new ContactFilter2D();
+            filter.SetLayerMask(~LayerMask.GetMask("Enemy"));
+            filter.useLayerMask = true;
+            filter.useTriggers = true;
+
+            int count = Physics2D.OverlapCircle(transform.position, maxRange, filter, SenseResults);
+
+            IReadOnlyList<TargetPriorityRule> rules = _targeting.EffectiveRules;
+            for (int r = 0; r < rules.Count; r++)
+            {
+                TargetPriorityRule rule = rules[r];
+                float range = rule.detectRange <= 0f ? _attackRange : rule.detectRange;
+
+                if (rule.kind == EnemyTargetKind.Core)
+                {
+                    if (_coreTarget != null && Vector3.Distance(transform.position, _coreTarget.position) <= range)
+                    {
+                        _hasTarget = true;
+                        _targetKind = EnemyTargetKind.Core;
+                        _targetTransform = _coreTarget;
+                        _targetChase = rule.chase;
+                        return;
+                    }
+                    continue;
+                }
+
+                // Player / Tower: lấy cái GẦN NHẤT trong bán kính của bậc này.
+                float bestDist = float.MaxValue;
+                Transform best = null;
+                DungeonBuilder.Player.PlayerStats bestPlayer = null;
+                DungeonBuilder.Building.BaseTower bestTower = null;
+
+                for (int i = 0; i < count; i++)
+                {
+                    Collider2D col = SenseResults[i];
+                    if (col == null) continue;
+
+                    float dist = Vector3.Distance(transform.position, col.transform.position);
+                    if (dist > range || dist >= bestDist) continue;
+
+                    if (rule.kind == EnemyTargetKind.Player)
+                    {
+                        var stats = col.GetComponentInParent<DungeonBuilder.Player.PlayerStats>();
+                        // Bỏ qua player đã chết — không dừng lại "đánh xác".
+                        if (stats == null || stats.IsDead) continue;
+                        bestDist = dist;
+                        best = stats.transform;
+                        bestPlayer = stats;
+                        bestTower = null;
+                    }
+                    else // Tower
+                    {
+                        var tower = col.GetComponentInParent<DungeonBuilder.Building.BaseTower>();
+                        if (tower == null || !tower.IsTargetable) continue;
+                        bestDist = dist;
+                        best = tower.transform;
+                        bestTower = tower;
+                        bestPlayer = null;
+                    }
+                }
+
+                if (best != null)
+                {
+                    _hasTarget = true;
+                    _targetKind = rule.kind;
+                    _targetTransform = best;
+                    _targetPlayerStats = bestPlayer;
+                    _targetTower = bestTower;
+                    _targetChase = rule.chase;
+                    return;
+                }
+            }
+        }
+
+        private void ClearTarget()
+        {
+            _hasTarget = false;
+            _targetTransform = null;
+            _targetPlayerStats = null;
+            _targetTower = null;
+            _targetChase = false;
+        }
+
+        /// <summary>Mục tiêu hiện tại đã ở trong tầm đánh chưa (nếu chưa thì cần tiến lại).</summary>
+        public bool IsTargetInAttackRange()
+        {
+            if (!_hasTarget || _targetTransform == null)
+            {
+                return false;
+            }
+
+            return Vector3.Distance(transform.position, _targetTransform.position) <= _attackRange;
+        }
+
+        /// <summary>Trả cache — vật chắn được quét trong <see cref="Sense"/> theo nhịp, không mỗi frame.</summary>
         public virtual bool IsBlockedByWall()
+        {
+            return _blockedCached && _currentBlocker != null;
+        }
+
+        private bool ScanBlocker()
         {
             Vector3 targetPos = GetCurrentTargetPosition();
             Vector3 dir = (targetPos - transform.position).normalized;
@@ -282,58 +502,36 @@ namespace Assets._Game.Scripts.Enemy
             return _coreTarget != null ? _coreTarget.position : transform.position;
         }
 
-        private DungeonBuilder.Player.PlayerStats _playerTarget;
-        private static readonly Collider2D[] PlayerScanResults = new Collider2D[8];
-
         /// <summary>
-        /// Quet xem co Player CON SONG nao dung trong tam danh khong (melee). Cache ket qua vao _playerTarget.
-        /// Player chet bi bo qua — khong lam enemy dung lai "danh xac" thay vi di tiep ve core.
+        /// Di chuyển: nếu đang có mục tiêu cho phép đuổi (chase) và còn trong dây kéo (leash) thì
+        /// tiến tới mục tiêu; ngược lại đi theo waypoint về core. Có lệch ngang (lane offset) để
+        /// đoàn quái không dính khít thành một khối.
         /// </summary>
-        protected virtual bool IsPlayerInAttackRange()
+        public virtual void MoveTowardsTarget()
         {
-            var filter = new ContactFilter2D();
-            filter.SetLayerMask(LayerMask.GetMask("Player"));
-            filter.useLayerMask = true;
-            filter.useTriggers = true;
-
-            _playerTarget = null;
-            int count = Physics2D.OverlapCircle(transform.position, _attackRange, filter, PlayerScanResults);
-            for (int i = 0; i < count; i++)
+            // Đuổi mục tiêu ngoài đường đi — chỉ khi rule bật chase và chưa vượt dây kéo.
+            if (_hasTarget && _targetChase && _targetTransform != null)
             {
-                if (PlayerScanResults[i] == null) continue;
-                var stats = PlayerScanResults[i].GetComponentInParent<DungeonBuilder.Player.PlayerStats>();
-                if (stats != null && !stats.IsDead)
+                Vector3 anchor = GetCurrentTargetPosition();
+                if (Vector3.Distance(transform.position, anchor) <= _targeting.leashRange)
                 {
-                    _playerTarget = stats;
-                    return true;
+                    Step(_targetTransform.position);
+                    return;
                 }
+
+                // Vượt dây kéo → bỏ mục tiêu, quay lại đường (chống bị kiting kéo đi mãi).
+                ClearTarget();
             }
 
-            return false;
-        }
-
-        public virtual bool IsCoreInAttackRange()
-        {
-            if (IsPlayerInAttackRange())
-            {
-                return true;
-            }
-
-            return _coreTarget != null && Vector3.Distance(transform.position, _coreTarget.position) <= _attackRange;
-        }
-
-        public virtual void MoveTowardsCore()
-        {
             if (_currentPathWaypoints != null && _currentWaypointIndex < _currentPathWaypoints.Length)
             {
                 Transform waypoint = _currentPathWaypoints[_currentWaypointIndex];
                 if (waypoint != null)
                 {
-                    Vector3 targetPos = waypoint.position;
-                    Vector3 nextPosition = Vector3.MoveTowards(transform.position, targetPos, MoveSpeed * Time.deltaTime);
-                    transform.position = nextPosition;
+                    Vector3 desired = ApplyLaneOffset(waypoint.position, _currentWaypointIndex);
+                    Step(desired);
 
-                    if (Vector3.Distance(transform.position, targetPos) < 0.15f)
+                    if (Vector3.Distance(transform.position, desired) < 0.15f)
                     {
                         _currentWaypointIndex++;
                     }
@@ -346,8 +544,49 @@ namespace Assets._Game.Scripts.Enemy
                 return;
             }
 
-            Vector3 nextPositionDirect = Vector3.MoveTowards(transform.position, _coreTarget.position, MoveSpeed * Time.deltaTime);
-            transform.position = nextPositionDirect;
+            Step(_coreTarget.position);
+        }
+
+        private void Step(Vector3 destination)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, destination, MoveSpeed * Time.deltaTime);
+        }
+
+        /// <summary>
+        /// Dịch điểm đến sang bên cạnh theo lane riêng của con này.
+        ///
+        /// Vector vuông góc PHẢI tính từ hướng của ĐOẠN ĐƯỜNG (waypoint trước → waypoint này),
+        /// KHÔNG được tính từ vị trí hiện tại của quái: làm vậy thì điểm đích tự xoay mỗi frame
+        /// thành mục tiêu di động, quái bị kéo xoáy chệch hẳn khỏi đường đi.
+        /// </summary>
+        private Vector3 ApplyLaneOffset(Vector3 destination, int waypointIndex)
+        {
+            if (Mathf.Approximately(_laneOffset, 0f) || _currentPathWaypoints == null)
+            {
+                return destination;
+            }
+
+            Vector3 segmentDir = Vector3.zero;
+
+            if (waypointIndex > 0 && _currentPathWaypoints[waypointIndex - 1] != null)
+            {
+                segmentDir = destination - _currentPathWaypoints[waypointIndex - 1].position;
+            }
+            else if (waypointIndex + 1 < _currentPathWaypoints.Length
+                     && _currentPathWaypoints[waypointIndex + 1] != null)
+            {
+                // Đoạn đầu tiên: dùng hướng của đoạn kế tiếp (vẫn độc lập với vị trí quái).
+                segmentDir = _currentPathWaypoints[waypointIndex + 1].position - destination;
+            }
+
+            if (segmentDir.sqrMagnitude < 0.0001f)
+            {
+                return destination;
+            }
+
+            segmentDir.Normalize();
+            Vector3 perpendicular = new Vector3(-segmentDir.y, segmentDir.x, 0f);
+            return destination + perpendicular * _laneOffset;
         }
 
         public virtual void AttackCurrentBlocker()
@@ -361,7 +600,8 @@ namespace Assets._Game.Scripts.Enemy
             }
         }
 
-        public virtual void AttackCore()
+        /// <summary>Đánh mục tiêu đã chọn theo bậc ưu tiên (player / tower / core).</summary>
+        public virtual void AttackCurrentTarget()
         {
             if (Time.time - _lastAttackTime < _attackInterval)
             {
@@ -370,13 +610,23 @@ namespace Assets._Game.Scripts.Enemy
 
             _lastAttackTime = Time.time;
 
-            if (_playerTarget != null)
+            switch (_targetKind)
             {
-                _playerTarget.ApplyDamage(_attackDamage);
-                return;
-            }
+                case EnemyTargetKind.Player:
+                    _targetPlayerStats?.ApplyDamage(_attackDamage);
+                    break;
 
-            _coreManager?.TakeDamage(_attackDamage);
+                case EnemyTargetKind.Tower:
+                    if (_targetTower != null)
+                    {
+                        _targetTower.TakeDamage(_attackDamage, 0);
+                    }
+                    break;
+
+                default:
+                    _coreManager?.TakeDamage(_attackDamage);
+                    break;
+            }
         }
 
         [ClientRpc]
@@ -464,7 +714,7 @@ namespace Assets._Game.Scripts.Enemy
             _isDying = false;
             _slowMultiplier = 1f;
             _lastAttackTime = -999f;
-            _stateMachine.ChangeState(new MoveToCoreState());
+            _stateMachine.ChangeState(MoveToCoreState.Instance);
         }
 
         private async UniTaskVoid DieAsync()

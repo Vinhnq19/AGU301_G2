@@ -475,6 +475,20 @@ MonoBehaviour:
   _attackInterval: 1
   _projectilePrefab: {fileID: 0}
   _tokenDropPrefab: {fileID: 19318099078005837, guid: a909bb052c4c38c41a1821dd6bb37455, type: 3}
+  _targeting:
+    priorities:
+    - kind: 2
+      detectRange: 0
+      chase: 0
+    - kind: 0
+      detectRange: 0
+      chase: 0
+    leashRange: 4
+  _senseInterval: 0.12
+  _speedJitter: 0.12
+  _laneOffsetRange: 0.6
+  _sprintDistance: 3.5
+  _sprintMultiplier: 1.6
 --- !u!1 &7294551576999005464
 GameObject:
   m_ObjectHideFlags: 0

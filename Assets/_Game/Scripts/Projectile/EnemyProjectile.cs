@@ -71,6 +71,12 @@ namespace DungeonBuilder.Projectile
 
         public override void OnNetworkSpawn()
         {
+            if (_spriteRenderer != null)
+            {
+                _spriteRenderer.sortingLayerName = "Tower";
+                _spriteRenderer.sortingOrder = 205;
+            }
+
             if (!IsServer)
             {
                 _speed = _netSpeed.Value;

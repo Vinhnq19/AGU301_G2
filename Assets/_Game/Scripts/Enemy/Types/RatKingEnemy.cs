@@ -79,8 +79,8 @@ namespace DungeonBuilder.Enemy.Types
                 lr.enabled = false;
                 lr.startWidth = 0.2f;
                 lr.endWidth = 0.05f;
-                lr.sortingLayerName = "Default";
-                lr.sortingOrder = 50;
+                lr.sortingLayerName = "Tower";
+                lr.sortingOrder = 220;
 
                 // Màu tím ma pháp
                 Color purple = new Color(0.7f, 0.2f, 0.9f, 1f);

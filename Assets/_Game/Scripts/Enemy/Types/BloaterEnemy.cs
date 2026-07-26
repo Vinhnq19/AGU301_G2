@@ -143,6 +143,8 @@ namespace DungeonBuilder.Enemy.Types
             _gasIndicator.loop = true;
             _gasIndicator.startWidth = 0.08f;
             _gasIndicator.endWidth = 0.08f;
+            _gasIndicator.sortingLayerName = "Tower";
+            _gasIndicator.sortingOrder = 181;
 
             Color c = new Color(0.2f, 0.8f, 0.2f, 0f);
             _gasIndicator.startColor = c;
@@ -190,6 +192,8 @@ namespace DungeonBuilder.Enemy.Types
 
             if (_gasFillVisual != null)
             {
+                _gasFillVisual.sortingLayerName = "Tower";
+                _gasFillVisual.sortingOrder = 180;
                 _gasFillVisual.transform.localPosition = Vector3.zero;
                 _gasFillVisual.transform.localScale = new Vector3(_gasRadius * 2f, _gasRadius * 2f, 1f);
                 _gasFillVisual.enabled = true;

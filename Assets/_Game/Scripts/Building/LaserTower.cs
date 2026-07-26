@@ -41,9 +41,9 @@ namespace DungeonBuilder.Building
                 _lineRenderer.startWidth = _laserStartWidth;
                 _lineRenderer.endWidth   = _laserEndWidth;
                 
-                // Đảm bảo LineRenderer không bị render dưới background
-                _lineRenderer.sortingLayerName = "Default";
-                _lineRenderer.sortingOrder = 50; // Set order cao để đè lên background
+                // Combat visuals dùng layer Tower để luôn nằm trên map, player và tower sprite.
+                _lineRenderer.sortingLayerName = "Tower";
+                _lineRenderer.sortingOrder = 210;
             }
         }
 

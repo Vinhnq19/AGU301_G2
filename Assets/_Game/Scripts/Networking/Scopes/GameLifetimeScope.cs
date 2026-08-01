@@ -84,12 +84,17 @@ namespace DungeonBuilder.Networking.Scopes
                 // (hot reload qua Cheat Panel); build release luôn đọc WaveCatalog SO.
                 builder.Register<IWaveProvider>(_ =>
                 {
-                    IWaveProvider soProvider = new SoWaveProvider(_waveManager.WaveCatalog);
+                    IWaveProvider source = new SoWaveProvider(_waveManager.WaveCatalog);
                     if (Application.isEditor || Debug.isDebugBuild)
                     {
-                        return new JsonWaveProvider(soProvider);
+                        source = new JsonWaveProvider(source);
                     }
-                    return soProvider;
+
+                    // Bọc ngoài cùng: chọn bộ level + hệ số cân bằng theo SỐ NGƯỜI CHƠI.
+                    return new ScaledWaveProvider(
+                        source,
+                        _waveManager.DifficultyConfig,
+                        WaveManager.GetActivePlayerCount);
                 }, Lifetime.Singleton);
             }
 

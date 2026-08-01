@@ -68,10 +68,10 @@ namespace DungeonBuilder.Networking.Lobby
                 return;
             }
 
-            // Room ID = IP host. Chi co y nghia khi minh la host.
+            // Room ID = IP host (kèm port nếu phải fallback sang port khác). Chỉ có ý nghĩa khi mình là host.
             if (_roomIdText != null)
             {
-                _roomIdText.text = model.IsHost ? $"Room ID (IP): {model.LocalIp}" : $"Local IP: {model.LocalIp}";
+                _roomIdText.text = model.IsHost ? $"Room ID: {model.RoomId}" : $"Local IP: {model.LocalIp}";
             }
 
             if (_statusText != null)
@@ -174,7 +174,8 @@ namespace DungeonBuilder.Networking.Lobby
         private void OnCopyRoomIdClicked()
         {
             LobbyModel model = GetModel();
-            string id = model != null ? model.LocalIp : null;
+            // Copy cả port khi host phải fallback — thiếu port thì người kia join không được.
+            string id = model != null ? model.RoomId : null;
             if (string.IsNullOrEmpty(id))
             {
                 return;

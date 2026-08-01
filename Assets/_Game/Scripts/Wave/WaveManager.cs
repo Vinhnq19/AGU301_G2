@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Assets._Game.Scripts.Data;
 using Assets._Game.Scripts.Enemy;
 using Cysharp.Threading.Tasks;
 using DungeonBuilder.Core;
@@ -24,6 +25,23 @@ namespace DungeonBuilder.Wave
 
         [SerializeField] private WaveCatalogSO _waveCatalog;
         public WaveCatalogSO WaveCatalog => _waveCatalog;
+
+        [Tooltip("Cân bằng theo số người chơi (bộ level riêng và/hoặc hệ số nhân). " +
+                 "Bỏ trống = không đổi gì, mọi số người chơi dùng chung dữ liệu gốc.")]
+        [SerializeField] private DifficultyConfigSO _difficultyConfig;
+        public DifficultyConfigSO DifficultyConfig => _difficultyConfig;
+
+        /// <summary>Số người chơi đang trong trận (server-side). Tối thiểu 1 để không chia/nhân 0.</summary>
+        public static int GetActivePlayerCount()
+        {
+            var nm = Unity.Netcode.NetworkManager.Singleton;
+            if (nm == null || !nm.IsListening)
+            {
+                return 1;
+            }
+
+            return Mathf.Max(1, nm.ConnectedClientsIds.Count);
+        }
         [SerializeField] private EnemyPrefabMapping[] _enemyPrefabMappings;
         [SerializeField] private EnemyPath[] _enemyPaths;
         public EnemyPath[] EnemyPaths => _enemyPaths;
@@ -387,6 +405,12 @@ namespace DungeonBuilder.Wave
             BaseEnemy enemy = enemyObj.GetComponent<BaseEnemy>();
             if (enemy != null)
             {
+                // Máu theo độ khó — phải set TRƯỚC Spawn() vì ResetEnemy dùng nó để đặt máu đầu.
+                if (_waveProvider is ScaledWaveProvider scaled)
+                {
+                    enemy.SetHealthMultiplier(scaled.EnemyHealthMultiplier);
+                }
+
                 enemy.SetCoreTarget(_coreTarget);
 
                 if (_enemyPaths != null && group.pathIndex >= 0 && group.pathIndex < _enemyPaths.Length)

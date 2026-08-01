@@ -19,6 +19,18 @@ namespace DungeonBuilder.Networking.Lobby
 
         public IReadOnlyList<LobbySlot> Slots => _slots;
         public string LocalIp { get; private set; } = "127.0.0.1";
+
+        /// <summary>Port host đang dùng (có thể khác mặc định nếu port chính bị chiếm).</summary>
+        public int HostPort { get; private set; }
+
+        /// <summary>Room ID đầy đủ để share: "ip" hoặc "ip:port" khi port khác mặc định.</summary>
+        public string RoomId => HostPort > 0 ? $"{LocalIp}:{HostPort}" : LocalIp;
+
+        public void SetHostPort(int port)
+        {
+            HostPort = port;
+            OnChanged?.Invoke();
+        }
         public bool IsHost { get; private set; }
         public LobbyConnectionState State { get; private set; } = LobbyConnectionState.Disconnected;
         public string Status { get; private set; } = string.Empty;

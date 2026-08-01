@@ -49,10 +49,14 @@ namespace DungeonBuilder.Networking.Lobby
             if (_connection.StartHost(playerName))
             {
                 Model.SetIsHost(true);
+                // Ghi lại port thực tế: nếu port chính bị chiếm, host đã fallback sang port khác
+                // và người chơi kia phải join bằng đúng IP:port đó.
+                Model.SetHostPort(_connection.ActivePort);
                 Model.SetState(LobbyConnectionState.InLobby);
             }
             else
             {
+                Model.SetHostPort(0);
                 Model.SetState(LobbyConnectionState.Disconnected);
             }
         }

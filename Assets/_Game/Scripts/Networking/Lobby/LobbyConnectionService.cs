@@ -18,9 +18,17 @@ namespace DungeonBuilder.Networking.Lobby
         [SerializeField] private LobbyController _lobbyController;
         [SerializeField] private ushort _port = 7777;
 
+        [Tooltip("Số port dự phòng sẽ thử khi port chính bị chiếm (7777 → 7778 → 7779...). " +
+                 "Unity Editor thường không nhả UDP socket sau khi thoát Play mode, nên port cũ " +
+                 "vẫn bị giữ cho tới khi đóng Editor.")]
+        [SerializeField, Range(0, 20)] private int _portFallbackAttempts = 10;
+
         private NetworkManager _net;
 
-        public ushort Port => _port;
+        /// <summary>Port đang thực sự dùng (có thể khác _port nếu phải fallback). Client cần đúng port này.</summary>
+        public ushort ActivePort { get; private set; }
+
+        public ushort Port => ActivePort != 0 ? ActivePort : _port;
 
         /// <summary>Trang thai ket noi thay doi (started ok / failed / disconnected).</summary>
         public event Action<string> StatusChanged;
@@ -46,19 +54,82 @@ namespace DungeonBuilder.Networking.Lobby
             _net.NetworkConfig.ConnectionApproval = true;
             _net.ConnectionApprovalCallback = ApprovalCheck;
 
-            // Host listen tren tat ca interface; address chi de hien thi.
-            var transport = _net.GetComponent<UnityTransport>();
-            if (transport != null)
-            {
-                transport.SetConnectionData("0.0.0.0", _port, "0.0.0.0");
-            }
-
             // Payload ten cho chinh host.
             _net.NetworkConfig.ConnectionData = Encoding.UTF8.GetBytes(playerName ?? string.Empty);
 
-            bool ok = _net.StartHost();
-            StatusChanged?.Invoke(ok ? "Hosting" : "Failed to start host");
-            return ok;
+            var transport = _net.GetComponent<UnityTransport>();
+
+            // Dò trước port còn trống rồi mới StartHost MỘT lần.
+            // Không thử-rồi-fail nhiều lần được: NGO tự Shutdown khi bind lỗi và không cho
+            // StartHost lại ngay trong cùng frame (ném "There is no NetworkManager assigned").
+            //
+            // Port bị chiếm là chuyện thường khi dev: Unity Editor giữ lại UDP socket của phiên
+            // Play trước cho tới khi đóng Editor, nên 7777 có thể "bận" dù không game nào đang chạy.
+            int attempts = Mathf.Max(0, _portFallbackAttempts) + 1;
+            ushort chosen = 0;
+            for (int i = 0; i < attempts; i++)
+            {
+                ushort candidate = (ushort)(_port + i);
+                if (IsUdpPortFree(candidate))
+                {
+                    chosen = candidate;
+                    break;
+                }
+            }
+
+            if (chosen == 0)
+            {
+                ActivePort = 0;
+                StatusChanged?.Invoke($"Failed to start host — port {_port}..{_port + attempts - 1} đều bận");
+                DBLog.Warning("lobby.no-free-port",
+                    $"Không còn port trống trong dải {_port}..{_port + attempts - 1}. " +
+                    "Thường do Unity Editor giữ socket của phiên Play cũ — khởi động lại Editor để giải phóng.", 0f, this);
+                return false;
+            }
+
+            if (transport != null)
+            {
+                // Host listen tren tat ca interface; address chi de hien thi.
+                transport.SetConnectionData("0.0.0.0", chosen, "0.0.0.0");
+            }
+
+            if (!_net.StartHost())
+            {
+                ActivePort = 0;
+                StatusChanged?.Invoke("Failed to start host");
+                return false;
+            }
+
+            ActivePort = chosen;
+
+            if (chosen == _port)
+            {
+                StatusChanged?.Invoke("Hosting");
+            }
+            else
+            {
+                DBLog.Warning("lobby.port-fallback",
+                    $"Port {_port} bị chiếm — đã host trên port {chosen}. " +
+                    "Người chơi khác phải join bằng đúng IP:port này.", 0f, this);
+                StatusChanged?.Invoke($"Hosting (port {chosen})");
+            }
+
+            return true;
+        }
+
+        /// <summary>Thử bind tạm một UDP socket để biết port còn trống hay không.</summary>
+        private static bool IsUdpPortFree(ushort port)
+        {
+            try
+            {
+                using var probe = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                probe.Bind(new IPEndPoint(IPAddress.Any, port));
+                return true;
+            }
+            catch (SocketException)
+            {
+                return false;
+            }
         }
 
         /// <summary>Join vao host theo IP. ID phong = IP cua host.</summary>
@@ -77,17 +148,41 @@ namespace DungeonBuilder.Networking.Lobby
 
             _net.NetworkConfig.ConnectionApproval = true;
 
+            // Chấp nhận cả "192.168.1.5" lẫn "192.168.1.5:7778" — khi host phải fallback sang
+            // port khác thì Room ID có kèm port, dán thẳng vào là join được.
+            ParseAddress(hostIp, out string ip, out ushort port);
+
             var transport = _net.GetComponent<UnityTransport>();
             if (transport != null)
             {
-                transport.SetConnectionData(hostIp.Trim(), _port);
+                transport.SetConnectionData(ip, port);
             }
 
             _net.NetworkConfig.ConnectionData = Encoding.UTF8.GetBytes(playerName ?? string.Empty);
 
             bool ok = _net.StartClient();
-            StatusChanged?.Invoke(ok ? $"Connecting to {hostIp}..." : "Failed to start client");
+            StatusChanged?.Invoke(ok ? $"Connecting to {ip}:{port}..." : "Failed to start client");
             return ok;
+        }
+
+        /// <summary>Tách "ip" hoặc "ip:port" thành 2 phần; thiếu port thì dùng port mặc định.</summary>
+        private void ParseAddress(string raw, out string ip, out ushort port)
+        {
+            ip = raw.Trim();
+            port = _port;
+
+            int colon = ip.LastIndexOf(':');
+            if (colon <= 0 || colon >= ip.Length - 1)
+            {
+                return;
+            }
+
+            string portText = ip.Substring(colon + 1);
+            if (ushort.TryParse(portText, out ushort parsed) && parsed > 0)
+            {
+                port = parsed;
+                ip = ip.Substring(0, colon).Trim();
+            }
         }
 
         public void Disconnect()

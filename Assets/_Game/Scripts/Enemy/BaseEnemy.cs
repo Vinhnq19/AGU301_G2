@@ -77,6 +77,9 @@ namespace Assets._Game.Scripts.Enemy
         private float _speedMultiplier = 1f;
         private float _laneOffset;
 
+        /// <summary>Hệ số máu theo độ khó (số người chơi). WaveManager set trước khi spawn.</summary>
+        private float _healthMultiplier = 1f;
+
         private static readonly Collider2D[] SenseResults = new Collider2D[48];
 
         private void CacheInitialScaleIfNeeded()
@@ -257,18 +260,30 @@ namespace Assets._Game.Scripts.Enemy
         public void Heal(float amount)
         {
             if (!IsServer || _isDying || amount <= 0f) return;
-            float maxHealth = _data != null ? _data.maxHealth : 100f;
-            _currentHP.Value = Mathf.Min(maxHealth, _currentHP.Value + amount);
+            _currentHP.Value = Mathf.Min(MaxHealth, _currentHP.Value + amount);
         }
 
         public float CurrentHP => _currentHP.Value;
-        public float MaxHealth => _data != null ? _data.maxHealth : 100f;
+
+        /// <summary>Máu tối đa = máu gốc × hệ số độ khó theo số người chơi.</summary>
+        public float MaxHealth => (_data != null ? _data.maxHealth : 100f) * _healthMultiplier;
+
+        /// <summary>
+        /// Đặt hệ số máu theo độ khó. PHẢI gọi TRƯỚC khi Spawn() vì ResetEnemy (chạy trong
+        /// OnNetworkSpawn) dùng giá trị này để set máu ban đầu.
+        /// </summary>
+        public void SetHealthMultiplier(float multiplier)
+        {
+            _healthMultiplier = multiplier > 0f ? multiplier : 1f;
+        }
 
         public virtual void OnGetFromPool()
         {
             _isDying = false;
             _currentPathWaypoints = null;
             _currentWaypointIndex = 0;
+            // Về mặc định; WaveManager set lại ngay sau Get() và TRƯỚC Spawn().
+            _healthMultiplier = 1f;
             SetPhysicsActive(true);
             RandomizeCrowdSpread();
             ClearTarget();
@@ -719,8 +734,7 @@ namespace Assets._Game.Scripts.Enemy
 
         private void ResetEnemy()
         {
-            float maxHealth = _data != null ? _data.maxHealth : 100f;
-            _currentHP.Value = maxHealth;
+            _currentHP.Value = MaxHealth;
             _isDying = false;
             _slowMultiplier = 1f;
             _lastAttackTime = -999f;

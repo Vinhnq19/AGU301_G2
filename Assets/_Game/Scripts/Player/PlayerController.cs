@@ -127,9 +127,9 @@ namespace DungeonBuilder.Player
         {
             if (_movementLocked) return true;
             if (_playerStats != null && _playerStats.IsDead) return true;
-            // Đang gõ chat → khóa di chuyển. FixedUpdate zero velocity mỗi frame nên
-            // dừng cả khi người chơi đang GIỮ phím lúc mở chat (Move action không re-fire).
-            if (InputReader.GameplayBlocked) return true;
+            // Đang gõ chat / mở Shop → khóa di chuyển. FixedUpdate zero velocity mỗi frame nên
+            // dừng cả khi người chơi đang GIỮ phím lúc mở UI (Move action không re-fire).
+            if (InputReader.MovementSuppressed) return true;
             return false;
         }
 

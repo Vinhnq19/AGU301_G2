@@ -37,7 +37,7 @@ public class Shop : NetworkBehaviour
         // Initialize NetworkList
         networkItemData = new NetworkList<ShopItemData>();
 
-        view.Initialize();
+        view.Initialize(CloseShopUI);
         presenter = new ShopPresenter(view, model, this);
     }
 
@@ -48,7 +48,7 @@ public class Shop : NetworkBehaviour
         if (presenter == null && view != null && model != null)
         {
             Debug.LogWarning("[Shop] presenter was null in Awake — re-initializing in Start");
-            view.Initialize();
+            view.Initialize(CloseShopUI);
             presenter = new ShopPresenter(view, model, this);
         }
     }
@@ -435,6 +435,126 @@ public class Shop : NetworkBehaviour
         return _sharedResources != null ? _sharedResources.GetAmount(type) : 0;
     }
 
+    // ---------------- Open/Close orchestration ----------------
+
+    /// <summary>Các shop đang mở trên client này. Dùng để đảm bảo chỉ 1 shop mở và để bật/tắt cổng input.</summary>
+    private static readonly HashSet<Shop> OpenShops = new HashSet<Shop>();
+
+    [Header("Interaction")]
+    [Tooltip("Phím bật/tắt shop khi đứng gần quầy.")]
+    [SerializeField] private KeyCode _toggleKey = KeyCode.P;
+
+    /// <summary>Player local đang đứng trong vùng quầy (chưa chắc đã mở UI).</summary>
+    private DungeonBuilder.Player.PlayerStats _localCustomer;
+
+    /// <summary>Player local có đang đứng đủ gần để mở shop không.</summary>
+    private bool IsCustomerNearby =>
+        _localCustomer != null && !_localCustomer.IsDead;
+
+    private void OpenShopUI()
+    {
+        if (!IsCustomerNearby || view.IsOpen)
+        {
+            return;
+        }
+
+        // Chỉ 1 shop được mở cùng lúc — tránh 2 panel chồng nhau khi 2 vùng quầy dính nhau
+        // hoặc khi player được teleport/hồi sinh sang quầy khác.
+        foreach (Shop other in new List<Shop>(OpenShops))
+        {
+            if (other != null && other != this)
+            {
+                other.CloseShopUI();
+            }
+        }
+
+        view.OpenShop();
+        OpenShops.Add(this);
+        SyncInputGate();
+    }
+
+    /// <summary>Bấm phím toggle hoặc click vào quầy: đang mở thì đóng, đang đóng thì mở.</summary>
+    private void ToggleShopUI()
+    {
+        if (view.IsOpen)
+        {
+            CloseShopUI();
+        }
+        else
+        {
+            OpenShopUI();
+        }
+    }
+
+    /// <summary>Click chuột trực tiếp vào quầy để mở (chỉ khi đã đứng gần).</summary>
+    private void OnMouseDown()
+    {
+        // Đang gõ chat thì click không tính (tránh mở nhầm khi đang thao tác UI khác).
+        if (DungeonBuilder.Player.InputReader.GameplayBlocked)
+        {
+            return;
+        }
+
+        if (IsCustomerNearby)
+        {
+            ToggleShopUI();
+        }
+    }
+
+    /// <summary>
+    /// Đóng UI shop và nhả cổng chặn input. An toàn khi gọi nhiều lần.
+    /// KHÔNG xoá _localCustomer: người chơi vẫn đứng tại quầy nên phải mở lại được ngay.
+    /// </summary>
+    private void CloseShopUI()
+    {
+        view.CloseShop();
+        OpenShops.Remove(this);
+        SyncInputGate();
+    }
+
+    /// <summary>
+    /// Đang mở shop thì khóa CẢ di chuyển lẫn hành động — người chơi đứng yên mua bán.
+    /// Đóng bằng nút X hoặc phím toggle, nên khóa di chuyển không làm kẹt người chơi.
+    /// </summary>
+    private static void SyncInputGate()
+    {
+        OpenShops.RemoveWhere(s => s == null || !s.IsOpen);
+        bool anyOpen = OpenShops.Count > 0;
+        DungeonBuilder.Player.InputReader.ActionsBlocked = anyOpen;
+        DungeonBuilder.Player.InputReader.MovementBlocked = anyOpen;
+    }
+
+    private void Update()
+    {
+        // Bấm phím toggle khi đứng gần quầy (bỏ qua nếu đang gõ chat).
+        if (IsCustomerNearby
+            && !DungeonBuilder.Player.InputReader.GameplayBlocked
+            && Input.GetKeyDown(_toggleKey))
+        {
+            ToggleShopUI();
+        }
+
+        if (!view.IsOpen)
+        {
+            return;
+        }
+
+        // Player chết khi đang mở quầy: OnTriggerExit không chắc chắn fire
+        // (bị disable/teleport khi hồi sinh) nên shop sẽ kẹt mở nếu không tự đóng ở đây.
+        if (!IsCustomerNearby)
+        {
+            CloseShopUI();
+        }
+    }
+
+    private void OnDisable()
+    {
+        // Đổi scene / despawn khi đang mở: phải nhả cổng input, nếu không người chơi
+        // sẽ bị kẹt không di chuyển/tấn công được ở scene sau.
+        OpenShops.Remove(this);
+        SyncInputGate();
+    }
+
     public void OnTriggerEnter2D(Collider2D collision)
     {
         if (!collision.CompareTag("Player"))
@@ -450,7 +570,13 @@ public class Shop : NetworkBehaviour
         if (networkObject == null || !networkObject.IsOwner)
             return;
 
-        view.OpenShop();
+        var stats = collision.GetComponentInParent<DungeonBuilder.Player.PlayerStats>();
+        if (stats == null)
+            return;
+
+        // CHỈ ghi nhận là đang đứng gần — KHÔNG tự mở UI nữa.
+        // Người chơi chủ động mở bằng phím toggle hoặc click vào quầy.
+        _localCustomer = stats;
     }
 
     public void OnTriggerExit2D(Collider2D collision)
@@ -464,6 +590,8 @@ public class Shop : NetworkBehaviour
         if (networkObject == null || !networkObject.IsOwner)
             return;
 
-        view.CloseShop();
+        // Đi ra xa thì mất quyền mở, và đóng luôn UI nếu đang mở.
+        _localCustomer = null;
+        CloseShopUI();
     }
 }

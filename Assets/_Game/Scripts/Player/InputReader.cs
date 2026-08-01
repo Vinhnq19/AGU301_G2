@@ -37,6 +37,18 @@ namespace DungeonBuilder.Player
         /// </summary>
         public static bool GameplayBlocked { get; set; }
 
+        /// <summary>Chặn các hành động rời rạc (attack/dash/interact/đổi tool/hotbar). Dùng khi mở UI.</summary>
+        public static bool ActionsBlocked { get; set; }
+
+        /// <summary>Chặn di chuyển. Dùng khi mở UI toàn màn hình như Shop (đứng yên khi đang mua bán).</summary>
+        public static bool MovementBlocked { get; set; }
+
+        /// <summary>Hành động rời rạc có bị chặn không (do đang chat hoặc đang mở UI).</summary>
+        private static bool ActionsSuppressed => GameplayBlocked || ActionsBlocked;
+
+        /// <summary>Di chuyển có bị chặn không — PlayerController đọc để đứng yên kể cả khi đang giữ phím.</summary>
+        public static bool MovementSuppressed => GameplayBlocked || MovementBlocked;
+
         /// <summary>
         /// Bật / tắt toàn bộ Player action map runtime.
         /// Dùng để khóa mọi input khi player chết / đang revive (không nhận attack, dash, move, hotbar…).
@@ -214,9 +226,9 @@ namespace DungeonBuilder.Player
 
         private void HandleMove(InputAction.CallbackContext context)
         {
-            // Đang gõ chat → coi như không di chuyển (trả 0). PlayerController còn zero velocity
-            // mỗi FixedUpdate nên cả trường hợp đang GIỮ phím lúc mở chat cũng đứng yên.
-            OnMove?.Invoke(GameplayBlocked ? Vector2.zero : context.ReadValue<Vector2>());
+            // Đang gõ chat / đang mở Shop → coi như không di chuyển (trả 0). PlayerController còn
+            // zero velocity mỗi FixedUpdate nên cả trường hợp đang GIỮ phím lúc mở UI cũng đứng yên.
+            OnMove?.Invoke(MovementSuppressed ? Vector2.zero : context.ReadValue<Vector2>());
         }
 
         private void HandleLook(InputAction.CallbackContext context)
@@ -226,7 +238,7 @@ namespace DungeonBuilder.Player
 
         private void HandleAttackPerformed(InputAction.CallbackContext context)
         {
-            if (GameplayBlocked) return;
+            if (ActionsSuppressed) return;
             DBLog.Info($"input.attack.{GetInstanceID()}", "Input Attack performed.", 0.2f, this);
             OnAttackPressed?.Invoke();
         }
@@ -238,34 +250,34 @@ namespace DungeonBuilder.Player
 
         private void HandleInteractPerformed(InputAction.CallbackContext context)
         {
-            if (GameplayBlocked) return;
+            if (ActionsSuppressed) return;
             DBLog.Info($"input.interact.{GetInstanceID()}", "Input Interact performed.", 0.2f, this);
             OnInteractPressed?.Invoke();
         }
 
         private void HandleDashPerformed(InputAction.CallbackContext context)
         {
-            if (GameplayBlocked) return;
+            if (ActionsSuppressed) return;
             OnDashPressed?.Invoke();
         }
 
         private void HandleNextToolPerformed(InputAction.CallbackContext context)
         {
-            if (GameplayBlocked) return;
+            if (ActionsSuppressed) return;
             DBLog.Info($"input.next-tool.{GetInstanceID()}", "Input NextTool performed.", 0.2f, this);
             OnNextToolPressed?.Invoke();
         }
 
         private void HandlePrevToolPerformed(InputAction.CallbackContext context)
         {
-            if (GameplayBlocked) return;
+            if (ActionsSuppressed) return;
             DBLog.Info($"input.prev-tool.{GetInstanceID()}", "Input PrevTool performed.", 0.2f, this);
             OnPrevToolPressed?.Invoke();
         }
 
         private void FireHotbar(int index)
         {
-            if (GameplayBlocked) return;
+            if (ActionsSuppressed) return;
             OnHotbarPressed?.Invoke(index);
         }
 

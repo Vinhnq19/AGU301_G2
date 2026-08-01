@@ -21,6 +21,9 @@ public class ShopView
 
     [SerializeField] private TransactionToast toast;
 
+    [Tooltip("Nút X đóng shop (tùy chọn). Không gán cũng được — vẫn đóng bằng cách đi ra khỏi quầy.")]
+    [SerializeField] private Button closeButton;
+
     public event Action<CurrencyType> OnTabChanged;
 
     // THÊM: List dùng để lưu trữ và tái sử dụng các Item Panel (Object Pooling)
@@ -28,7 +31,11 @@ public class ShopView
 
     public ShopView() { }
 
-    public void Initialize()
+    /// <summary>
+    /// Wire toàn bộ UI. Nhận thẳng callback đóng thay vì dùng event — tránh hoàn toàn rủi ro
+    /// "nút X không phản hồi" do thứ tự Initialize / đăng ký event bị lệch.
+    /// </summary>
+    public void Initialize(Action onCloseRequested = null)
     {
         coinTabButton.onClick.RemoveAllListeners();
         tokenTabButton.onClick.RemoveAllListeners();
@@ -44,6 +51,12 @@ public class ShopView
         {
             quantityPopup.Initialize();
             quantityPopup.Hide();
+        }
+
+        if (closeButton != null && onCloseRequested != null)
+        {
+            closeButton.onClick.RemoveAllListeners();
+            closeButton.onClick.AddListener(() => onCloseRequested());
         }
     }
 
@@ -62,13 +75,26 @@ public class ShopView
 
     public bool IsOpen => shopPanel != null && shopPanel.activeSelf;
 
-    public void OpenShop() => shopPanel.SetActive(true);
+    public void OpenShop()
+    {
+        if (shopPanel == null)
+        {
+            Debug.LogWarning("[ShopView] shopPanel chưa được gán trong Inspector — không mở được shop.");
+            return;
+        }
+
+        shopPanel.SetActive(true);
+    }
 
     public void CloseShop()
     {
         // Đóng shop cũng phải ẩn popup nhập số lượng (nếu đang mở)
         HideQuantityPopup();
-        shopPanel.SetActive(false);
+
+        if (shopPanel != null)
+        {
+            shopPanel.SetActive(false);
+        }
     }
 
     /// <summary>Mở popup nhập số lượng cho 1 item + thao tác (Buy/Sell).</summary>

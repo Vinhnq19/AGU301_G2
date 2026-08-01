@@ -549,7 +549,17 @@ namespace Assets._Game.Scripts.Enemy
 
         private void Step(Vector3 destination)
         {
+            destination = ModifyDestination(destination);
             transform.position = Vector3.MoveTowards(transform.position, destination, MoveSpeed * Time.deltaTime);
+        }
+
+        /// <summary>
+        /// Hook cho type con bẻ lái điểm đến trước khi bước (vd boss đi lắt léo, zigzag).
+        /// Mặc định giữ nguyên — quái thường vẫn đi thẳng theo đường.
+        /// </summary>
+        protected virtual Vector3 ModifyDestination(Vector3 destination)
+        {
+            return destination;
         }
 
         /// <summary>
@@ -769,8 +779,9 @@ namespace Assets._Game.Scripts.Enemy
                     continue;
                 }
 
+                // Văng rộng hơn để đống token không dồn cục một chỗ khi chết theo đàn.
                 float angle = UnityEngine.Random.Range(0f, 360f) * Mathf.Deg2Rad;
-                float distance = UnityEngine.Random.Range(0.5f, 1.2f);
+                float distance = UnityEngine.Random.Range(0.6f, 2.0f);
                 Vector3 offset = new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f) * distance;
 
                 NetworkObject dropObj = _pool.Get(_tokenDropPrefab, transform.position, Quaternion.identity);

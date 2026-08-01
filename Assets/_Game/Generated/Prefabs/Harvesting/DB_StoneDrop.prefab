@@ -276,8 +276,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Harvesting.ResourceDrop
   ShowTopMostFoldoutHeaderGroup: 1
   _visual: {fileID: 4006386577977299495}
-  _jumpRightDistance: 1
+  _scatterMinDistance: 0.5
+  _scatterMaxDistance: 1.6
   _jumpPower: 0.5
   _jumpDuration: 0.4
-  _jumpVerticalJitter: 0.25
-  _attractSpeed: 6
+  _bounceCount: 2
+  _spinDegrees: 360
+  _popInScale: 0.55
+  _landSquash: 0.35
+  _idleBobHeight: 0.09
+  _idleBobDuration: 0.7
+  _attractSpeed: 9
+  _attractStartSpeed: 2.5
+  _attractAcceleration: 22
+  _magnetDelay: 0.1

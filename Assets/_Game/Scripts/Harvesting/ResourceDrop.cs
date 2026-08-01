@@ -18,14 +18,14 @@ namespace DungeonBuilder.Harvesting
         [SerializeField] private Transform _visual;
 
         [Header("Jump Tween")]
-        [Tooltip("Khoảng cách drop nhảy ra phía bên phải (local X).")]
-        [SerializeField] private float _jumpRightDistance = 0.6f;
+        [Tooltip("Khoảng cách văng RA XA tối thiểu khi rơi (unit).")]
+        [SerializeField] private float _scatterMinDistance = 0.5f;
+        [Tooltip("Khoảng cách văng RA XA tối đa khi rơi (unit). Càng lớn item càng bắn tung tóe.")]
+        [SerializeField] private float _scatterMaxDistance = 1.5f;
         [Tooltip("Độ cao cung nhảy.")]
         [SerializeField] private float _jumpPower = 0.5f;
         [Tooltip("Thời gian nhảy (giây).")]
         [SerializeField] private float _jumpDuration = 0.4f;
-        [Tooltip("Độ lệch dọc ngẫu nhiên nhẹ để nhiều drop không chồng lên nhau (0 = tắt).")]
-        [SerializeField] private float _jumpVerticalJitter = 0.25f;
 
         [Header("Drop Feel")]
         [Tooltip("Số cung nảy khi rơi. 1 = bay thẳng rồi đáp, 2-3 = nảy thêm cho cảm giác có trọng lượng.")]
@@ -47,11 +47,11 @@ namespace DungeonBuilder.Harvesting
 
         [Header("Magnet")]
         [Tooltip("Tốc độ hút tối đa (unit/giây).")]
-        [SerializeField] private float _attractSpeed = 6f;
+        [SerializeField] private float _attractSpeed = 9f;
         [Tooltip("Tốc độ hút lúc bắt đầu — thấp hơn max để item 'từ từ bị kéo' rồi tăng tốc.")]
-        [SerializeField] private float _attractStartSpeed = 1.5f;
+        [SerializeField] private float _attractStartSpeed = 2.5f;
         [Tooltip("Gia tốc hút (unit/giây²). Càng cao càng giật mạnh về phía player.")]
-        [SerializeField] private float _attractAcceleration = 14f;
+        [SerializeField] private float _attractAcceleration = 22f;
         [Tooltip("Delay sau khi jump xong trước khi magnet có thể hút (giây).")]
         [SerializeField] private float _magnetDelay = 0.1f;
 
@@ -87,16 +87,25 @@ namespace DungeonBuilder.Harvesting
             _resourceType.Value = type;
             _amount.Value = amount;
 
-            // Server dịch cả drop (root) sang phải để vùng nhặt (collider root) đi theo item.
-            // NetworkTransform sẽ sync vị trí này tới mọi client.
-            float jitter = _jumpVerticalJitter > 0f
-                ? UnityEngine.Random.Range(-_jumpVerticalJitter, _jumpVerticalJitter)
-                : 0f;
-            Vector3 offset = new Vector3(_jumpRightDistance, jitter, 0f);
+            // Văng ra MỌI HƯỚNG với khoảng cách ngẫu nhiên (trước đây luôn nhảy sang phải nên
+            // đống drop xếp thành hàng thẳng, trông rất máy móc).
+            // Server dịch cả drop (root) để vùng nhặt (collider root) đi theo item;
+            // NetworkTransform sync vị trí này tới mọi client.
+            Vector3 offset = GetScatterOffset();
             _jumpOffset.Value = offset;
             transform.position += offset;
 
-            DBLog.Info($"drop.configure.{NetworkObjectId}", $"ResourceDrop configured. id={NetworkObjectId}, type={type}, amount={amount}, rightOffset={_jumpRightDistance}.", 0.2f, this);
+            DBLog.Info($"drop.configure.{NetworkObjectId}", $"ResourceDrop configured. id={NetworkObjectId}, type={type}, amount={amount}, scatter={offset}.", 0.2f, this);
+        }
+
+        /// <summary>Vector văng ngẫu nhiên theo mọi hướng, độ dài trong [min, max].</summary>
+        private Vector3 GetScatterOffset()
+        {
+            float max = Mathf.Max(_scatterMinDistance, _scatterMaxDistance);
+            float min = Mathf.Min(_scatterMinDistance, _scatterMaxDistance);
+            float angle = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
+            float distance = UnityEngine.Random.Range(min, max);
+            return new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f) * distance;
         }
 
         public void ConfigureWithOffset(ResourceType type, int amount, Vector3 offset)
@@ -205,9 +214,31 @@ namespace DungeonBuilder.Harvesting
             OnMagnetStartedClientRpc();
         }
 
+        /// <summary>
+        /// Chặn spam tiếng nhặt: magnet thường tóm nhiều item cùng lúc, phát mỗi item một tiếng
+        /// sẽ chồng thành tiếng ồn. Dùng chung cho mọi drop nên là static.
+        /// </summary>
+        private static float _lastCollectSfxTime = -99f;
+        private const float CollectSfxCooldown = 0.12f;
+
+        /// <summary>
+        /// Tiếng DUY NHẤT của vòng đời nhặt item. Trước đây có 2 tiếng chồng nhau
+        /// (magnet lúc bị hút + pickup lúc chạm) nghe như bị lặp — nay gộp còn một.
+        /// </summary>
+        private void PlayCollectSfx()
+        {
+            if (Time.time - _lastCollectSfxTime < CollectSfxCooldown) return;
+            if (DungeonBuilder.Audio.AudioManager.Instance == null) return;
+
+            _lastCollectSfxTime = Time.time;
+            DungeonBuilder.Audio.AudioManager.Instance.PlaySFX(SoundType.SFX_Item_Magnet, transform.position);
+        }
+
         [ClientRpc]
         private void OnMagnetStartedClientRpc()
         {
+            PlayCollectSfx();
+
             if (_visual == null) return;
 
             _visual.DOKill();
@@ -292,18 +323,20 @@ namespace DungeonBuilder.Harvesting
             DBLog.Info($"drop.pickup.{NetworkObjectId}", $"ResourceDrop picked up. type={_resourceType.Value}, amount={_amount.Value}, by={other.name}.", 0.2f, this);
             _sharedResources.TryAdd(_resourceType.Value, _amount.Value);
 
-            PlayPickupSoundClientRpc(transform.position);
-            
+            // Item bị hút thì tiếng đã phát lúc bắt đầu hút rồi — không phát lần hai.
+            // Chỉ item nhặt trực tiếp (đi đè lên, chưa kịp bị hút) mới cần phát ở đây.
+            if (!_isMagnetted)
+            {
+                PlayCollectSoundClientRpc();
+            }
+
             ReturnToPoolAsync().Forget();
         }
 
         [ClientRpc]
-        private void PlayPickupSoundClientRpc(Vector3 pos)
+        private void PlayCollectSoundClientRpc()
         {
-            if (DungeonBuilder.Audio.AudioManager.Instance != null)
-            {
-                DungeonBuilder.Audio.AudioManager.Instance.PlaySFX(SoundType.SFX_Item_Pickup, pos);
-            }
+            PlayCollectSfx();
         }
 
         private async UniTaskVoid ReturnToPoolAsync()

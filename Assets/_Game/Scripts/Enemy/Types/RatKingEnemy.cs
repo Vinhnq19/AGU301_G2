@@ -41,6 +41,22 @@ namespace DungeonBuilder.Enemy.Types
                  "bài kiểm tra sát thương thay vì chỉ đứng đợi hết timer. Để 0 = không cắt được.")]
         [SerializeField, Min(0f)] private float _healInterruptDamage = 60f;
 
+        [Header("Erratic Movement — di chuyển lộn xộn")]
+        [Tooltip("Bán kính đảo hướng tối đa quanh đường đi (unit). Càng lớn boss càng lượn rộng. 0 = tắt.")]
+        [SerializeField, Min(0f)] private float _wanderRadius = 2.5f;
+        [Tooltip("Khoảng thời gian NGẮN NHẤT giữa 2 lần đổi hướng ngẫu nhiên (giây).")]
+        [SerializeField, Min(0.05f)] private float _wanderIntervalMin = 0.35f;
+        [Tooltip("Khoảng thời gian DÀI NHẤT giữa 2 lần đổi hướng ngẫu nhiên (giây).")]
+        [SerializeField, Min(0.05f)] private float _wanderIntervalMax = 1.1f;
+        [Tooltip("Độ mượt khi bẻ lái (0.05 = lượn mềm, 1 = giật cục đổi hướng tức thì).")]
+        [SerializeField, Range(0.02f, 1f)] private float _wanderSmoothing = 0.12f;
+        [Tooltip("Xác suất lao vọt (lunge) mỗi lần đổi hướng.")]
+        [SerializeField, Range(0f, 1f)] private float _lungeChance = 0.3f;
+        [Tooltip("Hệ số tăng tốc khi lao vọt.")]
+        [SerializeField, Range(1f, 4f)] private float _lungeSpeedMultiplier = 2.2f;
+        [Tooltip("Thời gian mỗi cú lao vọt (giây).")]
+        [SerializeField, Min(0.05f)] private float _lungeDuration = 0.45f;
+
         private const float _bossScale = 2.2f;
 
         private float _magicCooldownTimer = 5f;
@@ -51,6 +67,12 @@ namespace DungeonBuilder.Enemy.Types
         private float _healDurationTimer = 0f;
         private float _healTickTimer = 0f;
         private float _damageDuringHeal = 0f;
+
+        // --- Erratic movement ---
+        private Vector3 _wanderOffset;        // độ lệch đang áp dụng (đã làm mượt)
+        private Vector3 _wanderTargetOffset;  // độ lệch mục tiêu, đổi ngẫu nhiên theo nhịp
+        private float _nextWanderTime;
+        private float _lungeEndTime;
 
         private Transform[] _gates;
         private LineRenderer[] _laserRenderers;
@@ -121,6 +143,66 @@ namespace DungeonBuilder.Enemy.Types
             }
         }
 
+        /// <summary>
+        /// Tốc độ boss: cộng thêm cú "lao vọt" bất chợt để nhịp di chuyển không đều,
+        /// người chơi khó đoán được boss sẽ tới đâu.
+        /// </summary>
+        public override float MoveSpeed =>
+            base.MoveSpeed * (Time.time < _lungeEndTime ? _lungeSpeedMultiplier : 1f);
+
+        /// <summary>
+        /// Bẻ lái điểm đến bằng độ lệch ngẫu nhiên → boss đi lượn/zigzag thay vì đi thẳng.
+        /// Độ lệch được thu nhỏ dần khi đã tới sát mục tiêu, nếu không boss cứ lượn vòng
+        /// quanh mà không bao giờ vào tầm đánh.
+        /// </summary>
+        protected override Vector3 ModifyDestination(Vector3 destination)
+        {
+            if (_wanderRadius <= 0f)
+            {
+                return destination;
+            }
+
+            float distance = Vector3.Distance(transform.position, destination);
+            float closeRange = Mathf.Max(0.01f, _attackRange * 2f);
+            float scale = Mathf.Clamp01(distance / closeRange);
+
+            return destination + _wanderOffset * scale;
+        }
+
+        /// <summary>Định kỳ chọn hướng lệch mới (và thỉnh thoảng lao vọt), rồi nội suy cho mượt.</summary>
+        private void UpdateErraticMovement()
+        {
+            if (_wanderRadius <= 0f)
+            {
+                return;
+            }
+
+            if (Time.time >= _nextWanderTime)
+            {
+                float min = Mathf.Min(_wanderIntervalMin, _wanderIntervalMax);
+                float max = Mathf.Max(_wanderIntervalMin, _wanderIntervalMax);
+                _nextWanderTime = Time.time + UnityEngine.Random.Range(min, max);
+
+                Vector2 random = UnityEngine.Random.insideUnitCircle * _wanderRadius;
+                _wanderTargetOffset = new Vector3(random.x, random.y, 0f);
+
+                if (UnityEngine.Random.value < _lungeChance)
+                {
+                    _lungeEndTime = Time.time + _lungeDuration;
+                }
+            }
+
+            _wanderOffset = Vector3.Lerp(_wanderOffset, _wanderTargetOffset, _wanderSmoothing);
+        }
+
+        private void ResetErraticMovement()
+        {
+            _wanderOffset = Vector3.zero;
+            _wanderTargetOffset = Vector3.zero;
+            _nextWanderTime = 0f;
+            _lungeEndTime = 0f;
+        }
+
         /// <summary>Kết thúc pha hồi máu (hết thời gian hoặc bị cắt mạch).</summary>
         private void EndHealing()
         {
@@ -154,6 +236,9 @@ namespace DungeonBuilder.Enemy.Types
                 }
                 return; // Đang hồi phục sẽ không di chuyển/tấn công
             }
+
+            // Đảo hướng lộn xộn (chỉ khi đang thực sự di chuyển — lúc hồi máu đã return ở trên).
+            UpdateErraticMovement();
 
             // Giảm cooldown
             if (_healCooldownTimer > 0f) _healCooldownTimer -= Time.deltaTime;
@@ -428,6 +513,7 @@ namespace DungeonBuilder.Enemy.Types
         public override void OnGetFromPool()
         {
             base.OnGetFromPool();
+            ResetErraticMovement();
             if (_visual != null)
             {
                 _visual.localScale = Vector3.one * _bossScale;
@@ -437,6 +523,7 @@ namespace DungeonBuilder.Enemy.Types
         public override void OnReturnToPool()
         {
             base.OnReturnToPool();
+            ResetErraticMovement();
             if (_visual != null)
             {
                 _visual.localScale = Vector3.one * _bossScale;

@@ -12,7 +12,7 @@ namespace DungeonBuilder.Player
     {
         [Tooltip("Bán kính hút theo MiningSkill. Index 0/1 là mức cơ bản — phải > 0 để Hero đi gần " +
                  "là hút được ngay từ đầu game (skill mặc định = 1); nâng skill thì hút xa hơn.")]
-        [SerializeField] private float[] _radiusBySkillLevel = { 1.8f, 1.8f, 2.4f, 3.2f, 4f, 5f };
+        [SerializeField] private float[] _radiusBySkillLevel = { 2.6f, 2.6f, 3.3f, 4.2f, 5.2f, 6.5f };
         [Tooltip("Layer của các ResourceDrop (mặc định drop nằm ở layer Default).")]
         [SerializeField] private LayerMask _dropLayer = 1; // 1 << 0 = Default
 

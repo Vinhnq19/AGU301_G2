@@ -933,12 +933,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonBuilder.Player.ResourceMagnetComponent
   ShowTopMostFoldoutHeaderGroup: 1
   _radiusBySkillLevel:
-  - 1.8
-  - 1.8
-  - 2.4
-  - 3.2
-  - 4
-  - 5
+  - 2.6
+  - 2.6
+  - 3.3
+  - 4.2
+  - 5.2
+  - 6.5
   _dropLayer:
     serializedVersion: 2
     m_Bits: 1

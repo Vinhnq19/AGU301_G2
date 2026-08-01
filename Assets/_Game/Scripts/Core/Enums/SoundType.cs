@@ -39,6 +39,7 @@ namespace DungeonBuilder.Core.Enums
         SFX_Canon_Boom = 221, // Added
         SFX_Hero_Dash = 222, // Added
         SFX_Error = 223, // Added
-        SFX_Get_Coins = 224 // Added
+        SFX_Get_Coins = 224, // Added
+        SFX_Item_Magnet = 225 // Tiếng item bị hút về phía player (khác với SFX_Item_Pickup lúc nhặt)
     }
 }
